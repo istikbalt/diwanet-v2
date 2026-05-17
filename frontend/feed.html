@@ -8,465 +8,429 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/main.css">
   <style>
-    .page-layout {
-      display: grid;
-      grid-template-columns: 260px 1fr 240px;
-      gap: 24px;
-      padding: 28px 0 60px;
-      align-items: start;
-    }
-    /* Left sidebar */
-    .sidebar-left {
-      position: sticky;
-      top: 80px;
-    }
-    .sidebar-left .card { padding: 16px; }
-    .sidebar-nav a {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: var(--radius-sm);
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: var(--muted);
-      transition: all 0.2s;
-      text-decoration: none;
-      margin-bottom: 2px;
-    }
-    .sidebar-nav a:hover { background: var(--surface2); color: var(--accent); }
-    .sidebar-nav a.active { background: var(--accent-light); color: var(--accent); }
-    .sidebar-nav .icon { width: 28px; height: 28px; display: grid; place-items: center; font-size: 1rem; }
-    .sidebar-profile {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px;
-      background: var(--surface2);
-      border-radius: var(--radius-sm);
-      margin-bottom: 14px;
-      text-decoration: none;
-      color: var(--text);
-    }
-    .sidebar-profile:hover { background: var(--accent-light); }
-    .sidebar-profile-info { flex: 1; min-width: 0; }
-    .sidebar-profile-name { font-size: 0.88rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sidebar-profile-role { font-size: 0.76rem; color: var(--muted); }
+    .layout { max-width: 1140px; margin: 0 auto; display: grid; grid-template-columns: 220px 1fr 260px; gap: 24px; padding: 28px 24px; align-items: start; }
+    .sidebar-left { position: sticky; top: 80px; }
+    .sidebar-right { position: sticky; top: 80px; display: grid; gap: 12px; }
+    .sidebar-card { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: var(--shadow); margin-bottom: 12px; }
+    .sidebar-card h3 { font-size: 0.76rem; font-weight: 700; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; font-size: 0.88rem; font-weight: 500; color: var(--muted); cursor: pointer; transition: all 0.15s; text-decoration: none; border: none; background: none; font-family: 'DM Sans', sans-serif; width: 100%; text-align: left; }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: var(--accent-light); color: var(--accent); font-weight: 700; }
 
-    /* Feed */
-    .feed-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-    }
-    .feed-header h2 { font-size: 1rem; font-weight: 700; }
-    .feed-tabs {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 18px;
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 4px;
-    }
-    .feed-tab {
-      flex: 1;
-      padding: 8px 14px;
-      border-radius: 999px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      text-align: center;
-      cursor: pointer;
-      color: var(--muted);
-      transition: all 0.2s;
-      border: none;
-      background: none;
-      font-family: 'DM Sans', sans-serif;
-    }
-    .feed-tab.active {
-      background: var(--accent);
-      color: white;
-    }
+    /* Compose */
+    .compose { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 18px; display: none; box-shadow: var(--shadow); margin-bottom: 14px; }
+    .compose.visible { display: block; }
+    .compose-top { display: flex; gap: 12px; }
+    .compose textarea { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 0.92rem; color: var(--text); font-family: 'DM Sans', sans-serif; resize: none; min-height: 90px; transition: border-color 0.2s; }
+    .compose textarea:focus { outline: none; border-color: var(--accent); background: white; }
+    .compose-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .tag-input { background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 0.84rem; color: var(--text); font-family: 'DM Sans', sans-serif; width: 180px; }
+    .tag-input:focus { outline: none; border-color: var(--accent); }
+    .post-btn { padding: 9px 20px; border-radius: 999px; border: none; background: var(--accent); color: white; font-weight: 700; font-size: 0.88rem; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; }
+    .post-btn:hover { background: var(--accent-dark); }
+    .post-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* Post card */
-    .post-card {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom: 16px;
-      overflow: hidden;
-    }
-    .post-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 16px 18px 12px;
-    }
-    .post-meta { flex: 1; }
-    .post-biz-name { font-size: 0.9rem; font-weight: 700; }
-    .post-biz-name a { color: var(--text); }
-    .post-biz-name a:hover { color: var(--accent); }
-    .post-time { font-size: 0.76rem; color: var(--muted); }
-    .post-body { padding: 0 18px 14px; }
-    .post-body p {
-      font-size: 0.92rem;
-      line-height: 1.55;
-      color: var(--text);
-      margin-bottom: 12px;
-      white-space: pre-wrap;
-    }
-    .post-images {
-      display: grid;
-      gap: 3px;
-      margin-bottom: 12px;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    .post-images.one img { width: 100%; max-height: 400px; object-fit: cover; }
-    .post-images.two { grid-template-columns: 1fr 1fr; }
-    .post-images.two img, .post-images.many img { width: 100%; height: 180px; object-fit: cover; cursor: pointer; }
-    .post-images.many { grid-template-columns: 1fr 1fr; }
-    .post-actions {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 10px 14px;
-      border-top: 1px solid var(--border);
-      background: var(--surface2);
-    }
-    .action-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 7px 12px;
-      border-radius: 999px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--muted);
-      cursor: pointer;
-      transition: all 0.2s;
-      border: none;
-      background: none;
-      font-family: 'DM Sans', sans-serif;
-    }
-    .action-btn:hover { background: white; color: var(--accent); }
-    .action-btn.liked { color: #DC2626; }
+    /* Posts */
+    .feed { display: grid; gap: 14px; }
+    .post { background: white; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); transition: all 0.2s; }
+    .post:hover { box-shadow: var(--shadow-lg); }
+    .post-header { padding: 16px 18px 0; display: flex; align-items: center; gap: 12px; }
+    .post-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); display: grid; place-items: center; font-weight: 800; color: white; font-size: 0.95rem; flex-shrink: 0; text-decoration: none; }
+    .post-avatar.individual { background: linear-gradient(135deg, #60a5fa, #3b82f6); }
+    .post-meta { flex: 1; min-width: 0; }
+    .post-author { font-weight: 700; font-size: 0.93rem; }
+    .post-author a { color: var(--text); text-decoration: none; }
+    .post-author a:hover { color: var(--accent); }
+    .post-time { font-size: 0.78rem; color: var(--muted2); margin-top: 2px; }
+    .post-type-badge { font-size: 0.74rem; padding: 3px 9px; border-radius: 999px; background: var(--accent-light); color: var(--accent-dark); border: 1px solid rgba(15,76,129,0.2); font-weight: 600; }
+    .post-body { padding: 12px 18px; }
+    .post-content { font-size: 0.93rem; line-height: 1.65; white-space: pre-wrap; }
+    .post-image { width: 100%; max-height: 380px; object-fit: cover; border-radius: 10px; margin-top: 12px; }
+    .shared-post { margin-top: 12px; padding: 14px; border-radius: 12px; background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--accent); }
+    .shared-post .shared-from { font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; }
+    .shared-post .shared-from a { color: var(--accent); text-decoration: none; font-weight: 600; }
+    .shared-post .shared-content { font-size: 0.88rem; color: var(--text); }
+    .post-actions { padding: 10px 18px; display: flex; align-items: center; gap: 4px; border-top: 1px solid var(--border); }
+    .action-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px; border: none; background: none; color: var(--muted); font-size: 0.84rem; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+    .action-btn:hover { background: var(--surface2); color: var(--text); }
+    .action-btn.liked { color: var(--danger); font-weight: 600; }
+    .action-sep { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
 
-    /* Right sidebar */
-    .sidebar-right {
-      position: sticky;
-      top: 80px;
-    }
-    .sidebar-right .card { padding: 16px; margin-bottom: 16px; }
-    .sidebar-right h3 { font-size: 0.85rem; font-weight: 700; margin-bottom: 12px; }
-    .trending-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 0;
-      border-bottom: 1px solid var(--border);
-      text-decoration: none;
-      color: var(--text);
-    }
-    .trending-item:last-child { border-bottom: 0; padding-bottom: 0; }
-    .trending-item:hover .trending-name { color: var(--accent); }
-    .trending-name { font-size: 0.85rem; font-weight: 600; }
-    .trending-cat { font-size: 0.75rem; color: var(--muted); }
+    /* Comments */
+    .comments-box { border-top: 1px solid var(--border); padding: 14px 18px; display: none; background: var(--surface2); }
+    .comments-box.open { display: block; }
+    .comment-list { display: grid; gap: 10px; margin-bottom: 12px; }
+    .comment { display: flex; gap: 10px; }
+    .comment-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); display: grid; place-items: center; font-size: 0.75rem; font-weight: 700; color: white; flex-shrink: 0; }
+    .comment-avatar.individual { background: linear-gradient(135deg, #60a5fa, #3b82f6); }
+    .comment-bubble { background: white; border-radius: 12px; padding: 9px 12px; flex: 1; border: 1px solid var(--border); }
+    .comment-name { font-size: 0.8rem; font-weight: 700; margin-bottom: 3px; }
+    .comment-name a { color: var(--text); text-decoration: none; }
+    .comment-name a:hover { color: var(--accent); }
+    .comment-text { font-size: 0.87rem; line-height: 1.5; }
+    .comment-time { font-size: 0.74rem; color: var(--muted2); margin-top: 4px; }
+    .comment-input-row { display: flex; gap: 8px; }
+    .comment-input { flex: 1; background: white; border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 12px; font-size: 0.87rem; color: var(--text); font-family: 'DM Sans', sans-serif; resize: none; }
+    .comment-input:focus { outline: none; border-color: var(--accent); }
+    .comment-send { padding: 9px 16px; border-radius: 10px; border: none; background: var(--accent); color: white; font-size: 0.84rem; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 
-    /* Compose box */
-    .compose-box {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: var(--shadow);
-      display: none;
-    }
-    .compose-box.visible { display: block; }
-    .compose-input {
-      width: 100%;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 12px 14px;
-      font-size: 0.92rem;
-      min-height: 80px;
-      resize: vertical;
-      font-family: 'DM Sans', sans-serif;
-    }
-    .compose-input:focus { outline: none; border-color: var(--accent); }
-    .compose-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+    /* Share modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,76,129,0.3); display: none; place-items: center; z-index: 200; backdrop-filter: blur(4px); }
+    .modal-overlay.open { display: grid; }
+    .modal { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; width: 90%; max-width: 480px; box-shadow: var(--shadow-lg); }
+    .modal h3 { font-family: 'DM Serif Display', serif; font-size: 1.3rem; margin-bottom: 14px; }
+    .modal .original-preview { background: var(--accent-light); border-radius: 10px; padding: 12px; margin-bottom: 14px; font-size: 0.87rem; color: var(--muted); border-left: 3px solid var(--accent); }
+    .modal .original-preview strong { display: block; color: var(--text); margin-bottom: 5px; font-size: 0.84rem; }
+    .modal textarea { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 0.9rem; color: var(--text); font-family: 'DM Sans', sans-serif; resize: none; min-height: 100px; }
+    .modal textarea:focus { outline: none; border-color: var(--accent); }
+    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+    .btn-cancel { padding: 9px 18px; border-radius: 999px; border: 1.5px solid var(--border); background: white; color: var(--muted); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.87rem; }
+    .btn-share-confirm { padding: 9px 20px; border-radius: 999px; border: none; background: var(--accent); color: white; font-weight: 700; font-size: 0.87rem; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 
-    @media (max-width: 1000px) {
-      .page-layout { grid-template-columns: 1fr; }
-      .sidebar-left, .sidebar-right { position: static; display: none; }
-    }
+    /* Sidebar widgets */
+    .widget { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); }
+    .widget h3 { font-size: 0.76rem; font-weight: 700; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 14px; }
+    .business-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); text-decoration: none; transition: all 0.15s; }
+    .business-item:last-child { border-bottom: none; }
+    .business-item:hover .b-name { color: var(--accent); }
+    .b-avatar { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); display: grid; place-items: center; font-weight: 700; color: white; font-size: 0.85rem; flex-shrink: 0; }
+    .b-name { font-size: 0.88rem; font-weight: 600; color: var(--text); }
+    .b-cat { font-size: 0.76rem; color: var(--muted2); }
+    .guest-banner { background: var(--accent-light); border: 1px solid rgba(15,76,129,0.2); border-radius: 16px; padding: 20px; text-align: center; }
+    .guest-banner h3 { font-family: 'DM Serif Display', serif; font-size: 1.1rem; margin-bottom: 8px; }
+    .guest-banner p { font-size: 0.84rem; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+    .guest-banner .actions { display: flex; flex-direction: column; gap: 8px; }
+    .guest-banner a { display: block; padding: 10px; border-radius: 12px; font-size: 0.88rem; font-weight: 700; text-decoration: none; transition: all 0.2s; }
+    .a-primary { background: var(--accent); color: white; }
+    .a-ghost { background: white; color: var(--text); border: 1.5px solid var(--border); }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--text); border-radius: 12px; padding: 12px 20px; font-size: 0.88rem; font-weight: 600; color: white; box-shadow: var(--shadow-lg); transition: transform 0.3s; z-index: 300; }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 1000px) { .layout { grid-template-columns: 1fr; } .sidebar-left, .sidebar-right { position: static; } }
+    @media (max-width: 640px) { .layout { padding: 16px; } }
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="topbar-inner">
-      <a href="index.html" class="brand">
-        <div class="brand-mark">D</div>
-        <span class="brand-name">Diwanet</span>
-      </a>
-      <nav class="topbar-nav">
-        <a href="categories.html">Categories</a>
-        <a href="feed.html" class="active">Feed</a>
-      </nav>
-      <div class="topbar-actions" id="topbarActions"></div>
-      <button class="hamburger" onclick="document.getElementById('mobileMenu').classList.toggle('open')">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
-  <div class="mobile-menu" id="mobileMenu">
-    <a href="categories.html">Categories</a>
-    <a href="feed.html">Feed</a>
-    <a href="login.html">Sign in</a>
-    <a href="signup.html" class="primary">Sign up</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="brand">
+      <div class="brand-mark">D</div>
+      <span class="brand-name">Diwanet</span>
+    </a>
+    <nav class="topbar-nav">
+      <a href="feed.html" class="active">Feed</a>
+      <a href="categories.html">Explore</a>
+    </nav>
+    <div class="topbar-actions" id="authArea"></div>
   </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar-left">
+    <div class="sidebar-card">
+      <h3>Navigation</h3>
+      <a class="nav-item active" href="feed.html"><span>🏠</span> Feed</a>
+      <a class="nav-item" href="categories.html"><span>🔍</span> Explore</a>
+      <a class="nav-item" id="profileNavLink" href="#"><span>👤</span> Profile</a>
+      <button class="nav-item" id="notifBtn"><span>🔔</span> Notifications <span id="notifBadge"></span></button>
+    </div>
+  </aside>
 
   <main>
-    <div class="container">
-      <div class="page-layout">
-
-        <!-- Left sidebar -->
-        <aside class="sidebar-left">
-          <div class="card">
-            <div id="sidebarUser"></div>
-            <nav class="sidebar-nav">
-              <a href="feed.html" class="active"><span class="icon">🏠</span> Feed</a>
-              <a href="categories.html"><span class="icon">🔍</span> Discover</a>
-              <a href="#" id="sidebarMyPage"><span class="icon">🏢</span> My Business</a>
-              <a href="#" id="sidebarNotifs"><span class="icon">🔔</span> Notifications</a>
-              <a href="#" onclick="doLogout()"><span class="icon">👋</span> Sign out</a>
-            </nav>
-          </div>
-        </aside>
-
-        <!-- Main feed -->
-        <div>
-          <!-- Compose (business owners only) -->
-          <div class="compose-box" id="composeBox">
-            <textarea class="compose-input" id="composeText" placeholder="Share a post, promotion, or update…"></textarea>
-            <div class="compose-actions">
-              <button class="btn btn-ghost btn-sm" onclick="document.getElementById('composeText').value=''">Clear</button>
-              <button class="btn btn-primary btn-sm" onclick="submitPost()">Post</button>
-            </div>
-            <div class="msg" id="composeMsg" style="margin-top:10px;"></div>
-          </div>
-
-          <div class="feed-tabs">
-            <button class="feed-tab active" onclick="switchTab('all', this)">All Posts</button>
-            <button class="feed-tab" onclick="switchTab('following', this)">Following</button>
-          </div>
-
-          <div id="feedContainer">
-            <div class="loading">Loading posts…</div>
-          </div>
-        </div>
-
-        <!-- Right sidebar -->
-        <aside class="sidebar-right">
-          <div class="card">
-            <h3>🔥 Trending Businesses</h3>
-            <div id="trendingList">
-              <div class="trending-item">
-                <div class="biz-avatar biz-avatar-sm">T</div>
-                <div><div class="trending-name">Tulip Furniture</div><div class="trending-cat">Retail</div></div>
-              </div>
-              <div class="trending-item">
-                <div class="biz-avatar biz-avatar-sm" style="background: linear-gradient(135deg,#EA580C,#c2410c);">B</div>
-                <div><div class="trending-name">Blue Bowl Bistro</div><div class="trending-cat">Restaurant</div></div>
-              </div>
-              <div class="trending-item">
-                <div class="biz-avatar biz-avatar-sm" style="background: linear-gradient(135deg,#7C3AED,#6D28D9);">G</div>
-                <div><div class="trending-name">Global Study Centre</div><div class="trending-cat">Education</div></div>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <h3>📋 Quick Links</h3>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <a href="create-business.html" class="btn btn-primary btn-sm btn-full">+ Create Business Page</a>
-              <a href="categories.html" class="btn btn-ghost btn-sm btn-full">Browse Categories</a>
-              <a href="privacy-policy.html" style="font-size:0.78rem; color:var(--muted); text-align:center; display:block; padding-top:4px;">Privacy Policy</a>
-            </div>
-          </div>
-        </aside>
-
+    <div class="compose" id="composeBox">
+      <div class="compose-top">
+        <div class="avatar avatar-md" id="composeAvatar">B</div>
+        <textarea id="composeText" placeholder="Share something with your followers... Use @slug to tag other businesses."></textarea>
       </div>
+      <div class="compose-footer">
+        <input class="tag-input" id="tagInput" placeholder="@business-slug (optional)" />
+        <button class="post-btn" id="postBtn" onclick="submitPost()">Post</button>
+      </div>
+    </div>
+    <div class="feed" id="feedContainer"><div class="loading">Loading feed...</div></div>
+    <div id="loadMoreContainer" style="text-align:center;padding:20px;display:none;">
+      <button class="btn btn-ghost btn-sm" onclick="loadMore()">Load more</button>
     </div>
   </main>
 
-  <script src="assets/js/auth.js"></script>
-  <script>
-    renderTopbarAuth("topbarActions");
+  <aside class="sidebar-right">
+    <div id="rightSidebarContent"></div>
+  </aside>
+</div>
 
-    const user = getUser();
-    const business = getBusiness();
+<div class="modal-overlay" id="shareModal">
+  <div class="modal">
+    <h3>Share this post</h3>
+    <div class="original-preview" id="sharePreview"></div>
+    <textarea id="shareComment" placeholder="Add your thoughts... (optional)"></textarea>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeShare()">Cancel</button>
+      <button class="btn-share-confirm" onclick="confirmShare()">Share</button>
+    </div>
+  </div>
+</div>
 
-    // Sidebar user block
-    const sidebarUser = document.getElementById("sidebarUser");
-    if (user) {
-      const name = business ? business.business_name : `${user.first_name} ${user.last_name}`;
-      const profileLink = business ? `business.html?slug=${business.slug}` : `profile.html?id=${user.id}`;
-      const initial = name.charAt(0).toUpperCase();
-      sidebarUser.innerHTML = `
-        <a href="${profileLink}" class="sidebar-profile">
-          <div class="biz-avatar biz-avatar-sm">${escHtml(initial)}</div>
-          <div class="sidebar-profile-info">
-            <div class="sidebar-profile-name">${escHtml(name)}</div>
-            <div class="sidebar-profile-role">${business ? 'Business page' : 'Visitor'}</div>
-          </div>
-        </a>
-      `;
-    } else {
-      sidebarUser.innerHTML = `
-        <div style="margin-bottom:14px;">
-          <a href="login.html" class="btn btn-primary btn-sm btn-full" style="margin-bottom:8px;">Sign in</a>
-          <a href="signup.html" class="btn btn-ghost btn-sm btn-full">Sign up</a>
-        </div>
-      `;
-    }
+<div class="toast" id="toast"></div>
 
-    // My business link
-    if (business) {
-      document.getElementById("sidebarMyPage").href = `business.html?slug=${business.slug}`;
-    } else {
-      document.getElementById("sidebarMyPage").href = "create-business.html";
-    }
+<script src="assets/js/auth.js"></script>
+<script>
+let page = 1, hasMore = false, shareTargetId = null;
 
-    // Show compose box for business owners
-    if (business) {
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+function setupUI() {
+  const user = getUser(), business = getBusiness(), authArea = document.getElementById("authArea");
+  if (user) {
+    const name = business ? business.business_name : `${user.first_name} ${user.last_name}`;
+    const initial = name.charAt(0).toUpperCase();
+    const profileLink = user.role === "business_owner" ? `business.html?slug=${business?.slug}` : `profile.html?id=${user.id}`;
+    authArea.innerHTML = `
+      <a href="${profileLink}" class="btn btn-ghost btn-sm">${initial} ${escHtml(name)}</a>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign out</button>`;
+    const navLink = document.getElementById("profileNavLink");
+    navLink.href = user.role === "business_owner" && business ? `business.html?slug=${business.slug}` : `profile.html?id=${user.id}`;
+    if (user.role === "business_owner" && business) {
       document.getElementById("composeBox").classList.add("visible");
+      document.getElementById("composeAvatar").textContent = business.business_name.charAt(0).toUpperCase();
     }
+    renderFollowingWidget();
+    loadNotifCount();
+  } else {
+    authArea.innerHTML = `
+      <a href="login.html" class="btn btn-ghost btn-sm">Sign in</a>
+      <a href="signup.html" class="btn btn-primary btn-sm">Sign up</a>`;
+    document.getElementById("profileNavLink").style.display = "none";
+    renderGuestSidebar();
+  }
+}
 
-    // Active tab
-    let currentTab = "all";
+function renderGuestSidebar() {
+  document.getElementById("rightSidebarContent").innerHTML = `
+    <div class="guest-banner">
+      <h3>Join Diwanet</h3>
+      <p>Follow businesses, like and comment on posts.</p>
+      <div class="actions">
+        <a href="signup.html" class="a-primary">Create free account</a>
+        <a href="login.html" class="a-ghost">Sign in</a>
+      </div>
+    </div>`;
+}
 
-    function switchTab(tab, btn) {
-      currentTab = tab;
-      document.querySelectorAll(".feed-tab").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      loadFeed();
+async function renderFollowingWidget() {
+  const user = getUser();
+  if (!getToken() || !user) return;
+  document.getElementById("rightSidebarContent").innerHTML = `<div class="widget"><div class="loading" style="padding:16px;">Loading...</div></div>`;
+  try {
+    const res = await fetch(`${API}/api/profile/${user.id}`, { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success) return;
+    const following = data.following || [];
+    const html = following.length > 0
+      ? following.slice(0, 6).map(b => `
+          <a class="business-item" href="business.html?slug=${b.slug}">
+            <div class="b-avatar">${b.business_name.charAt(0)}</div>
+            <div><div class="b-name">${escHtml(b.business_name)}</div><div class="b-cat">${escHtml(b.category_name || "")}</div></div>
+          </a>`).join("")
+      : `<p style="font-size:0.84rem;color:var(--muted2);">Not following anyone yet. <a href="categories.html" style="color:var(--accent);text-decoration:none;font-weight:600;">Explore</a></p>`;
+    document.getElementById("rightSidebarContent").innerHTML = `
+      <div class="widget"><h3>Following</h3>${html}
+        ${following.length > 6 ? `<a href="profile.html?id=${user.id}" style="font-size:0.82rem;color:var(--accent);text-decoration:none;display:block;margin-top:10px;font-weight:600;">See all →</a>` : ""}
+      </div>`;
+  } catch {}
+}
+
+async function loadNotifCount() {
+  if (!getToken()) return;
+  try {
+    const res = await fetch(`${API}/api/notifications`, { headers: authHeaders() });
+    const data = await res.json();
+    if (data.unread_count > 0) {
+      const badge = document.getElementById("notifBadge");
+      badge.textContent = data.unread_count;
+      badge.style.cssText = "background:var(--danger);color:white;border-radius:999px;padding:1px 7px;font-size:0.74rem;font-weight:700;margin-left:4px;";
     }
+  } catch {}
+}
 
-    // Load feed
-    async function loadFeed() {
-      const container = document.getElementById("feedContainer");
-      container.innerHTML = '<div class="loading">Loading posts…</div>';
-      try {
-        const url = `${API}/api/feed?limit=20`;
-        const headers = getToken() ? { "Authorization": "Bearer " + getToken() } : {};
-        const res = await fetch(url, { headers });
-        const data = await res.json();
-        if (!data.success || !data.posts.length) {
-          container.innerHTML = `
-            <div class="empty-state">
-              <h3>No posts yet</h3>
-              <p>Businesses haven't posted anything recently.</p>
-            </div>`;
-          return;
-        }
-        container.innerHTML = data.posts.map(renderPost).join("");
-      } catch (e) {
-        container.innerHTML = `<div class="msg error">Failed to load feed: ${escHtml(e.message)}</div>`;
-      }
+async function loadFeed(reset = false) {
+  if (reset) { page = 1; document.getElementById("feedContainer").innerHTML = '<div class="loading">Loading...</div>'; }
+  const headers = getToken() ? { "Authorization": "Bearer " + getToken() } : {};
+  try {
+    const res = await fetch(`${API}/api/feed?page=${page}`, { headers });
+    const data = await res.json();
+    if (!data.success) { document.getElementById("feedContainer").innerHTML = '<div class="loading">Could not load feed.</div>'; return; }
+    hasMore = data.has_more;
+    const posts = data.posts;
+    if (reset && posts.length === 0) {
+      document.getElementById("feedContainer").innerHTML = `<div class="empty-state"><h3>No posts yet</h3><p>Follow some businesses to see their posts. <a href="categories.html" style="color:var(--accent);text-decoration:none;font-weight:600;">Explore</a></p></div>`;
+      return;
     }
+    const html = posts.map(renderPost).join("");
+    if (reset) { document.getElementById("feedContainer").innerHTML = html; }
+    else { document.getElementById("feedContainer").insertAdjacentHTML("beforeend", html); }
+    document.getElementById("loadMoreContainer").style.display = hasMore ? "block" : "none";
+  } catch { document.getElementById("feedContainer").innerHTML = '<div class="loading">Connection error.</div>'; }
+}
 
-    function renderPost(post) {
-      const imgs = post.media_urls ? post.media_urls.slice(0, 4) : [];
-      const imgClass = imgs.length === 1 ? "one" : imgs.length === 2 ? "two" : imgs.length > 2 ? "many" : "";
-      const imgsHtml = imgs.length
-        ? `<div class="post-images ${imgClass}">${imgs.map(u => `<img src="${escAttr(u)}" alt="" loading="lazy" onclick="openImg('${escAttr(u)}')">`).join("")}</div>`
-        : "";
-      const initial = (post.business_name || "B").charAt(0).toUpperCase();
-      const logoHtml = post.logo_url
-        ? `<img src="${escAttr(post.logo_url)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
-        : escHtml(initial);
+function loadMore() { page++; loadFeed(false); }
 
-      return `
-        <div class="post-card" id="post-${post.id}">
-          <div class="post-header">
-            <a href="business.html?slug=${escAttr(post.slug)}" class="avatar avatar-md">${logoHtml}</a>
-            <div class="post-meta">
-              <div class="post-biz-name"><a href="business.html?slug=${escAttr(post.slug)}">${escHtml(post.business_name)}</a></div>
-              <div class="post-time">${escHtml(post.category_name || "")} · ${timeAgo(post.created_at)}</div>
-            </div>
-          </div>
-          <div class="post-body">
-            ${post.content ? `<p>${escHtml(post.content)}</p>` : ""}
-            ${imgsHtml}
-            <div class="post-actions">
-              <button class="action-btn ${post.user_liked ? 'liked' : ''}" onclick="toggleLike(${post.id}, this)">
-                ♥ <span>${post.like_count || 0}</span>
-              </button>
-              <button class="action-btn">💬 <span>${post.comment_count || 0}</span></button>
-              <button class="action-btn" onclick="sharePost('${escAttr(post.slug)}')">↗ Share</button>
-            </div>
-          </div>
-        </div>`;
+function renderPost(p) {
+  const isShare = p.post_type === "share", isBiz = p.author_type === "business";
+  const authorName = isBiz ? escHtml(p.business_name) : escHtml(`${p.first_name} ${p.last_name}`);
+  const authorLink = isBiz ? `business.html?slug=${p.business_slug}` : `profile.html?id=${p.user_id}`;
+  const avatarClass = isBiz ? "post-avatar" : "post-avatar individual";
+  const sharedBlock = isShare && p.original_post
+    ? `<div class="shared-post"><div class="shared-from">Originally posted by <a href="business.html?slug=${p.original_post.business_slug}">${escHtml(p.original_post.business_name)}</a></div><div class="shared-content">${escHtml(p.original_post.content).substring(0, 200)}${p.original_post.content.length > 200 ? "…" : ""}</div></div>`
+    : "";
+  const imageBlock = p.image_url ? `<img class="post-image" src="${escHtml(p.image_url)}" alt="" loading="lazy" />` : "";
+  const user = getUser(), canInteract = !!user;
+  const likedClass = p.is_liked ? "action-btn liked" : "action-btn";
+  const likedIcon = p.is_liked ? "❤️" : "🤍";
+  const actionsHtml = canInteract
+    ? `<button class="${likedClass}" id="like-${p.id}" onclick="toggleLike(${p.id})">${likedIcon} <span class="count" id="like-count-${p.id}">${p.like_count}</span></button>
+       <div class="action-sep"></div>
+       <button class="action-btn" onclick="toggleComments(${p.id})">💬 <span>${p.comment_count}</span></button>
+       <div class="action-sep"></div>
+       <button class="action-btn" onclick="openShare(${p.id},'${escAttr(authorName)}','${escAttr((p.content || "").substring(0, 80))}')">🔁 <span>${p.share_count}</span></button>`
+    : `<span class="action-btn" style="cursor:default;">🤍 ${p.like_count}</span>
+       <div class="action-sep"></div>
+       <span class="action-btn" style="cursor:default;">💬 ${p.comment_count}</span>
+       <div class="action-sep"></div>
+       <a href="login.html" class="action-btn" style="text-decoration:none;color:var(--accent);font-weight:600;">Sign in to interact</a>`;
+
+  return `<article class="post" id="post-${p.id}">
+    <div class="post-header">
+      <a href="${authorLink}" class="${avatarClass}">${authorName.charAt(0)}</a>
+      <div class="post-meta">
+        <div class="post-author"><a href="${authorLink}">${authorName}</a></div>
+        <div class="post-time">${timeAgo(p.created_at)}${isShare ? " · shared a post" : ""}</div>
+      </div>
+      ${isShare ? '<span class="post-type-badge">🔁 Share</span>' : ""}
+    </div>
+    <div class="post-body">
+      <div class="post-content">${escHtml(p.content || "")}</div>
+      ${imageBlock}${sharedBlock}
+    </div>
+    <div class="post-actions">${actionsHtml}</div>
+    <div class="comments-box" id="comments-${p.id}">
+      <div class="comment-list" id="comment-list-${p.id}"></div>
+      ${canInteract
+        ? `<div class="comment-input-row"><textarea class="comment-input" id="comment-input-${p.id}" placeholder="Write a comment..." rows="1"></textarea><button class="comment-send" onclick="submitComment(${p.id})">Send</button></div>`
+        : `<a href="login.html" style="font-size:0.84rem;color:var(--accent);text-decoration:none;font-weight:600;">Sign in to comment</a>`}
+    </div>
+  </article>`;
+}
+
+async function toggleLike(postId) {
+  if (!getUser()) { window.location.href = "login.html"; return; }
+  const btn = document.getElementById(`like-${postId}`);
+  btn.disabled = true;
+  try {
+    const res = await fetch(`${API}/api/posts/${postId}/like`, { method: "POST", headers: authHeaders() });
+    const data = await res.json();
+    if (data.success) {
+      btn.className = data.liked ? "action-btn liked" : "action-btn";
+      btn.innerHTML = (data.liked ? "❤️" : "🤍") + ` <span class="count" id="like-count-${postId}">${data.like_count}</span>`;
     }
+  } catch {}
+  btn.disabled = false;
+}
 
-    async function toggleLike(postId, btn) {
-      if (!getToken()) { window.location.href = "login.html"; return; }
-      const isLiked = btn.classList.contains("liked");
-      const method = isLiked ? "DELETE" : "POST";
-      try {
-        const res = await fetch(`${API}/api/posts/${postId}/like`, {
-          method,
-          headers: { "Authorization": "Bearer " + getToken() }
-        });
-        const data = await res.json();
-        if (data.success) {
-          btn.classList.toggle("liked");
-          const countEl = btn.querySelector("span");
-          countEl.textContent = data.like_count ?? (parseInt(countEl.textContent) + (isLiked ? -1 : 1));
-        }
-      } catch {}
-    }
+async function toggleComments(postId) {
+  const box = document.getElementById(`comments-${postId}`);
+  if (box.classList.contains("open")) { box.classList.remove("open"); return; }
+  box.classList.add("open");
+  await loadComments(postId);
+}
 
-    function sharePost(slug) {
-      const url = `${window.location.origin}/business.html?slug=${slug}`;
-      navigator.clipboard.writeText(url).then(() => alert("Link copied!")).catch(() => alert(url));
-    }
+async function loadComments(postId) {
+  const list = document.getElementById(`comment-list-${postId}`);
+  list.innerHTML = '<div style="color:var(--muted2);font-size:0.84rem;">Loading...</div>';
+  try {
+    const res = await fetch(`${API}/api/posts/${postId}/comments`);
+    const data = await res.json();
+    if (!data.success || data.comments.length === 0) { list.innerHTML = '<div style="color:var(--muted2);font-size:0.84rem;">No comments yet.</div>'; return; }
+    list.innerHTML = data.comments.map(c => {
+      const isBiz = c.commenter_type === "business";
+      const name = isBiz ? escHtml(c.business_name) : escHtml(`${c.first_name} ${c.last_name}`);
+      const link = isBiz ? `business.html?slug=${c.business_slug}` : `profile.html?id=${c.commenter_user_id}`;
+      return `<div class="comment">
+        <div class="comment-avatar ${isBiz ? "" : "individual"}">${name.charAt(0)}</div>
+        <div class="comment-bubble">
+          <div class="comment-name"><a href="${link}">${name}</a></div>
+          <div class="comment-text">${escHtml(c.content)}</div>
+          <div class="comment-time">${timeAgo(c.created_at)}</div>
+        </div>
+      </div>`;
+    }).join("");
+  } catch { list.innerHTML = ""; }
+}
 
-    function openImg(url) {
-      const overlay = document.createElement("div");
-      overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:grid;place-items:center;cursor:pointer;";
-      overlay.innerHTML = `<img src="${escAttr(url)}" style="max-width:90vw;max-height:90vh;border-radius:12px;">`;
-      overlay.onclick = () => overlay.remove();
-      document.body.appendChild(overlay);
-    }
+async function submitComment(postId) {
+  const input = document.getElementById(`comment-input-${postId}`);
+  const content = input.value.trim();
+  if (!content) return;
+  try {
+    const res = await fetch(`${API}/api/posts/${postId}/comments`, { method: "POST", headers: authHeaders(), body: JSON.stringify({ content }) });
+    const data = await res.json();
+    if (data.success) { input.value = ""; await loadComments(postId); }
+    else showToast(data.error || "Failed.");
+  } catch {}
+}
 
-    async function submitPost() {
-      const content = document.getElementById("composeText").value.trim();
-      const msg = document.getElementById("composeMsg");
-      if (!content) { msg.className = "msg error"; msg.textContent = "Please write something."; return; }
-      try {
-        const res = await fetch(`${API}/api/posts`, {
-          method: "POST",
-          headers: authHeaders(),
-          body: JSON.stringify({ content })
-        });
-        const data = await res.json();
-        if (data.success) {
-          document.getElementById("composeText").value = "";
-          msg.className = "msg success"; msg.textContent = "Post published!";
-          setTimeout(() => { msg.className = "msg"; loadFeed(); }, 1000);
-        } else {
-          msg.className = "msg error"; msg.textContent = data.error || "Failed to post.";
-        }
-      } catch (e) {
-        msg.className = "msg error"; msg.textContent = "Connection failed.";
-      }
-    }
+async function submitPost() {
+  const content = document.getElementById("composeText").value.trim();
+  if (!content) return;
+  const tagRaw = document.getElementById("tagInput").value.trim();
+  const tagged_businesses = tagRaw ? tagRaw.split(",").map(s => s.trim().replace(/^@/, "")).filter(Boolean) : [];
+  const btn = document.getElementById("postBtn");
+  btn.disabled = true; btn.textContent = "Posting...";
+  try {
+    const res = await fetch(`${API}/api/posts`, { method: "POST", headers: authHeaders(), body: JSON.stringify({ content, tagged_businesses }) });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById("composeText").value = "";
+      document.getElementById("tagInput").value = "";
+      showToast("Post published!");
+      await loadFeed(true);
+    } else showToast(data.error || "Failed.");
+  } catch { showToast("Connection error."); }
+  btn.disabled = false; btn.textContent = "Post";
+}
 
-    loadFeed();
-  </script>
+function openShare(postId, authorName, preview) {
+  if (!getUser()) { window.location.href = "login.html"; return; }
+  shareTargetId = postId;
+  document.getElementById("sharePreview").innerHTML = `<strong>${escHtml(authorName)}</strong>${escHtml(preview)}${preview.length >= 80 ? "…" : ""}`;
+  document.getElementById("shareComment").value = "";
+  document.getElementById("shareModal").classList.add("open");
+}
+
+function closeShare() {
+  document.getElementById("shareModal").classList.remove("open");
+  shareTargetId = null;
+}
+
+async function confirmShare() {
+  if (!shareTargetId) return;
+  const content = document.getElementById("shareComment").value.trim();
+  try {
+    const res = await fetch(`${API}/api/posts/${shareTargetId}/share`, { method: "POST", headers: authHeaders(), body: JSON.stringify({ content }) });
+    const data = await res.json();
+    closeShare();
+    if (data.success) { showToast("Shared successfully!"); await loadFeed(true); }
+    else showToast(data.error || "Share failed.");
+  } catch {}
+}
+
+(async () => { setupUI(); await loadFeed(true); })();
+</script>
 </body>
 </html>
