@@ -1,0 +1,23 @@
+{
+  "name": "diwanet-backend",
+  "version": "2.0.0",
+  "description": "Diwanet business social network - backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1048.0",
+    "@aws-sdk/s3-request-presigner": "^3.1048.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.0",
+    "express": "^5.2.1",
+    "multer": "^2.1.1",
+    "mysql2": "^3.20.0"
+  }
+}
