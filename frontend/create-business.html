@@ -8,20 +8,20 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/main.css">
   <style>
-    .topbar-inner { max-width: 860px; }
-    .main { max-width: 860px; margin: 0 auto; padding: 40px 24px 60px; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
     .page-header { margin-bottom: 28px; }
-    .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 2.2rem; letter-spacing: -0.02em; margin-bottom: 8px; }
-    .page-header p { color: var(--muted); font-size: 0.95rem; }
-    .card { margin-bottom: 20px; overflow: hidden; }
-    .card-header-icon {
-      width: 36px; height: 36px; border-radius: 10px;
-      background: var(--accent); display: grid; place-items: center;
-      color: white; font-size: 1rem; flex-shrink: 0;
-    }
-    .slug-hint { font-size: 0.78rem; color: var(--muted2); margin-top: 4px; }
-    .slug-hint span { color: var(--accent); font-weight: 600; }
-    @media(max-width:600px) { .main { padding: 24px 16px 48px; } }
+    .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 2rem; letter-spacing: -0.02em; margin-bottom: 6px; }
+    .page-header p { color: var(--muted); }
+    .section-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 20px; box-shadow: var(--shadow); }
+    .section-head { padding: 16px 22px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .section-head h2 { font-size: 0.92rem; font-weight: 700; }
+    .section-body { padding: 22px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .full { grid-column: 1 / -1; }
+    .actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+    .slug-preview { font-size: 0.78rem; color: var(--muted2); margin-top: 4px; }
+    .slug-preview span { color: var(--accent); font-weight: 600; }
+    @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -32,234 +32,205 @@
       <div class="brand-mark">D</div>
       <span class="brand-name">Diwanet</span>
     </a>
-    <div class="topbar-actions">
-      <a href="login.html" class="btn btn-ghost btn-sm">Sign in</a>
-    </div>
+    <div class="topbar-actions" id="authArea"></div>
   </div>
 </header>
 
-<main class="main">
+<div class="wrap">
   <div class="page-header">
-    <h1>Create your business page</h1>
-    <p>Register your business on Diwanet and start connecting with customers and partners.</p>
+    <h1>Create Business Page</h1>
+    <p>Register a business owner and publish the first version of the business page.</p>
   </div>
 
-  <!-- Owner Info -->
-  <div class="card">
-    <div class="card-header">
-      <div class="card-header-icon">👤</div>
-      <div>
-        <h2>Owner Information</h2>
-        <p>Your personal account details</p>
-      </div>
-    </div>
-    <div class="card-body">
-      <div class="form-grid">
-        <div class="field">
-          <label>First Name</label>
-          <input id="owner_first_name" type="text" placeholder="John" required />
-        </div>
-        <div class="field">
-          <label>Last Name</label>
-          <input id="owner_last_name" type="text" placeholder="Smith" required />
-        </div>
-        <div class="field">
-          <label>Email Address</label>
-          <input id="owner_email" type="email" placeholder="you@example.com" required />
-        </div>
-        <div class="field">
-          <label>Password</label>
-          <input id="owner_password" type="password" placeholder="••••••••" required />
-        </div>
-        <div class="field full">
-          <label>Phone Number <span class="optional">(optional)</span></label>
-          <input id="owner_phone" type="tel" placeholder="+1 416 000 0000" />
+  <form id="businessForm">
+    <div class="section-card">
+      <div class="section-head"><h2>Owner Information</h2></div>
+      <div class="section-body">
+        <div class="grid2">
+          <div class="field">
+            <label for="owner_first_name">First Name</label>
+            <input id="owner_first_name" name="owner_first_name" required />
+          </div>
+          <div class="field">
+            <label for="owner_last_name">Last Name</label>
+            <input id="owner_last_name" name="owner_last_name" required />
+          </div>
+          <div class="field">
+            <label for="owner_email">Owner Email</label>
+            <input id="owner_email" name="owner_email" type="email" required />
+          </div>
+          <div class="field">
+            <label for="owner_password">Password</label>
+            <input id="owner_password" name="owner_password" type="password" required />
+          </div>
+          <div class="field full">
+            <label for="owner_phone">Owner Phone <span class="optional">(optional)</span></label>
+            <input id="owner_phone" name="owner_phone" />
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Business Info -->
-  <div class="card">
-    <div class="card-header">
-      <div class="card-header-icon">🏢</div>
-      <div>
-        <h2>Business Information</h2>
-        <p>Your public business page details</p>
-      </div>
-    </div>
-    <div class="card-body">
-      <div class="form-grid">
-        <div class="field">
-          <label>Business Name</label>
-          <input id="business_name" type="text" placeholder="My Business" required />
-        </div>
-        <div class="field">
-          <label>Page URL Slug</label>
-          <input id="slug" type="text" placeholder="my-business" required />
-          <div class="slug-hint">diwanet.com/business.html?slug=<span id="slugPreview">my-business</span></div>
-        </div>
-        <div class="field">
-          <label>Category</label>
-          <select id="category_id" required>
-            <option value="">Loading categories...</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Sub Category <span class="optional">(optional)</span></label>
-          <select id="subcategory_id">
-            <option value="">Select a category first</option>
-          </select>
-        </div>
-        <div class="field full">
-          <label>Short Description</label>
-          <textarea id="short_description" placeholder="Tell people what your business does..." required></textarea>
-        </div>
-        <div class="field">
-          <label>Country</label>
-          <input id="country" type="text" value="Canada" required />
-        </div>
-        <div class="field">
-          <label>City</label>
-          <input id="city" type="text" placeholder="Toronto" required />
-        </div>
-        <div class="field">
-          <label>Business Email <span class="optional">(optional)</span></label>
-          <input id="business_email" type="email" placeholder="info@mybusiness.com" />
-        </div>
-        <div class="field">
-          <label>Business Phone <span class="optional">(optional)</span></label>
-          <input id="business_phone" type="tel" placeholder="+1 416 000 0000" />
+    <div class="section-card">
+      <div class="section-head"><h2>Business Information</h2></div>
+      <div class="section-body">
+        <div class="grid2">
+          <div class="field">
+            <label for="business_name">Business Name</label>
+            <input id="business_name" name="business_name" required />
+          </div>
+          <div class="field">
+            <label for="slug">Page URL Slug</label>
+            <input id="slug" name="slug" required />
+            <div class="slug-preview">diwanet.com/business.html?slug=<span id="slugPreview">my-business</span></div>
+          </div>
+          <div class="field">
+            <label for="category_id">Category</label>
+            <select id="category_id" name="category_id" required onchange="loadSubcategories(this.value)">
+              <option value="">Loading categories...</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="subcategory_id">Sub Category <span class="optional">(optional)</span></label>
+            <select id="subcategory_id" name="subcategory_id">
+              <option value="">Select a category first</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label for="short_description">Short Description</label>
+            <textarea id="short_description" name="short_description" required placeholder="Tell people what your business does..."></textarea>
+          </div>
+          <div class="field">
+            <label for="country">Country</label>
+            <input id="country" name="country" value="Canada" required />
+          </div>
+          <div class="field">
+            <label for="city">City</label>
+            <input id="city" name="city" required />
+          </div>
+          <div class="field">
+            <label for="business_email">Business Email <span class="optional">(optional)</span></label>
+            <input id="business_email" name="business_email" type="email" />
+          </div>
+          <div class="field">
+            <label for="business_phone">Business Phone <span class="optional">(optional)</span></label>
+            <input id="business_phone" name="business_phone" />
+          </div>
         </div>
       </div>
     </div>
-    <div class="card-footer" style="flex-direction:column;gap:12px;">
-      <div class="msg" id="msg"></div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;">
-        <button class="btn btn-primary btn-lg" id="submitBtn" onclick="submitForm()">Create Business Page</button>
-        <a href="index.html" class="btn btn-ghost btn-lg">← Back to Home</a>
-      </div>
+
+    <div class="msg" id="message"></div>
+
+    <div class="actions">
+      <button type="submit" class="btn btn-primary btn-lg">Create Business Page</button>
+      <a href="index.html" class="btn btn-ghost btn-lg">Back to Home</a>
     </div>
-  </div>
-</main>
+  </form>
+</div>
 
 <script src="assets/js/auth.js"></script>
 <script>
-  const businessNameInput = document.getElementById("business_name");
-  const slugInput = document.getElementById("slug");
-  const slugPreview = document.getElementById("slugPreview");
+renderTopbarAuth("authArea");
 
-  businessNameInput.addEventListener("input", () => {
-    if (!slugInput.dataset.touched) {
-      const s = makeSlug(businessNameInput.value);
-      slugInput.value = s;
-      slugPreview.textContent = s || "my-business";
-    }
-  });
+const form = document.getElementById("businessForm");
+const messageBox = document.getElementById("message");
+const businessNameInput = document.getElementById("business_name");
+const slugInput = document.getElementById("slug");
 
-  slugInput.addEventListener("input", () => {
-    slugInput.dataset.touched = "true";
-    const s = makeSlug(slugInput.value);
-    slugInput.value = s;
-    slugPreview.textContent = s || "my-business";
-  });
-
-  async function loadCategories() {
-    const select = document.getElementById("category_id");
-    try {
-      const res = await fetch(`${API}/api/categories`);
-      const data = await res.json();
-      if (!data.success) { select.innerHTML = '<option value="">Could not load</option>'; return; }
-      select.innerHTML = '<option value="">Select a category</option>';
-      data.categories.forEach(c => {
-        const o = document.createElement("option");
-        o.value = c.id; o.textContent = c.name;
-        select.appendChild(o);
-      });
-    } catch { select.innerHTML = '<option value="">Connection failed</option>'; }
+businessNameInput.addEventListener("input", () => {
+  if (!slugInput.dataset.touched) {
+    slugInput.value = makeSlug(businessNameInput.value);
+    document.getElementById("slugPreview").textContent = slugInput.value || "my-business";
   }
+});
 
-  document.getElementById("category_id").addEventListener("change", async function () {
-    const subSelect = document.getElementById("subcategory_id");
-    const catId = this.value;
-    if (!catId) { subSelect.innerHTML = '<option value="">Select a category first</option>'; return; }
-    subSelect.innerHTML = '<option value="">Loading...</option>';
-    try {
-      const res = await fetch(`${API}/api/subcategories/${catId}`);
-      const data = await res.json();
-      if (!data.success || !data.subcategories.length) {
-        subSelect.innerHTML = '<option value="">No subcategories</option>'; return;
-      }
-      subSelect.innerHTML = '<option value="">Select subcategory (optional)</option>';
-      data.subcategories.forEach(s => {
-        const o = document.createElement("option");
-        o.value = s.id; o.textContent = s.name;
-        subSelect.appendChild(o);
-      });
-    } catch { subSelect.innerHTML = '<option value="">Could not load</option>'; }
-  });
+slugInput.addEventListener("input", () => {
+  slugInput.dataset.touched = "true";
+  slugInput.value = makeSlug(slugInput.value);
+  document.getElementById("slugPreview").textContent = slugInput.value || "my-business";
+});
 
-  function showMsg(text, type) {
-    const msg = document.getElementById("msg");
-    msg.className = "msg " + type;
-    msg.textContent = text;
-  }
+async function loadSubcategories(categoryId) {
+  const select = document.getElementById("subcategory_id");
+  if (!categoryId) { select.innerHTML = '<option value="">Select a category first</option>'; return; }
+  select.innerHTML = '<option value="">Loading...</option>';
+  try {
+    const res = await fetch(`${API}/api/categories/subcategories/${categoryId}`);
+    const result = await res.json();
+    if (!result.success) { select.innerHTML = '<option value="">Could not load</option>'; return; }
+    select.innerHTML = '<option value="">Select sub category (optional)</option>';
+    result.subcategories.forEach(s => {
+      const option = document.createElement("option");
+      option.value = s.id; option.textContent = s.name;
+      select.appendChild(option);
+    });
+  } catch { select.innerHTML = '<option value="">Error loading</option>'; }
+}
 
-  async function submitForm() {
-    const btn = document.getElementById("submitBtn");
+async function loadCategories() {
+  const select = document.getElementById("category_id");
+  try {
+    const res = await fetch(`${API}/api/categories`);
+    const result = await res.json();
+    if (!res.ok || !result.success) { select.innerHTML = '<option value="">Could not load categories</option>'; return; }
+    select.innerHTML = '<option value="">Select</option>';
+    result.categories.forEach(c => {
+      const option = document.createElement("option");
+      option.value = c.id; option.textContent = c.name;
+      select.appendChild(option);
+    });
+  } catch { select.innerHTML = '<option value="">Server connection failed</option>'; }
+}
 
-    const payload = {
-      owner_first_name: document.getElementById("owner_first_name").value.trim(),
-      owner_last_name: document.getElementById("owner_last_name").value.trim(),
-      owner_email: document.getElementById("owner_email").value.trim(),
-      owner_password: document.getElementById("owner_password").value,
-      owner_phone: document.getElementById("owner_phone").value.trim(),
-      business_name: document.getElementById("business_name").value.trim(),
-      slug: document.getElementById("slug").value.trim(),
-      category_id: document.getElementById("category_id").value,
-      subcategory_id: document.getElementById("subcategory_id").value,
-      short_description: document.getElementById("short_description").value.trim(),
-      country: document.getElementById("country").value.trim(),
-      city: document.getElementById("city").value.trim(),
-      business_email: document.getElementById("business_email").value.trim(),
-      business_phone: document.getElementById("business_phone").value.trim()
-    };
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  messageBox.className = "msg"; messageBox.textContent = "";
 
-    if (!payload.owner_first_name || !payload.owner_last_name || !payload.owner_email ||
-        !payload.owner_password || !payload.business_name || !payload.slug ||
-        !payload.category_id || !payload.short_description || !payload.country || !payload.city) {
-      showMsg("Please fill in all required fields.", "error"); return;
+  const payload = {
+    owner_first_name: document.getElementById("owner_first_name").value.trim(),
+    owner_last_name: document.getElementById("owner_last_name").value.trim(),
+    owner_email: document.getElementById("owner_email").value.trim(),
+    owner_password: document.getElementById("owner_password").value.trim(),
+    owner_phone: document.getElementById("owner_phone").value.trim(),
+    business_name: document.getElementById("business_name").value.trim(),
+    slug: document.getElementById("slug").value.trim(),
+    subcategory_id: document.getElementById("subcategory_id").value,
+    category_id: document.getElementById("category_id").value,
+    short_description: document.getElementById("short_description").value.trim(),
+    country: document.getElementById("country").value.trim(),
+    city: document.getElementById("city").value.trim(),
+    business_email: document.getElementById("business_email").value.trim(),
+    business_phone: document.getElementById("business_phone").value.trim()
+  };
+
+  try {
+    const res = await fetch(`${API}/api/business/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const text = await res.text();
+    let result = {};
+    try { result = JSON.parse(text); } catch { result = { error: text }; }
+
+    if (!res.ok) {
+      messageBox.className = "msg error"; messageBox.textContent = result.error || "Something went wrong."; return;
     }
 
-    btn.disabled = true; btn.textContent = "Creating...";
+    messageBox.className = "msg success"; messageBox.textContent = "Business page created successfully. Redirecting...";
 
-    try {
-      const res = await fetch(`${API}/api/business/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-
-      if (!data.success) {
-        showMsg(data.error || "Something went wrong.", "error");
-      } else {
-        if (data.token) {
-          localStorage.setItem("dn_token", data.token);
-          localStorage.setItem("dn_user", JSON.stringify({ id: data.user_id, role: "business_owner" }));
-          localStorage.setItem("dn_business", JSON.stringify({ id: data.business_id, slug: data.slug, business_name: payload.business_name }));
-        }
-        showMsg("Business page created! Redirecting...", "success");
-        setTimeout(() => { window.location.href = `business.html?slug=${data.slug}`; }, 900);
-      }
-    } catch (e) {
-      showMsg("Connection failed: " + e.message, "error");
-    } finally {
-      btn.disabled = false; btn.textContent = "Create Business Page";
+    if (result.token) {
+      setAuth(result.token, { id: result.user_id, role: "business_owner" }, { id: result.business_id, slug: result.slug });
     }
-  }
 
-  loadCategories();
+    setTimeout(() => { window.location.href = `business.html?slug=${result.slug}`; }, 900);
+  } catch (error) {
+    messageBox.className = "msg error"; messageBox.textContent = "Server connection failed: " + error.message;
+  }
+});
+
+loadCategories();
 </script>
 </body>
 </html>

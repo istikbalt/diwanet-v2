@@ -8,381 +8,625 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/main.css">
   <style>
-    .cover {
-      height: 200px;
-      background: linear-gradient(135deg, var(--accent-light), #dbeafe 60%, #d1fae5);
-      position: relative;
-    }
-    .cover img { width: 100%; height: 100%; object-fit: cover; }
-    .profile-row {
-      display: flex;
-      align-items: flex-end;
-      gap: 18px;
-      padding: 0 32px;
-      margin-top: -36px;
-      margin-bottom: 18px;
-    }
-    .profile-logo {
-      width: 80px; height: 80px;
-      border-radius: 20px;
-      background: var(--accent);
-      border: 4px solid white;
-      display: grid; place-items: center;
-      font-weight: 800; color: white; font-size: 1.8rem;
-      flex-shrink: 0;
-      overflow: hidden;
-      box-shadow: var(--shadow);
-    }
-    .profile-logo img { width: 100%; height: 100%; object-fit: cover; }
-    .profile-info { flex: 1; padding-bottom: 6px; }
-    .profile-info h1 { font-family: 'DM Serif Display', serif; font-size: 1.7rem; letter-spacing: -0.02em; }
-    .profile-info .meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
-    .profile-actions { display: flex; gap: 8px; padding-bottom: 6px; }
+    .wrap { max-width: 1060px; margin: 0 auto; padding: 28px 24px; display: grid; grid-template-columns: 1fr 300px; gap: 24px; align-items: start; }
 
-    .profile-layout {
-      display: grid;
-      grid-template-columns: 1fr 300px;
-      gap: 24px;
-      padding: 0 0 60px;
-      align-items: start;
-    }
+    /* Profile panel */
+    .profile-panel { background: white; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 20px; grid-column: 1/-1; box-shadow: var(--shadow); }
+    .profile-cover { height: 280px; background: linear-gradient(135deg, var(--accent-light), #dbeafe 50%, #e0f2fe); background-size: cover; background-position: center; }
+    .profile-body { padding: 0 24px 20px; }
+    .logo-wrap { display: flex; align-items: flex-end; justify-content: space-between; margin-top: -42px; margin-bottom: 16px; }
+    .biz-logo { width: 84px; height: 84px; border-radius: 20px; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); display: grid; place-items: center; font-size: 2.2rem; font-weight: 800; color: white; border: 4px solid white; flex-shrink: 0; box-shadow: var(--shadow-lg); overflow: hidden; }
+    .follow-btn { padding: 10px 26px; border-radius: 999px; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+    .follow-btn.not-following { background: var(--accent); color: white; border: none; }
+    .follow-btn.not-following:hover { background: var(--accent-dark); }
+    .follow-btn.following { background: white; color: var(--muted); border: 1.5px solid var(--border); }
+    .follow-btn.following:hover { color: var(--danger); border-color: var(--danger); }
+    .biz-name { font-family: 'DM Serif Display', serif; font-size: 1.6rem; margin-bottom: 4px; }
+    .biz-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.5; margin-bottom: 10px; }
 
     /* Tabs */
-    .tabs {
-      display: flex;
-      gap: 2px;
-      border-bottom: 2px solid var(--border);
-      margin-bottom: 20px;
-    }
-    .tab-btn {
-      padding: 10px 18px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: var(--muted);
-      cursor: pointer;
-      border: none;
-      background: none;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -2px;
-      font-family: 'DM Sans', sans-serif;
-      transition: all 0.2s;
-    }
-    .tab-btn:hover { color: var(--accent); }
-    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tabs { display: flex; gap: 4px; margin-bottom: 18px; background: white; border: 1px solid var(--border); border-radius: 14px; padding: 5px; box-shadow: var(--shadow); }
+    .tab { flex: 1; padding: 9px; border-radius: 10px; text-align: center; font-size: 0.88rem; font-weight: 500; cursor: pointer; color: var(--muted); border: none; background: none; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+    .tab.active { background: var(--accent); color: white; font-weight: 700; }
+    .tab:hover:not(.active) { background: var(--surface2); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
-    /* Post cards */
-    .post-card {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      margin-bottom: 14px;
-      overflow: hidden;
-    }
-    .post-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 10px; }
-    .post-time { font-size: 0.76rem; color: var(--muted); }
-    .post-body { padding: 0 16px 12px; font-size: 0.92rem; line-height: 1.55; white-space: pre-wrap; }
-    .post-images { display: grid; gap: 3px; margin-bottom: 10px; }
-    .post-images img { width: 100%; max-height: 360px; object-fit: cover; cursor: pointer; }
-    .post-images.two { grid-template-columns: 1fr 1fr; }
-    .post-images.many { grid-template-columns: 1fr 1fr; }
-    .post-images.two img, .post-images.many img { height: 160px; }
-    .post-footer { display: flex; gap: 4px; padding: 8px 12px; border-top: 1px solid var(--border); background: var(--surface2); }
-    .action-btn {
-      display: flex; align-items: center; gap: 5px;
-      padding: 6px 10px; border-radius: 999px;
-      font-size: 0.8rem; font-weight: 600; color: var(--muted);
-      cursor: pointer; border: none; background: none;
-      font-family: 'DM Sans', sans-serif; transition: all 0.2s;
-    }
-    .action-btn:hover { background: white; color: var(--accent); }
-    .action-btn.liked { color: #DC2626; }
+    /* Compose */
+    .compose { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 16px; display: none; box-shadow: var(--shadow); }
+    .compose.visible { display: block; }
+    .compose-label { font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+    .compose textarea { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 0.92rem; color: var(--text); font-family: 'DM Sans', sans-serif; resize: none; min-height: 90px; transition: border-color 0.2s; }
+    .compose textarea:focus { outline: none; border-color: var(--accent); background: white; }
+    .compose-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+    .compose-hint { font-size: 0.78rem; color: var(--muted2); }
+    .post-btn { padding: 9px 22px; border-radius: 999px; border: none; background: var(--accent); color: white; font-weight: 700; font-size: 0.88rem; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+    .post-btn:hover { background: var(--accent-dark); }
+    .post-btn:disabled { opacity: 0.5; }
 
-    /* Sidebar cards */
-    .info-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow); }
-    .info-card h3 { font-size: 0.88rem; font-weight: 700; margin-bottom: 12px; }
-    .info-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
-    .info-row:last-child { border-bottom: 0; padding-bottom: 0; }
-    .info-row .label { color: var(--muted); width: 90px; flex-shrink: 0; }
-    .info-row .value { color: var(--text); font-weight: 500; flex: 1; word-break: break-word; }
+    /* Posts */
+    .post { background: white; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 14px; transition: all 0.2s; box-shadow: var(--shadow); }
+    .post:hover { box-shadow: var(--shadow-lg); }
+    .post-header { padding: 16px 18px 0; display: flex; align-items: center; gap: 12px; }
+    .post-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); display: grid; place-items: center; font-weight: 800; color: white; font-size: 1rem; flex-shrink: 0; }
+    .post-author { font-weight: 700; font-size: 0.93rem; }
+    .post-time { font-size: 0.78rem; color: var(--muted2); margin-top: 2px; }
+    .post-body { padding: 12px 18px; }
+    .post-content { font-size: 0.93rem; line-height: 1.65; white-space: pre-wrap; }
+    .post-image { width: 100%; max-height: 360px; object-fit: cover; border-radius: 10px; margin-top: 10px; cursor: pointer; }
+    .post-actions { padding: 10px 18px; display: flex; align-items: center; gap: 4px; border-top: 1px solid var(--border); }
+    .action-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px; border: none; background: none; color: var(--muted); font-size: 0.84rem; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+    .action-btn:hover { background: var(--surface2); color: var(--text); }
+    .action-btn.liked { color: var(--danger); font-weight: 600; }
+    .action-sep { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
+    .comments-box { border-top: 1px solid var(--border); padding: 14px 18px; display: none; background: var(--surface2); }
+    .comments-box.open { display: block; }
+    .comment { display: flex; gap: 10px; margin-bottom: 10px; }
+    .c-avatar { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; font-size: 0.75rem; font-weight: 700; color: white; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); }
+    .c-avatar.ind { background: linear-gradient(135deg, #60a5fa, #3b82f6); }
+    .c-bubble { background: white; border-radius: 12px; padding: 9px 12px; flex: 1; border: 1px solid var(--border); }
+    .c-name { font-size: 0.8rem; font-weight: 700; margin-bottom: 3px; }
+    .c-name a { color: var(--text); text-decoration: none; }
+    .c-name a:hover { color: var(--accent); }
+    .c-text { font-size: 0.87rem; line-height: 1.5; }
+    .c-time { font-size: 0.74rem; color: var(--muted2); margin-top: 4px; }
+    .c-input-row { display: flex; gap: 8px; margin-top: 12px; }
+    .c-input { flex: 1; background: white; border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 12px; font-size: 0.87rem; color: var(--text); font-family: 'DM Sans', sans-serif; resize: none; }
+    .c-input:focus { outline: none; border-color: var(--accent); }
+    .c-send { padding: 9px 16px; border-radius: 10px; border: none; background: var(--accent); color: white; font-size: 0.84rem; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 
-    /* About tab */
-    .about-section { margin-bottom: 20px; }
-    .about-section h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
-    .about-section p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+    /* Share modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,76,129,0.3); display: none; place-items: center; z-index: 200; backdrop-filter: blur(4px); }
+    .modal-overlay.open { display: grid; }
+    .modal { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; width: 90%; max-width: 460px; box-shadow: var(--shadow-lg); }
+    .modal h3 { font-family: 'DM Serif Display', serif; font-size: 1.3rem; margin-bottom: 14px; }
+    .modal-preview { background: var(--accent-light); border-radius: 12px; padding: 14px; margin-bottom: 14px; font-size: 0.87rem; color: var(--muted); border-left: 3px solid var(--accent); }
+    .modal-preview strong { display: block; color: var(--text); font-size: 0.84rem; margin-bottom: 5px; }
+    .modal textarea { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 0.9rem; color: var(--text); font-family: 'DM Sans', sans-serif; resize: none; min-height: 90px; }
+    .modal textarea:focus { outline: none; border-color: var(--accent); }
+    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+    .btn-cancel { padding: 9px 18px; border-radius: 999px; border: 1.5px solid var(--border); background: white; color: var(--muted); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.87rem; }
+    .btn-share { padding: 9px 22px; border-radius: 999px; border: none; background: var(--accent); color: white; font-weight: 700; font-size: 0.87rem; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 
-    @media (max-width: 860px) {
-      .profile-layout { grid-template-columns: 1fr; }
-      .profile-row { padding: 0 16px; }
-    }
-    @media (max-width: 600px) {
-      .cover { height: 140px; }
-      .profile-info h1 { font-size: 1.3rem; }
-      .profile-actions { flex-wrap: wrap; }
-    }
+    /* Sidebar */
+    .sidebar { display: grid; gap: 14px; }
+    .widget { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); }
+    .widget-title { font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 14px; }
+    .info-row { padding: 9px 0; border-bottom: 1px solid var(--border); }
+    .info-row:last-child { border-bottom: none; }
+    .info-lbl { font-size: 0.74rem; color: var(--muted2); margin-bottom: 3px; }
+    .info-val { font-size: 0.88rem; font-weight: 500; }
+    .join-widget { background: var(--accent-light); border: 1px solid rgba(15,76,129,0.2); border-radius: 16px; padding: 20px; text-align: center; }
+    .join-widget h3 { font-family: 'DM Serif Display', serif; font-size: 1.1rem; margin-bottom: 8px; }
+    .join-widget p { font-size: 0.84rem; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+    .j-btn { display: block; padding: 10px; border-radius: 12px; text-align: center; font-size: 0.88rem; font-weight: 700; text-decoration: none; transition: all 0.2s; margin-bottom: 8px; }
+    .j-primary { background: var(--accent); color: white; }
+    .j-ghost { background: white; color: var(--text); border: 1.5px solid var(--border); }
+
+    /* Lightbox */
+    .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 1000; align-items: center; justify-content: center; }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 92vw; max-height: 92vh; border-radius: 10px; object-fit: contain; }
+    .lightbox-close { position: fixed; top: 20px; right: 24px; color: white; font-size: 2rem; cursor: pointer; background: none; border: none; }
+    .lightbox-prev, .lightbox-next { position: fixed; top: 50%; transform: translateY(-50%); color: white; font-size: 2rem; cursor: pointer; background: rgba(0,0,0,0.4); border: none; padding: 10px 16px; border-radius: 8px; }
+    .lightbox-prev { left: 16px; }
+    .lightbox-next { right: 16px; }
+
+    /* Notifications */
+    .notif-btn { position: relative; padding: 8px 14px; border-radius: 999px; border: 1.5px solid var(--border); background: white; cursor: pointer; font-size: 1.1rem; }
+    .notif-badge { position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--danger); color: white; font-size: 10px; font-weight: 700; display: none; align-items: center; justify-content: center; }
+    .notif-badge.show { display: flex; }
+    .notif-panel { display: none; position: fixed; top: 60px; right: 16px; width: 340px; max-height: 480px; overflow-y: auto; background: white; border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); z-index: 200; }
+    .notif-panel.open { display: block; }
+    .notif-header { padding: 14px 18px; font-weight: 700; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .notif-item { padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 0.88rem; color: var(--muted); }
+    .notif-item:last-child { border-bottom: 0; }
+    .notif-item.unread { background: var(--accent-light); }
+    .notif-empty { padding: 24px; text-align: center; color: var(--muted2); }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--text); border-radius: 12px; padding: 11px 22px; font-size: 0.88rem; font-weight: 600; color: white; box-shadow: var(--shadow-lg); transition: transform 0.3s; z-index: 300; }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 760px) { .wrap { grid-template-columns: 1fr; padding: 16px; } .profile-body { padding: 0 18px 20px; } .biz-name { font-size: 1.5rem; } }
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="topbar-inner">
-      <a href="index.html" class="brand">
-        <div class="brand-mark">D</div>
-        <span class="brand-name">Diwanet</span>
-      </a>
-      <nav class="topbar-nav">
-        <a href="categories.html">Categories</a>
-        <a href="feed.html">Feed</a>
-      </nav>
-      <div class="topbar-actions" id="topbarActions"></div>
-      <button class="hamburger" onclick="document.getElementById('mobileMenu').classList.toggle('open')">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
-  <div class="mobile-menu" id="mobileMenu">
-    <a href="categories.html">Categories</a>
-    <a href="feed.html">Feed</a>
-    <a href="login.html">Sign in</a>
-    <a href="signup.html" class="primary">Sign up</a>
+
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-header">
+    <span>Notifications</span>
+    <button onclick="markAllRead()" style="font-size:0.8rem;color:var(--accent);background:none;border:none;cursor:pointer;">Mark all read</button>
   </div>
+  <div id="notifList"><div class="notif-empty">No notifications yet.</div></div>
+</div>
 
-  <main>
-    <!-- Cover -->
-    <div class="cover" id="coverDiv"></div>
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <button class="lightbox-prev" onclick="event.stopPropagation();lightboxNav(-1)">‹</button>
+  <img id="lightboxImg" src="" style="display:none;" />
+  <video id="lightboxVideo" controls style="max-width:92vw;max-height:92vh;display:none;border-radius:10px;" onclick="event.stopPropagation()"></video>
+  <button class="lightbox-next" onclick="event.stopPropagation();lightboxNav(1)">›</button>
+</div>
 
-    <div class="container">
-      <!-- Profile row -->
-      <div class="profile-row">
-        <div class="profile-logo" id="logoDiv"></div>
-        <div class="profile-info">
-          <h1 id="bizName">Loading…</h1>
-          <div class="meta" id="bizMeta"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="brand">
+      <div class="brand-mark">D</div>
+      <span class="brand-name">Diwanet</span>
+    </a>
+    <button class="notif-btn" id="notifBtn" onclick="toggleNotif()" style="display:none;">🔔<span class="notif-badge" id="notifBadge"></span></button>
+    <div class="topbar-actions" id="navRight"></div>
+  </div>
+</header>
+
+<div id="mainWrap" style="max-width:1060px;margin:0 auto;padding:28px 24px;"><div class="loading">Loading business...</div></div>
+
+<div class="modal-overlay" id="shareModal">
+  <div class="modal">
+    <h3>Share this post</h3>
+    <div class="modal-preview" id="sharePreview"></div>
+    <textarea id="shareComment" placeholder="Add your thoughts... (optional)"></textarea>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeShare()">Cancel</button>
+      <button class="btn-share" onclick="confirmShare()">Share</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="assets/js/auth.js"></script>
+<script>
+let bizData = null, shareTargetId = null;
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+function setupNav() {
+  const user = getUser(), biz = getBusiness(), navRight = document.getElementById("navRight");
+  if (user) {
+    navRight.innerHTML = `<a href="feed.html" class="btn btn-ghost btn-sm">Feed</a><button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign out</button>`;
+  } else {
+    navRight.innerHTML = `<a href="login.html" class="btn btn-ghost btn-sm">Sign in</a><a href="signup.html" class="btn btn-primary btn-sm">Join free</a>`;
+  }
+}
+
+async function loadBusiness() {
+  const slug = new URLSearchParams(window.location.search).get("slug");
+  if (!slug) { document.getElementById("mainWrap").innerHTML = '<div class="loading">No business specified.</div>'; return; }
+  const headers = getToken() ? { "Authorization": "Bearer " + getToken() } : {};
+  try {
+    const res = await fetch(`${API}/api/business/${slug}`, { headers });
+    const data = await res.json();
+    if (!data.success) { document.getElementById("mainWrap").innerHTML = '<div class="loading">Business not found.</div>'; return; }
+    bizData = data.business;
+    document.title = `${bizData.business_name} · Diwanet`;
+    renderPage();
+  } catch { document.getElementById("mainWrap").innerHTML = '<div class="loading">Connection error.</div>'; }
+}
+
+function renderPage() {
+  const b = bizData, user = getUser(), myBiz = getBusiness(), isOwner = myBiz && myBiz.slug === b.slug;
+  const initial = b.business_name.charAt(0).toUpperCase();
+  const joinDate = new Date(b.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+
+  const followBtnHtml = user && !isOwner
+    ? `<button class="follow-btn ${b.is_following ? "following" : "not-following"}" id="followBtn" onclick="toggleFollow()">${b.is_following ? "✓ Following" : "+ Follow"}</button>`
+    : isOwner
+    ? `<span class="btn btn-ghost btn-sm" style="cursor:default;">Your page</span> <a href="edit-business.html" class="btn btn-primary btn-sm">✏️ Edit Profile</a>`
+    : `<a href="login.html" class="btn btn-primary btn-sm">+ Follow</a>`;
+
+  const wrap = document.getElementById("mainWrap");
+  wrap.style.cssText = "max-width:1060px;margin:0 auto;padding:28px 24px;display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start;";
+
+  wrap.innerHTML = `
+    <div style="grid-column:1/-1;">
+      <div class="profile-panel">
+        <div class="profile-cover" ${b.cover_url ? `style="background-image:url(${escAttr(b.cover_url)});background-size:cover;background-position:center;"` : ""}></div>
+        <div class="profile-body">
+          <div class="logo-wrap">
+            <div class="biz-logo">${b.logo_url ? `<img src="${escAttr(b.logo_url)}" style="width:100%;height:100%;object-fit:cover;" />` : initial}</div>
+            <div style="display:flex;gap:8px;align-items:center;">${followBtnHtml}</div>
+          </div>
+          <div class="biz-name">${escHtml(b.business_name)}</div>
+          <div style="font-size:0.88rem;color:var(--muted);margin-bottom:6px;">
+            <span style="font-weight:600;color:var(--accent);">${escHtml(b.category_name || "")}</span>
+            ${b.business_type ? ` · ${escHtml(b.business_type)}` : ""}
+            ${b.city ? ` · 📍 ${escHtml(b.city)}, ${escHtml(b.country)}` : ""}
+          </div>
+          ${b.short_description ? `<div class="biz-desc">${escHtml(b.short_description)}</div>` : ""}
+          <div style="font-size:0.88rem;color:var(--muted);margin-top:8px;">
+            <span style="font-weight:700;color:var(--text);" id="followerCount">${b.follower_count || 0}</span> Followers
+            <span style="margin:0 8px;">·</span> Joined ${joinDate}
+          </div>
         </div>
-        <div class="profile-actions" id="profileActions"></div>
       </div>
-
-      <!-- Tabs -->
+    </div>
+    <div>
+      <div class="compose ${isOwner ? "visible" : ""}" id="composeBox">
+        <div class="compose-label">New Post</div>
+        <textarea id="composeText" placeholder="Share an update or tag another business with @slug..."></textarea>
+        <div style="margin-top:10px;">
+          <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:0.84rem;color:var(--muted);padding:7px 12px;border-radius:999px;border:1.5px solid var(--border);background:var(--surface2);">
+            📷 Add photos/video
+            <input type="file" id="postImageInput" accept="image/*,video/*" style="display:none;" multiple onchange="previewPostImages(this)">
+          </label>
+        </div>
+        <div id="postImagePreviewWrap" style="display:none;margin-top:8px;display:flex;flex-wrap:wrap;gap:8px;"></div>
+        <div class="compose-footer">
+          <span class="compose-hint">Use @slug to tag businesses</span>
+          <button class="post-btn" id="postBtn" onclick="submitPost()">Publish</button>
+        </div>
+      </div>
       <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('posts', this)">Posts</button>
-        <button class="tab-btn" onclick="switchTab('about', this)">About</button>
+        <button class="tab active" onclick="switchTab('posts')">Posts</button>
+        <button class="tab" onclick="switchTab('tagged')">Tagged</button>
       </div>
-
-      <div class="profile-layout">
-        <!-- Main content -->
-        <div id="mainContent">
-          <div class="loading">Loading…</div>
-        </div>
-
-        <!-- Right sidebar -->
-        <aside>
-          <div class="info-card" id="infoCard" style="display:none;">
-            <h3>Business Info</h3>
-            <div id="infoRows"></div>
-          </div>
-          <div class="info-card">
-            <h3>Share this page</h3>
-            <button class="btn btn-ghost btn-sm btn-full" onclick="copyLink()">Copy link</button>
-          </div>
-        </aside>
-      </div>
+      <div id="tab-posts" class="tab-content active"><div class="loading">Loading posts...</div></div>
+      <div id="tab-tagged" class="tab-content"><div class="loading">Loading...</div></div>
     </div>
-  </main>
+    <div class="sidebar">
+      <div class="widget">
+        <div class="widget-title">Business Info</div>
+        ${b.business_email ? `<div class="info-row"><div class="info-lbl">Email</div><div class="info-val">${escHtml(b.business_email)}</div></div>` : ""}
+        ${b.business_phone ? `<div class="info-row"><div class="info-lbl">Phone</div><div class="info-val">${escHtml(b.business_phone)}</div></div>` : ""}
+        <div class="info-row"><div class="info-lbl">Location</div><div class="info-val">${escHtml(b.city ? b.city + ", " + b.country : b.country)}</div></div>
+        <div class="info-row"><div class="info-lbl">Category</div><div class="info-val">${escHtml(b.category_name || "-")}</div></div>
+        <div class="info-row"><div class="info-lbl">Type</div><div class="info-val" style="text-transform:capitalize;">${escHtml(b.business_type || "-")}</div></div>
+        ${b.website ? `<div class="info-row"><div class="info-lbl">Website</div><div class="info-val"><a href="${escAttr(b.website)}" target="_blank" style="color:var(--accent);text-decoration:none;">${escHtml(b.website.replace(/https?:\/\//, ""))}</a></div></div>` : ""}
+        ${(b.instagram_url || b.facebook_url || b.linkedin_url || b.twitter_url || b.youtube_url || b.tiktok_url) ? `
+        <div class="info-row"><div class="info-lbl">Social</div><div class="info-val" style="display:flex;gap:10px;flex-wrap:wrap;">
+          ${b.instagram_url ? `<a href="${escAttr(b.instagram_url)}" target="_blank" style="color:var(--accent);text-decoration:none;font-size:0.85rem;">Instagram</a>` : ""}
+          ${b.facebook_url ? `<a href="${escAttr(b.facebook_url)}" target="_blank" style="color:var(--accent);text-decoration:none;font-size:0.85rem;">Facebook</a>` : ""}
+          ${b.linkedin_url ? `<a href="${escAttr(b.linkedin_url)}" target="_blank" style="color:var(--accent);text-decoration:none;font-size:0.85rem;">LinkedIn</a>` : ""}
+          ${b.twitter_url ? `<a href="${escAttr(b.twitter_url)}" target="_blank" style="color:var(--accent);text-decoration:none;font-size:0.85rem;">Twitter</a>` : ""}
+          ${b.youtube_url ? `<a href="${escAttr(b.youtube_url)}" target="_blank" style="color:var(--accent);text-decoration:none;font-size:0.85rem;">YouTube</a>` : ""}
+          ${b.tiktok_url ? `<a href="${escAttr(b.tiktok_url)}" target="_blank" style="color:var(--accent);text-decoration:none;font-size:0.85rem;">TikTok</a>` : ""}
+        </div></div>` : ""}
+      </div>
+      ${!user ? `<div class="join-widget"><h3>Join Diwanet</h3><p>Follow businesses, like and comment on posts.</p><a href="signup.html" class="j-btn j-primary">Create free account</a><a href="login.html" class="j-btn j-ghost">Sign in</a></div>` : ""}
+    </div>`;
 
-  <!-- Lightbox -->
-  <div id="lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;place-items:center;cursor:pointer;" onclick="this.style.display='none'">
-    <img id="lightboxImg" style="max-width:90vw;max-height:90vh;border-radius:12px;">
-  </div>
+  loadPosts();
+}
 
-  <script src="assets/js/auth.js"></script>
-  <script>
-    renderTopbarAuth("topbarActions");
+function switchTab(tab) {
+  document.querySelectorAll(".tab").forEach((t, i) => t.classList.toggle("active", ["posts", "tagged"][i] === tab));
+  document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+  document.getElementById(`tab-${tab}`).classList.add("active");
+  if (tab === "tagged") loadTagged();
+}
 
+async function loadPosts() {
+  const slug = new URLSearchParams(window.location.search).get("slug");
+  const headers = getToken() ? { "Authorization": "Bearer " + getToken() } : {};
+  try {
+    const res = await fetch(`${API}/api/business/${slug}/posts`, { headers });
+    const data = await res.json();
+    const container = document.getElementById("tab-posts");
+    if (!data.success || data.posts.length === 0) { container.innerHTML = '<div class="empty-state"><h3>No posts yet.</h3></div>'; return; }
+    container.innerHTML = data.posts.map(renderPost).join("");
+  } catch { document.getElementById("tab-posts").innerHTML = '<div class="empty-state"><h3>Could not load posts.</h3></div>'; }
+}
+
+async function loadTagged() {
+  const slug = new URLSearchParams(window.location.search).get("slug");
+  const headers = getToken() ? { "Authorization": "Bearer " + getToken() } : {};
+  try {
+    const res = await fetch(`${API}/api/business/${slug}/posts`, { headers });
+    const data = await res.json();
+    const container = document.getElementById("tab-tagged");
+    if (!data.success || !data.tagged_posts || data.tagged_posts.length === 0) { container.innerHTML = '<div class="empty-state"><h3>Not tagged in any posts yet.</h3></div>'; return; }
+    container.innerHTML = data.tagged_posts.map(t => `
+      <div class="post">
+        <div class="post-header">
+          <div class="post-avatar">${t.business_name.charAt(0)}</div>
+          <div>
+            <div class="post-author"><a href="business.html?slug=${t.business_slug}" style="color:var(--text);text-decoration:none;">${escHtml(t.business_name)}</a> tagged this page</div>
+            <div class="post-time">${timeAgo(t.created_at)}</div>
+          </div>
+        </div>
+        <div class="post-body"><div class="post-content">${escHtml(t.content).substring(0, 200)}${t.content.length > 200 ? "…" : ""}</div></div>
+      </div>`).join("");
+  } catch { document.getElementById("tab-tagged").innerHTML = '<div class="empty-state"><h3>Could not load.</h3></div>'; }
+}
+
+function renderPost(p) {
+  const user = getUser(), canInteract = !!user;
+  const likedIcon = p.is_liked ? "❤️" : "🤍", likedClass = p.is_liked ? "action-btn liked" : "action-btn";
+  const myBiz = getBusiness(), isPostOwner = myBiz && bizData && myBiz.slug === bizData.slug;
+  const ownerActions = isPostOwner
+    ? `<div class="action-sep"></div><button class="action-btn" onclick="editPost(${p.id},'${escAttr(p.content || "")}')">✏️ Edit</button><div class="action-sep"></div><button class="action-btn" style="color:var(--danger);" onclick="deletePost(${p.id})">🗑️ Delete</button>`
+    : "";
+  const actionsHtml = canInteract
+    ? `<button class="${likedClass}" id="like-${p.id}" onclick="toggleLike(${p.id})">${likedIcon} <span id="lc-${p.id}">${p.like_count}</span></button>
+       <div class="action-sep"></div>
+       <button class="action-btn" onclick="toggleComments(${p.id})">💬 ${p.comment_count}</button>
+       <div class="action-sep"></div>
+       <button class="action-btn" onclick="openShare(${p.id},'${escAttr(p.business_name)}','${escAttr((p.content || "").substring(0, 80))}')">🔁 ${p.share_count}</button>
+       ${ownerActions}`
+    : `<span class="action-btn" style="cursor:default;">🤍 ${p.like_count}</span><div class="action-sep"></div><span class="action-btn" style="cursor:default;">💬 ${p.comment_count}</span><div class="action-sep"></div><a href="login.html" class="action-btn" style="text-decoration:none;color:var(--accent);font-weight:600;">Sign in to interact</a>`;
+
+  const mediaHtml = (() => {
+    const imgs = p.images ? (typeof p.images === "string" ? JSON.parse(p.images) : p.images) : null;
+    if (imgs && imgs.length > 1) {
+      const grid = imgs.length === 2 ? "grid-template-columns:1fr 1fr;" : "grid-template-columns:1fr 1fr;";
+      const urlsJson = JSON.stringify(imgs).replace(/"/g, "&quot;");
+      return `<div style="display:grid;${grid}gap:4px;margin-top:10px;border-radius:10px;overflow:hidden;">${imgs.map((url, i) => `<img src="${escHtml(url)}" style="width:100%;height:200px;object-fit:cover;cursor:pointer;" loading="lazy" onclick="openLightbox(JSON.parse(this.dataset.urls),${i})" data-urls="${urlsJson}" />`).join("")}</div>`;
+    } else if (p.image_url) {
+      return p.image_url.match(/\.(mp4|webm|mov|avi)$/i)
+        ? `<video class="post-image" src="${escHtml(p.image_url)}" controls style="width:100%;border-radius:10px;margin-top:10px;" onclick="openLightbox(['${escHtml(p.image_url)}'],0)"></video>`
+        : `<img class="post-image" src="${escHtml(p.image_url)}" loading="lazy" onclick="openLightbox(['${escHtml(p.image_url)}'],0)" />`;
+    }
+    return "";
+  })();
+
+  return `<div class="post" id="post-${p.id}">
+    <div class="post-header">
+      <div class="post-avatar">${(p.business_name || "B").charAt(0)}</div>
+      <div><div class="post-author">${escHtml(p.business_name)}</div><div class="post-time">${timeAgo(p.created_at)}</div></div>
+    </div>
+    <div class="post-body">
+      <div class="post-content">${escHtml(p.content || "")}</div>
+      ${mediaHtml}
+    </div>
+    <div class="post-actions">${actionsHtml}</div>
+    <div class="comments-box" id="comments-${p.id}">
+      <div class="comment-list" id="clist-${p.id}"></div>
+      ${canInteract
+        ? `<div class="c-input-row"><textarea class="c-input" id="cinput-${p.id}" rows="1" placeholder="Write a comment..."></textarea><button class="c-send" onclick="submitComment(${p.id})">Send</button></div>`
+        : `<p style="font-size:0.84rem;color:var(--muted);"><a href="login.html" style="color:var(--accent);font-weight:600;">Sign in</a> to comment</p>`}
+    </div>
+  </div>`;
+}
+
+async function toggleFollow() {
+  const btn = document.getElementById("followBtn");
+  if (!btn) return; btn.disabled = true;
+  try {
     const slug = new URLSearchParams(window.location.search).get("slug");
-    const myBusiness = getBusiness();
-    const myToken = getToken();
-    let bizData = null;
-
-    if (!slug) {
-      document.getElementById("bizName").textContent = "Business not found.";
-    } else {
-      loadBusiness();
+    const res = await fetch(`${API}/api/business/${slug}/follow`, { method: "POST", headers: authHeaders() });
+    const data = await res.json();
+    if (data.success) {
+      btn.className = `follow-btn ${data.following ? "following" : "not-following"}`;
+      btn.textContent = data.following ? "✓ Following" : "+ Follow";
+      const fc = document.getElementById("followerCount");
+      if (fc) fc.textContent = parseInt(fc.textContent) + (data.following ? 1 : -1);
     }
+  } catch {}
+  btn.disabled = false;
+}
 
-    async function loadBusiness() {
-      try {
-        const headers = myToken ? { "Authorization": "Bearer " + myToken } : {};
-        const res = await fetch(`${API}/api/business/${slug}`, { headers });
-        const data = await res.json();
-        if (!data.success) { document.getElementById("bizName").textContent = "Business not found."; return; }
-        bizData = data.business;
-        renderHeader(bizData);
-        renderInfoSidebar(bizData);
-        loadPosts();
-      } catch (e) {
-        document.getElementById("bizName").textContent = "Failed to load.";
-      }
+async function toggleLike(postId) {
+  if (!getToken()) { window.location.href = "login.html"; return; }
+  const btn = document.getElementById(`like-${postId}`); btn.disabled = true;
+  try {
+    const res = await fetch(`${API}/api/posts/${postId}/like`, { method: "POST", headers: authHeaders() });
+    const data = await res.json();
+    if (data.success) {
+      btn.className = data.liked ? "action-btn liked" : "action-btn";
+      btn.innerHTML = (data.liked ? "❤️" : "🤍") + ` <span id="lc-${postId}">${data.like_count}</span>`;
     }
+  } catch {} btn.disabled = false;
+}
 
-    function renderHeader(b) {
-      document.title = `${b.business_name} · Diwanet`;
+async function toggleComments(postId) {
+  const box = document.getElementById(`comments-${postId}`);
+  if (box.classList.contains("open")) { box.classList.remove("open"); return; }
+  box.classList.add("open"); await loadComments(postId);
+}
 
-      // Cover
-      if (b.cover_url) {
-        document.getElementById("coverDiv").innerHTML = `<img src="${escAttr(b.cover_url)}" alt="">`;
-      }
+async function loadComments(postId) {
+  const list = document.getElementById(`clist-${postId}`);
+  list.innerHTML = '<p style="color:var(--muted2);font-size:0.83rem;">Loading...</p>';
+  try {
+    const res = await fetch(`${API}/api/posts/${postId}/comments`);
+    const data = await res.json();
+    if (!data.success || !data.comments.length) { list.innerHTML = '<p style="color:var(--muted2);font-size:0.83rem;">No comments yet.</p>'; return; }
+    list.innerHTML = data.comments.map(c => {
+      const isBiz = c.commenter_type === "business";
+      const name = isBiz ? escHtml(c.business_name) : escHtml(`${c.first_name} ${c.last_name}`);
+      const link = isBiz ? `business.html?slug=${c.business_slug}` : `profile.html?id=${c.commenter_user_id}`;
+      return `<div class="comment"><div class="c-avatar ${isBiz ? "" : "ind"}">${name.charAt(0)}</div><div class="c-bubble"><div class="c-name"><a href="${link}">${name}</a></div><div class="c-text">${escHtml(c.content)}</div><div class="c-time">${timeAgo(c.created_at)}</div></div></div>`;
+    }).join("");
+  } catch { list.innerHTML = ""; }
+}
 
-      // Logo
-      const logoDiv = document.getElementById("logoDiv");
-      if (b.logo_url) {
-        logoDiv.innerHTML = `<img src="${escAttr(b.logo_url)}" alt="">`;
-      } else {
-        logoDiv.textContent = (b.business_name || "B").charAt(0).toUpperCase();
-      }
+async function submitComment(postId) {
+  const input = document.getElementById(`cinput-${postId}`), content = input.value.trim();
+  if (!content) return;
+  try {
+    const res = await fetch(`${API}/api/posts/${postId}/comments`, { method: "POST", headers: authHeaders(), body: JSON.stringify({ content }) });
+    const data = await res.json();
+    if (data.success) { input.value = ""; await loadComments(postId); }
+    else showToast(data.error || "Failed.");
+  } catch {}
+}
 
-      document.getElementById("bizName").textContent = b.business_name;
+function previewPostImages(input) {
+  const wrap = document.getElementById("postImagePreviewWrap");
+  wrap.innerHTML = ""; wrap.style.display = "flex";
+  Array.from(input.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const div = document.createElement("div"); div.style.cssText = "position:relative;";
+      const isVideo = file.type.startsWith("video/");
+      div.innerHTML = isVideo
+        ? `<video src="${e.target.result}" style="height:100px;border-radius:8px;max-width:160px;"></video>`
+        : `<img src="${e.target.result}" style="height:100px;border-radius:8px;object-fit:cover;max-width:160px;" />`;
+      const btn = document.createElement("button");
+      btn.textContent = "✕"; btn.style.cssText = "position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.5);color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;";
+      btn.onclick = () => div.remove(); div.appendChild(btn); wrap.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
-      document.getElementById("bizMeta").innerHTML = `
-        ${b.category_name ? `<span class="tag">${escHtml(b.category_name)}</span>` : ""}
-        ${b.city ? `<span class="tag grey">📍 ${escHtml(b.city)}${b.country ? ", " + escHtml(b.country) : ""}</span>` : ""}
-        ${b.business_type ? `<span class="tag grey">${escHtml(b.business_type)}</span>` : ""}
-      `;
+async function uploadPostImages() {
+  const input = document.getElementById("postImageInput");
+  if (!input.files.length) return { image_url: null, images: null };
+  const urls = [];
+  for (const file of Array.from(input.files)) {
+    const formData = new FormData(); formData.append("file", file);
+    try {
+      const res = await fetch(`${API}/api/upload`, { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.url) urls.push(data.url);
+    } catch {}
+  }
+  if (!urls.length) return { image_url: null, images: null };
+  if (urls.length === 1) return { image_url: urls[0], images: null };
+  return { image_url: urls[0], images: urls };
+}
 
-      const actions = document.getElementById("profileActions");
-      const isOwner = myBusiness && myBusiness.slug === slug;
-      if (isOwner) {
-        actions.innerHTML = `<a href="edit-business.html" class="btn btn-ghost btn-sm">✏️ Edit page</a>`;
-      } else {
-        if (b.business_phone) actions.innerHTML += `<a href="tel:${escAttr(b.business_phone)}" class="btn btn-ghost btn-sm">📞 Call</a>`;
-        if (b.business_email) actions.innerHTML += `<a href="mailto:${escAttr(b.business_email)}" class="btn btn-primary btn-sm">✉️ Email</a>`;
-      }
-    }
+async function submitPost() {
+  const content = document.getElementById("composeText").value.trim();
+  if (!content) return;
+  const btn = document.getElementById("postBtn");
+  btn.disabled = true; btn.textContent = "Uploading...";
+  const { image_url, images } = await uploadPostImages();
+  btn.textContent = "Publishing...";
+  const tagged_businesses = [...content.matchAll(/@([\w-]+)/g)].map(m => m[1]);
+  try {
+    const res = await fetch(`${API}/api/posts`, { method: "POST", headers: authHeaders(), body: JSON.stringify({ content, image_url, images, tagged_businesses }) });
+    const data = await res.json();
+    if (data.success) { document.getElementById("composeText").value = ""; document.getElementById("postImageInput").value = ""; document.getElementById("postImagePreviewWrap").innerHTML = ""; document.getElementById("postImagePreviewWrap").style.display = "none"; showToast("Post published!"); await loadPosts(); }
+    else showToast(data.error || "Failed.");
+  } catch {}
+  btn.disabled = false; btn.textContent = "Publish";
+}
 
-    function renderInfoSidebar(b) {
-      const rows = [
-        b.business_type && ["Type", b.business_type],
-        b.city && ["Location", `${b.city}${b.country ? ", " + b.country : ""}`],
-        b.business_email && ["Email", `<a href="mailto:${escAttr(b.business_email)}" style="color:var(--accent)">${escHtml(b.business_email)}</a>`],
-        b.business_phone && ["Phone", `<a href="tel:${escAttr(b.business_phone)}" style="color:var(--accent)">${escHtml(b.business_phone)}</a>`],
-        b.website_url && ["Website", `<a href="${escAttr(b.website_url)}" target="_blank" style="color:var(--accent)">Visit ↗</a>`],
-        b.created_at && ["Member since", new Date(b.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })],
-      ].filter(Boolean);
+function openShare(postId, authorName, preview) {
+  if (!getToken()) { window.location.href = "login.html"; return; }
+  shareTargetId = postId;
+  document.getElementById("sharePreview").innerHTML = `<strong>${escHtml(authorName)}</strong>${escHtml(preview)}${preview.length >= 80 ? "…" : ""}`;
+  document.getElementById("shareComment").value = "";
+  document.getElementById("shareModal").classList.add("open");
+}
 
-      document.getElementById("infoRows").innerHTML = rows.map(([label, value]) =>
-        `<div class="info-row"><span class="label">${label}</span><span class="value">${value}</span></div>`
-      ).join("");
-      document.getElementById("infoCard").style.display = "block";
-    }
+function closeShare() { document.getElementById("shareModal").classList.remove("open"); shareTargetId = null; }
 
-    let currentTab = "posts";
+async function confirmShare() {
+  if (!shareTargetId) return;
+  const content = document.getElementById("shareComment").value.trim();
+  try {
+    const res = await fetch(`${API}/api/posts/${shareTargetId}/share`, { method: "POST", headers: authHeaders(), body: JSON.stringify({ content }) });
+    const data = await res.json();
+    closeShare(); showToast(data.success ? "Shared!" : data.error || "Failed.");
+    if (data.success) await loadPosts();
+  } catch {}
+}
 
-    function switchTab(tab, btn) {
-      currentTab = tab;
-      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      if (tab === "posts") loadPosts();
-      else renderAbout();
-    }
+function deletePost(postId) {
+  const postEl = document.getElementById(`post-${postId}`);
+  const existing = postEl.querySelector(".delete-confirm");
+  if (existing) { existing.remove(); return; }
+  const confirm = document.createElement("div");
+  confirm.className = "delete-confirm";
+  confirm.style.cssText = "margin-top:8px;padding:10px 14px;background:var(--danger-light);border:1px solid #fecaca;border-radius:10px;display:flex;align-items:center;justify-content:space-between;";
+  confirm.innerHTML = `<span style="font-size:0.88rem;color:var(--danger);">Delete this post?</span>
+    <div style="display:flex;gap:8px;">
+      <button onclick="confirmDeletePost(${postId})" style="padding:6px 14px;border-radius:999px;background:var(--danger);color:white;border:none;cursor:pointer;font-size:0.83rem;font-weight:600;">Delete</button>
+      <button onclick="this.closest('.delete-confirm').remove()" style="padding:6px 14px;border-radius:999px;background:white;color:#333;border:1px solid #ddd;cursor:pointer;font-size:0.83rem;">Cancel</button>
+    </div>`;
+  postEl.querySelector(".post-actions").after(confirm);
+}
 
-    async function loadPosts() {
-      const container = document.getElementById("mainContent");
-      container.innerHTML = '<div class="loading">Loading posts…</div>';
-      try {
-        const res = await fetch(`${API}/api/posts?slug=${encodeURIComponent(slug)}&limit=20`);
-        const data = await res.json();
-        if (!data.success || !data.posts.length) {
-          container.innerHTML = `<div class="empty-state"><h3>No posts yet</h3><p>This business hasn't posted anything yet.</p></div>`;
-          return;
-        }
-        container.innerHTML = data.posts.map(renderPost).join("");
-      } catch (e) {
-        container.innerHTML = `<div class="msg error">Failed to load posts.</div>`;
-      }
-    }
+async function confirmDeletePost(postId) {
+  try {
+    const res = await fetch(`${API}/api/posts/${postId}`, { method: "DELETE", headers: authHeaders() });
+    const data = await res.json();
+    if (data.success) { document.getElementById(`post-${postId}`).remove(); showToast("Post deleted."); }
+    else showToast(data.error || "Failed.");
+  } catch { showToast("Connection error."); }
+}
 
-    function renderPost(post) {
-      const imgs = post.media_urls ? post.media_urls.slice(0, 4) : [];
-      const imgClass = imgs.length === 1 ? "one" : imgs.length === 2 ? "two" : imgs.length > 2 ? "many" : "";
-      const imgsHtml = imgs.length
-        ? `<div class="post-images ${imgClass}">${imgs.map(u => `<img src="${escAttr(u)}" alt="" loading="lazy" onclick="openImg('${escAttr(u)}')">`).join("")}</div>`
-        : "";
-      const isOwner = myBusiness && myBusiness.slug === slug;
-      const editBtn = isOwner
-        ? `<button class="action-btn" onclick="deletePost(${post.id})">🗑️ Delete</button>`
-        : "";
+function editPost(postId, currentContent) {
+  const postEl = document.getElementById(`post-${postId}`);
+  const contentEl = postEl.querySelector(".post-content");
+  const existingEditor = postEl.querySelector(".inline-editor");
+  if (existingEditor) { existingEditor.remove(); contentEl.style.display = "block"; return; }
+  contentEl.style.display = "none";
+  const editor = document.createElement("div");
+  editor.className = "inline-editor"; editor.style.cssText = "margin-top:10px;";
+  editor.innerHTML = `
+    <textarea style="width:100%;border:1.5px solid var(--accent);border-radius:10px;padding:10px;font-size:0.92rem;font-family:inherit;resize:vertical;min-height:80px;">${currentContent}</textarea>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button onclick="saveEditPost(${postId},this)" style="padding:7px 16px;border-radius:999px;background:var(--accent);color:white;border:none;cursor:pointer;font-size:0.85rem;font-weight:600;">Save</button>
+      <button onclick="this.closest('.post').querySelector('.post-content').style.display='block'; this.closest('.inline-editor').remove()" style="padding:7px 16px;border-radius:999px;background:var(--surface2);color:var(--text);border:1px solid var(--border);cursor:pointer;font-size:0.85rem;">Cancel</button>
+    </div>`;
+  contentEl.after(editor); editor.querySelector("textarea").focus();
+}
 
-      return `
-        <div class="post-card" id="post-${post.id}">
-          <div class="post-header">
-            <span class="post-time">${timeAgo(post.created_at)}</span>
-            ${editBtn}
-          </div>
-          <div class="post-body">
-            ${post.content ? escHtml(post.content) : ""}
-            ${imgsHtml}
-          </div>
-          <div class="post-footer">
-            <button class="action-btn ${post.user_liked ? 'liked' : ''}" onclick="toggleLike(${post.id}, this)">
-              ♥ <span>${post.like_count || 0}</span>
-            </button>
-            <button class="action-btn">💬 ${post.comment_count || 0}</button>
-          </div>
-        </div>`;
-    }
+async function saveEditPost(postId, btn) {
+  const editor = btn.closest(".inline-editor");
+  const newContent = editor.querySelector("textarea").value.trim();
+  if (!newContent) return;
+  try {
+    const res = await fetch(`${API}/api/posts/${postId}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify({ content: newContent }) });
+    const data = await res.json();
+    if (data.success) { editor.closest(".post").querySelector(".post-content").style.display = "block"; editor.remove(); await loadPosts(); showToast("Post updated."); }
+    else showToast(data.error || "Failed.");
+  } catch { showToast("Connection error."); }
+}
 
-    function renderAbout() {
-      const b = bizData;
-      if (!b) return;
-      document.getElementById("mainContent").innerHTML = `
-        <div class="info-card">
-          ${b.short_description ? `<div class="about-section"><h3>About</h3><p>${escHtml(b.short_description)}</p></div>` : ""}
-          ${b.long_description ? `<div class="about-section"><h3>Our Story</h3><p>${escHtml(b.long_description)}</p></div>` : ""}
-          <div class="about-section">
-            <h3>Details</h3>
-            <div class="info-row"><span class="label">Type</span><span class="value">${escHtml(b.business_type || "-")}</span></div>
-            <div class="info-row"><span class="label">Category</span><span class="value">${escHtml(b.category_name || "-")}</span></div>
-            <div class="info-row"><span class="label">Location</span><span class="value">${escHtml(b.city || "")}${b.country ? ", " + escHtml(b.country) : ""}</span></div>
-            ${b.business_email ? `<div class="info-row"><span class="label">Email</span><span class="value"><a href="mailto:${escAttr(b.business_email)}" style="color:var(--accent)">${escHtml(b.business_email)}</a></span></div>` : ""}
-            ${b.business_phone ? `<div class="info-row"><span class="label">Phone</span><span class="value"><a href="tel:${escAttr(b.business_phone)}" style="color:var(--accent)">${escHtml(b.business_phone)}</a></span></div>` : ""}
-          </div>
-        </div>`;
-    }
+let notifOpen = false;
 
-    async function toggleLike(postId, btn) {
-      if (!myToken) { window.location.href = "login.html"; return; }
-      const isLiked = btn.classList.contains("liked");
-      try {
-        const res = await fetch(`${API}/api/posts/${postId}/like`, {
-          method: isLiked ? "DELETE" : "POST",
-          headers: { "Authorization": "Bearer " + myToken }
-        });
-        const data = await res.json();
-        if (data.success) {
-          btn.classList.toggle("liked");
-          const countEl = btn.querySelector("span");
-          countEl.textContent = data.like_count ?? (parseInt(countEl.textContent) + (isLiked ? -1 : 1));
-        }
-      } catch {}
-    }
+async function loadNotifications() {
+  const token = getToken(); if (!token) return;
+  document.getElementById("notifBtn").style.display = "flex";
+  try {
+    const res = await fetch(`${API}/api/notifications`, { headers: { "Authorization": "Bearer " + token } });
+    const data = await res.json();
+    if (!data.success) return;
+    const badge = document.getElementById("notifBadge");
+    if (data.unread > 0) { badge.textContent = data.unread > 9 ? "9+" : data.unread; badge.classList.add("show"); }
+    else { badge.classList.remove("show"); }
+    const list = document.getElementById("notifList");
+    if (!data.notifications || data.notifications.length === 0) { list.innerHTML = '<div class="notif-empty">No notifications yet.</div>'; return; }
+    list.innerHTML = data.notifications.map(n => {
+      const actor = n.actor_business_name || `${n.actor_first_name || ""} ${n.actor_last_name || ""}`.trim();
+      const msg = n.type === "like" ? `${actor} liked your post` : n.type === "comment" ? `${actor} commented on your post` : n.type === "follow" ? `${actor} followed your page` : n.type === "share" ? `${actor} shared your post` : `${actor} tagged your page`;
+      return `<div class="notif-item ${n.is_read ? "" : "unread"}">${msg} · <span style="color:var(--muted2);">${timeAgo(n.created_at)}</span></div>`;
+    }).join("");
+  } catch {}
+}
 
-    async function deletePost(postId) {
-      if (!confirm("Delete this post?")) return;
-      try {
-        const res = await fetch(`${API}/api/posts/${postId}`, {
-          method: "DELETE",
-          headers: { "Authorization": "Bearer " + myToken }
-        });
-        const data = await res.json();
-        if (data.success) document.getElementById(`post-${postId}`).remove();
-      } catch {}
-    }
+function toggleNotif() {
+  const panel = document.getElementById("notifPanel");
+  notifOpen = !notifOpen; panel.classList.toggle("open", notifOpen);
+  if (notifOpen) markAllRead();
+}
 
-    function openImg(url) {
-      document.getElementById("lightboxImg").src = url;
-      document.getElementById("lightbox").style.display = "grid";
-    }
+async function markAllRead() {
+  const token = getToken(); if (!token) return;
+  try {
+    await fetch(`${API}/api/notifications/read`, { method: "POST", headers: { "Authorization": "Bearer " + token } });
+    document.getElementById("notifBadge").classList.remove("show");
+  } catch {}
+}
 
-    function copyLink() {
-      navigator.clipboard.writeText(window.location.href).then(() => alert("Link copied!")).catch(() => alert(window.location.href));
-    }
-  </script>
+document.addEventListener("click", e => {
+  const panel = document.getElementById("notifPanel"), btn = document.getElementById("notifBtn");
+  if (notifOpen && !panel.contains(e.target) && !btn.contains(e.target)) { notifOpen = false; panel.classList.remove("open"); }
+});
+
+let lightboxUrls = [], lightboxIdx = 0;
+function openLightbox(urls, idx) { lightboxUrls = urls; lightboxIdx = idx; showLightboxMedia(urls[idx]); document.getElementById("lightbox").classList.add("open"); document.body.style.overflow = "hidden"; }
+function showLightboxMedia(url) {
+  const img = document.getElementById("lightboxImg"), vid = document.getElementById("lightboxVideo");
+  if (url.match(/\.(mp4|webm|mov|avi)$/i)) { img.style.display = "none"; vid.style.display = "block"; vid.src = url; }
+  else { vid.style.display = "none"; vid.src = ""; img.style.display = "block"; img.src = url; }
+}
+function closeLightbox() { document.getElementById("lightbox").classList.remove("open"); document.body.style.overflow = ""; const vid = document.getElementById("lightboxVideo"); vid.pause(); vid.src = ""; }
+function lightboxNav(dir) { lightboxIdx = (lightboxIdx + dir + lightboxUrls.length) % lightboxUrls.length; showLightboxMedia(lightboxUrls[lightboxIdx]); }
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeLightbox(); if (e.key === "ArrowRight") lightboxNav(1); if (e.key === "ArrowLeft") lightboxNav(-1); });
+
+setupNav(); loadNotifications(); loadBusiness();
+</script>
 </body>
 </html>
