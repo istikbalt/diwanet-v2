@@ -1,381 +1,487 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Edit Business · Diwanet</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/main.css">
   <style>
-    .page-wrap { max-width: 860px; margin: 0 auto; padding: 32px 24px 80px; }
-    .page-header { margin-bottom: 28px; }
-    .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 1.9rem; letter-spacing: -0.02em; }
-    .page-header p { color: var(--muted); margin-top: 6px; }
-
-    .section-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 20px; box-shadow: var(--shadow); }
-    .section-head { padding: 16px 22px; border-bottom: 1px solid var(--border); background: var(--surface2); }
-    .section-head h2 { font-size: 0.92rem; font-weight: 700; }
-    .section-head p { font-size: 0.8rem; color: var(--muted); margin-top: 3px; }
-    .section-body { padding: 22px; }
-
-    /* Image upload */
-    .upload-row { display: flex; align-items: center; gap: 18px; margin-bottom: 16px; }
-    .upload-preview {
-      width: 80px; height: 80px;
-      border-radius: 18px;
-      background: var(--surface2);
-      border: 1.5px solid var(--border);
-      display: grid; place-items: center;
-      overflow: hidden; flex-shrink: 0;
-      font-size: 1.8rem; font-weight: 800; color: var(--accent);
+    :root {
+      --bg:#f5f7f2; --surface:#fff; --surface2:#f0f4ec; --border:#e2e8da;
+      --text:#1a2418; --muted:#6b7d65; --muted2:#a0b09a;
+      --accent:#6aaa2a; --accent-dark:#4d8a18; --accent-light:#edf7e3;
+      --danger:#e05252; --shadow:0 2px 12px rgba(26,36,24,0.07);
+      --shadow-lg:0 8px 32px rgba(26,36,24,0.1);
     }
-    .upload-preview img { width: 100%; height: 100%; object-fit: cover; }
-    .upload-preview.cover-preview { width: 160px; height: 80px; border-radius: 12px; font-size: 0.8rem; color: var(--muted); }
-    .upload-info { flex: 1; }
-    .upload-info p { font-size: 0.82rem; color: var(--muted); margin-top: 4px; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+    .topbar { position:sticky; top:0; z-index:100; background:rgba(255,255,255,0.96); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); box-shadow:0 1px 8px rgba(26,36,24,0.06); }
+    .topbar-inner { max-width:800px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding:14px 24px; }
+    .brand { display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text); }
+    .brand-mark { width:36px; height:36px; border-radius:10px; background:var(--accent); display:grid; place-items:center; font-family:'DM Serif Display',serif; color:white; }
+    .brand-name { font-weight:700; font-size:1rem; }
+    .btn-sm { padding:8px 18px; border-radius:999px; font-size:0.88rem; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; font-family:'DM Sans',sans-serif; border:none; transition:all 0.2s; }
+    .btn-ghost { background:white; color:var(--text); border:1.5px solid var(--border); }
+    .btn-ghost:hover { border-color:var(--accent); color:var(--accent); }
 
-    input[type="file"] { display: none; }
+    .wrap { max-width:800px; margin:0 auto; padding:28px 24px; }
 
-    .sticky-bar {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: white;
-      border-top: 1px solid var(--border);
-      padding: 14px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      z-index: 50;
-      box-shadow: 0 -4px 20px rgba(15,76,129,0.08);
+    /* COVER + LOGO PREVIEW */
+    .profile-preview {
+      background:white; border:1px solid var(--border); border-radius:20px;
+      overflow:hidden; margin-bottom:24px; box-shadow:var(--shadow);
     }
-    .sticky-bar-left { font-size: 0.85rem; color: var(--muted); }
+    .cover-area {
+      height:160px; position:relative; cursor:pointer;
+      background:linear-gradient(135deg,#d4edbc,#eaf7d8 50%,#c8e8a8);
+      display:flex; align-items:center; justify-content:center;
+      overflow:hidden;
+    }
+    .cover-area img { width:100%; height:100%; object-fit:cover; }
+    .cover-overlay {
+      position:absolute; inset:0; background:rgba(0,0,0,0.35);
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; transition:opacity 0.2s;
+    }
+    .cover-area:hover .cover-overlay { opacity:1; }
+    .upload-hint { color:white; font-size:0.9rem; font-weight:600; text-align:center; }
+    .upload-hint span { display:block; font-size:1.5rem; margin-bottom:4px; }
+    .logo-area {
+      display:flex; align-items:flex-end; justify-content:space-between;
+      padding:0 24px 20px; margin-top:-40px;
+    }
+    .logo-wrap { position:relative; cursor:pointer; }
+    .logo-circle {
+      width:80px; height:80px; border-radius:20px;
+      background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+      display:grid; place-items:center; font-size:2rem; font-weight:800;
+      color:white; border:4px solid white; box-shadow:var(--shadow-lg);
+      overflow:hidden;
+    }
+    .logo-circle img { width:100%; height:100%; object-fit:cover; }
+    .logo-badge {
+      position:absolute; bottom:-4px; right:-4px; width:26px; height:26px;
+      background:var(--accent); border-radius:50%; display:grid; place-items:center;
+      border:2px solid white; font-size:0.75rem; color:white;
+    }
+    .biz-preview-name { font-family:'DM Serif Display',serif; font-size:1.4rem; }
+    .biz-preview-cat { font-size:0.82rem; color:var(--muted2); margin-top:2px; }
+
+    /* FORM */
+    .card { background:white; border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:16px; box-shadow:var(--shadow); }
+    .card-title { font-size:0.8rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:18px; }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .field { margin-bottom:16px; }
+    .field:last-child { margin-bottom:0; }
+    label { display:block; font-size:0.83rem; font-weight:600; color:var(--muted); margin-bottom:7px; }
+    input, textarea {
+      width:100%; background:var(--surface2); border:1.5px solid var(--border);
+      border-radius:12px; padding:11px 14px; font-size:0.92rem; color:var(--text);
+      font-family:'DM Sans',sans-serif; transition:border-color 0.2s;
+    }
+    input:focus, textarea:focus { outline:none; border-color:var(--accent); background:white; }
+    textarea { resize:vertical; min-height:100px; }
+
+    /* UPLOAD AREA */
+    .upload-area {
+      border:2px dashed var(--border); border-radius:12px; padding:24px;
+      text-align:center; cursor:pointer; transition:all 0.2s; position:relative;
+    }
+    .upload-area:hover { border-color:var(--accent); background:var(--accent-light); }
+    .upload-area input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; }
+    .upload-icon { font-size:2rem; margin-bottom:8px; }
+    .upload-text { font-size:0.88rem; color:var(--muted); }
+    .upload-text strong { color:var(--accent); }
+    .upload-preview { margin-top:12px; }
+    .upload-preview img { max-height:120px; border-radius:10px; }
+    .uploading-bar {
+      height:4px; background:var(--surface2); border-radius:2px; margin-top:10px; overflow:hidden; display:none;
+    }
+    .uploading-bar .bar { height:100%; background:var(--accent); border-radius:2px; animation:progress 1.5s ease-in-out infinite; }
+    @keyframes progress { 0%{width:0%} 50%{width:70%} 100%{width:100%} }
+
+    .save-btn {
+      width:100%; padding:14px; border-radius:12px; border:none;
+      background:var(--accent); color:white; font-size:1rem; font-weight:700;
+      cursor:pointer; font-family:'DM Sans',sans-serif; transition:background 0.2s;
+      margin-top:8px;
+    }
+    .save-btn:hover { background:var(--accent-dark); }
+    .save-btn:disabled { opacity:0.5; cursor:not-allowed; }
+    .msg { padding:12px 14px; border-radius:10px; font-size:0.88rem; font-weight:500; display:none; margin-top:12px; }
+    .msg.error { display:block; background:#fef2f2; color:var(--danger); border:1px solid #fecaca; }
+    .msg.success { display:block; background:var(--accent-light); color:var(--accent-dark); border:1px solid rgba(106,170,42,0.3); }
+
+    @media (max-width:600px) { .grid2 { grid-template-columns:1fr; } .wrap { padding:16px; } }
   </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
+<style>
+  .crop-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; flex-direction:column; gap:16px; }
+  .crop-modal.open { display:flex; }
+  .crop-container { width:90vw; max-width:1000px; height:80vh; background:#000; border-radius:12px; overflow:hidden; }
+  .crop-container img { max-width:100%; display:block; }
+  .crop-actions { display:flex; gap:12px; }
+  .crop-btn { padding:10px 24px; border-radius:999px; font-size:0.9rem; font-weight:600; cursor:pointer; border:none; font-family:'DM Sans',sans-serif; }
+  .crop-confirm { background:#6aaa2a; color:white; }
+  .crop-cancel { background:white; color:#333; }
+</style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="topbar-inner">
-      <a href="index.html" class="brand">
-        <div class="brand-mark">D</div>
-        <span class="brand-name">Diwanet</span>
-      </a>
-      <nav class="topbar-nav">
-        <a href="feed.html">Feed</a>
-      </nav>
-      <div class="topbar-actions" id="topbarActions"></div>
-    </div>
-  </header>
 
-  <div class="page-wrap">
-    <div class="page-header">
-      <h1>Edit Business Page</h1>
-      <p>Update your business information, photos, and contact details.</p>
-    </div>
-
-    <!-- Logo & Cover -->
-    <div class="section-card">
-      <div class="section-head">
-        <h2>Photos</h2>
-        <p>Your logo and cover image are the first things visitors see.</p>
-      </div>
-      <div class="section-body">
-        <div class="upload-row">
-          <div class="upload-preview" id="logoPreview">?</div>
-          <div class="upload-info">
-            <label for="logoFile" class="btn btn-ghost btn-sm" style="cursor:pointer;">Upload logo</label>
-            <input type="file" id="logoFile" accept="image/*" onchange="previewImage('logoFile','logoPreview')">
-            <p>Square image recommended. Max 5 MB.</p>
-          </div>
-        </div>
-        <div class="upload-row">
-          <div class="upload-preview cover-preview" id="coverPreview">Cover photo</div>
-          <div class="upload-info">
-            <label for="coverFile" class="btn btn-ghost btn-sm" style="cursor:pointer;">Upload cover</label>
-            <input type="file" id="coverFile" accept="image/*" onchange="previewImage('coverFile','coverPreview')">
-            <p>Landscape image recommended (1200×400). Max 10 MB.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Basic Info -->
-    <div class="section-card">
-      <div class="section-head">
-        <h2>Business Information</h2>
-        <p>Basic details about your business.</p>
-      </div>
-      <div class="section-body">
-        <div class="form-grid">
-          <div class="field">
-            <label>Business Name</label>
-            <input id="business_name" type="text" />
-          </div>
-          <div class="field">
-            <label>Slug <span class="optional">(URL)</span></label>
-            <input id="slug" type="text" readonly style="background:var(--surface2);color:var(--muted);" />
-          </div>
-          <div class="field">
-            <label>Business Type</label>
-            <select id="business_type">
-              <option value="">Select type</option>
-              <option value="store">Store</option>
-              <option value="restaurant">Restaurant</option>
-              <option value="service">Service</option>
-              <option value="education">Education</option>
-              <option value="clinic">Clinic</option>
-              <option value="agency">Agency</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Category</label>
-            <select id="category_id">
-              <option value="">Loading…</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Country</label>
-            <input id="country" type="text" />
-          </div>
-          <div class="field">
-            <label>City</label>
-            <input id="city" type="text" />
-          </div>
-        </div>
-        <div class="field" style="margin-top:16px;">
-          <label>Short Description</label>
-          <textarea id="short_description" rows="3" placeholder="One or two sentences that describe your business."></textarea>
-        </div>
-        <div class="field">
-          <label>About / Full Description <span class="optional">(optional)</span></label>
-          <textarea id="long_description" rows="5" placeholder="Tell your story, what you offer, your mission…"></textarea>
-        </div>
-      </div>
-    </div>
-
-    <!-- Contact -->
-    <div class="section-card">
-      <div class="section-head">
-        <h2>Contact Information</h2>
-        <p>Help visitors reach you easily.</p>
-      </div>
-      <div class="section-body">
-        <div class="form-grid">
-          <div class="field">
-            <label>Business Email <span class="optional">(optional)</span></label>
-            <input id="business_email" type="email" />
-          </div>
-          <div class="field">
-            <label>Business Phone <span class="optional">(optional)</span></label>
-            <input id="business_phone" type="tel" />
-          </div>
-          <div class="field full">
-            <label>Website URL <span class="optional">(optional)</span></label>
-            <input id="website_url" type="url" placeholder="https://yourwebsite.com" />
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Social links -->
-    <div class="section-card">
-      <div class="section-head">
-        <h2>Social Media <span style="font-weight:400;color:var(--muted);">(optional)</span></h2>
-      </div>
-      <div class="section-body">
-        <div class="form-grid">
-          <div class="field">
-            <label>Instagram</label>
-            <input id="instagram_url" type="url" placeholder="https://instagram.com/yourpage" />
-          </div>
-          <div class="field">
-            <label>Facebook</label>
-            <input id="facebook_url" type="url" placeholder="https://facebook.com/yourpage" />
-          </div>
-          <div class="field">
-            <label>Twitter / X</label>
-            <input id="twitter_url" type="url" placeholder="https://x.com/yourpage" />
-          </div>
-          <div class="field">
-            <label>LinkedIn</label>
-            <input id="linkedin_url" type="url" placeholder="https://linkedin.com/company/yourpage" />
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="msg" id="pageMsg"></div>
+<div class="crop-modal" id="cropModal">
+  <div class="crop-container">
+    <img id="cropImage" src="" alt="crop" />
   </div>
-
-  <!-- Sticky save bar -->
-  <div class="sticky-bar">
-    <div class="sticky-bar-left" id="saveStatus">Unsaved changes</div>
+  <div class="crop-actions">
+    <button class="crop-btn crop-confirm" onclick="confirmCrop()">Apply Crop</button>
+    <button class="crop-btn crop-cancel" onclick="cancelCrop()">Cancel</button>
+  </div>
+</div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="brand">
+      <div class="brand-mark">D</div>
+      <span class="brand-name">Diwanet</span>
+    </a>
     <div style="display:flex;gap:8px;">
-      <a id="viewPageBtn" href="#" class="btn btn-ghost btn-sm">View page ↗</a>
-      <button class="btn btn-primary" onclick="saveChanges()">Save changes</button>
+      <a id="viewPageBtn" href="#" class="btn-sm btn-ghost">View Page</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- PREVIEW -->
+  <div class="profile-preview">
+    <div class="cover-area" id="coverArea" onclick="document.getElementById('coverInput').click()">
+      <img id="coverPreview" src="" alt="" style="display:none;" />
+      <div class="cover-overlay">
+        <div class="upload-hint"><span>🖼️</span>Click to change cover</div>
+      </div>
+    </div>
+    <div class="logo-area">
+      <div>
+        <div class="logo-wrap" onclick="document.getElementById('logoInput').click()">
+          <div class="logo-circle" id="logoCircle">
+            <img id="logoPreview" src="" alt="" style="display:none;" />
+            <span id="logoInitial">?</span>
+          </div>
+          <div class="logo-badge">✏️</div>
+        </div>
+      </div>
+      <div>
+        <div class="biz-preview-name" id="previewName">Business Name</div>
+        <div class="biz-preview-cat" id="previewCat"></div>
+      </div>
     </div>
   </div>
 
-  <script src="assets/js/auth.js"></script>
-  <script>
-    if (!requireBusiness()) throw new Error("redirect");
-    renderTopbarAuth("topbarActions");
+  <!-- LOGO UPLOAD -->
+  <div class="card">
+    <div class="card-title">Logo / Profile Image</div>
+    <div class="upload-area">
+      <input type="file" id="logoInput" accept="image/*" onchange="uploadImage('logo', this)" />
+      <div class="upload-icon">🏢</div>
+      <div class="upload-text">Click to upload logo<br><strong>JPG, PNG or WebP</strong> · Max 5MB</div>
+      <div class="uploading-bar" id="logoBar"><div class="bar"></div></div>
+    </div>
+  </div>
 
-    const business = getBusiness();
-    const token = getToken();
+  <!-- COVER UPLOAD -->
+  <div class="card">
+    <div class="card-title">Cover Photo</div>
+    <div class="upload-area">
+      <input type="file" id="coverInput" accept="image/*" onchange="uploadImage('cover', this)" />
+      <div class="upload-icon">🖼️</div>
+      <div class="upload-text">Click to upload cover photo<br><strong>JPG, PNG or WebP</strong> · Recommended 1200×400</div>
+      <div class="uploading-bar" id="coverBar"><div class="bar"></div></div>
+    </div>
+  </div>
 
-    document.getElementById("viewPageBtn").href = `business.html?slug=${business.slug}`;
+  <!-- BUSINESS INFO -->
+  <div class="card">
+    <div class="card-title">Business Information</div>
+    <div class="field">
+      <label>Business Name</label>
+      <input id="business_name" placeholder="Your business name" oninput="updatePreview()" />
+    </div>
+    <div class="field">
+      <label>Short Description</label>
+      <textarea id="short_description" placeholder="Describe your business in a few sentences..."></textarea>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label>City</label>
+        <input id="city" placeholder="Toronto" />
+      </div>
+      <div class="field">
+        <label>Country</label>
+        <input id="country" placeholder="Canada" />
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label>Business Email</label>
+        <input id="business_email" type="email" placeholder="contact@yourbusiness.com" />
+      </div>
+      <div class="field">
+        <label>Business Phone</label>
+        <input id="business_phone" placeholder="+1 (555) 000-0000" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Website</label>
+      <input id="website" placeholder="https://yourbusiness.com" />
+    </div>
+  </div>
 
-    // Load categories
-    async function loadCategories() {
-      try {
-        const res = await fetch(`${API}/api/categories`);
-        const data = await res.json();
-        const sel = document.getElementById("category_id");
-        if (data.success) {
-          sel.innerHTML = '<option value="">Select category</option>' +
-            data.categories.map(c => `<option value="${c.id}">${escHtml(c.name)}</option>`).join("");
-        }
-      } catch {}
+  <div class="card">
+    <div class="card-title">Social Media</div>
+    <div class="grid2">
+      <div class="field">
+        <label>Instagram</label>
+        <input id="instagram_url" placeholder="https://instagram.com/yourbusiness" />
+      </div>
+      <div class="field">
+        <label>Facebook</label>
+        <input id="facebook_url" placeholder="https://facebook.com/yourbusiness" />
+      </div>
+      <div class="field">
+        <label>LinkedIn</label>
+        <input id="linkedin_url" placeholder="https://linkedin.com/company/yourbusiness" />
+      </div>
+      <div class="field">
+        <label>Twitter / X</label>
+        <input id="twitter_url" placeholder="https://twitter.com/yourbusiness" />
+      </div>
+      <div class="field">
+        <label>YouTube</label>
+        <input id="youtube_url" placeholder="https://youtube.com/@yourbusiness" />
+      </div>
+      <div class="field">
+        <label>TikTok</label>
+        <input id="tiktok_url" placeholder="https://tiktok.com/@yourbusiness" />
+      </div>
+    </div>
+  </div>
+
+  <button class="save-btn" id="saveBtn" onclick="saveProfile()">Save Changes</button>
+  <div class="msg" id="msg"></div>
+
+</div>
+
+<script>
+const API = "https://diwanet.com";
+
+let currentSlug = "";
+let logoUrl = null;
+let coverUrl = null;
+
+function getToken() { return localStorage.getItem("dn_token"); }
+function getUser() { try { return JSON.parse(localStorage.getItem("dn_user")); } catch { return null; } }
+function getBusiness() { try { return JSON.parse(localStorage.getItem("dn_business")); } catch { return null; } }
+
+function authHeaders() {
+  return { "Authorization": "Bearer " + getToken(), "Content-Type": "application/json" };
+}
+
+function showMsg(text, type) {
+  const msg = document.getElementById("msg");
+  msg.className = "msg " + type; msg.textContent = text;
+  msg.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function updatePreview() {
+  const name = document.getElementById("business_name").value || "Business Name";
+  document.getElementById("previewName").textContent = name;
+  document.getElementById("logoInitial").textContent = name.charAt(0).toUpperCase();
+}
+
+async function loadBusiness() {
+  const user = getUser();
+  const biz = getBusiness();
+
+  if (!user || !biz) {
+    window.location.href = "login.html"; return;
+  }
+
+  currentSlug = biz.slug;
+  document.getElementById("viewPageBtn").href = `business.html?slug=${currentSlug}`;
+
+  try {
+    const res = await fetch(`${API}/api/business/${currentSlug}`);
+    const data = await res.json();
+    if (!data.success) return;
+    const b = data.business;
+
+    document.getElementById("business_name").value = b.business_name || "";
+    document.getElementById("short_description").value = b.short_description || "";
+    document.getElementById("city").value = b.city || "";
+    document.getElementById("country").value = b.country || "";
+    document.getElementById("business_email").value = b.business_email || "";
+    document.getElementById("business_phone").value = b.business_phone || "";
+    document.getElementById("website").value = b.website || "";
+    document.getElementById("instagram_url").value = b.instagram_url || "";
+    document.getElementById("facebook_url").value = b.facebook_url || "";
+    document.getElementById("linkedin_url").value = b.linkedin_url || "";
+    document.getElementById("twitter_url").value = b.twitter_url || "";
+    document.getElementById("youtube_url").value = b.youtube_url || "";
+    document.getElementById("tiktok_url").value = b.tiktok_url || "";
+
+    document.getElementById("previewName").textContent = b.business_name;
+    document.getElementById("previewCat").textContent = b.category_name || "";
+    document.getElementById("logoInitial").textContent = b.business_name.charAt(0).toUpperCase();
+
+    if (b.logo_url) {
+      logoUrl = b.logo_url;
+      const img = document.getElementById("logoPreview");
+      img.src = b.logo_url; img.style.display = "block";
+      document.getElementById("logoInitial").style.display = "none";
     }
 
-    // Load existing data
-    async function loadBusinessData() {
-      try {
-        const res = await fetch(`${API}/api/business/${business.slug}`, {
-          headers: { "Authorization": "Bearer " + token }
-        });
-        const data = await res.json();
-        if (!data.success) return;
-        const b = data.business;
-
-        document.getElementById("business_name").value = b.business_name || "";
-        document.getElementById("slug").value = b.slug || "";
-        document.getElementById("business_type").value = b.business_type || "";
-        document.getElementById("country").value = b.country || "";
-        document.getElementById("city").value = b.city || "";
-        document.getElementById("short_description").value = b.short_description || "";
-        document.getElementById("long_description").value = b.long_description || "";
-        document.getElementById("business_email").value = b.business_email || "";
-        document.getElementById("business_phone").value = b.business_phone || "";
-        document.getElementById("website_url").value = b.website_url || "";
-        document.getElementById("instagram_url").value = b.instagram_url || "";
-        document.getElementById("facebook_url").value = b.facebook_url || "";
-        document.getElementById("twitter_url").value = b.twitter_url || "";
-        document.getElementById("linkedin_url").value = b.linkedin_url || "";
-
-        // Logo preview
-        const logoP = document.getElementById("logoPreview");
-        if (b.logo_url) {
-          logoP.innerHTML = `<img src="${escAttr(b.logo_url)}" alt="">`;
-        } else {
-          logoP.textContent = (b.business_name || "B").charAt(0).toUpperCase();
-        }
-        // Cover preview
-        if (b.cover_url) {
-          document.getElementById("coverPreview").innerHTML = `<img src="${escAttr(b.cover_url)}" alt="">`;
-        }
-
-        // Set category
-        await loadCategories();
-        document.getElementById("category_id").value = b.category_id || "";
-
-        document.getElementById("saveStatus").textContent = "All changes saved";
-      } catch (e) {
-        document.getElementById("pageMsg").className = "msg error";
-        document.getElementById("pageMsg").textContent = "Failed to load business data.";
-      }
+    if (b.cover_url) {
+      coverUrl = b.cover_url;
+      const img = document.getElementById("coverPreview");
+      img.src = b.cover_url; img.style.display = "block";
     }
+  } catch (e) { console.error(e); }
+}
 
-    function previewImage(inputId, previewId) {
-      const file = document.getElementById(inputId).files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = e => {
-        document.getElementById(previewId).innerHTML = `<img src="${e.target.result}" alt="">`;
-      };
-      reader.readAsDataURL(file);
-      document.getElementById("saveStatus").textContent = "Unsaved changes";
-    }
+async function uploadImage(type, input) {
+  const file = input.files[0];
+  if (!file) return;
 
-    async function saveChanges() {
-      const btn = document.querySelector('.sticky-bar .btn-primary');
-      const msg = document.getElementById("pageMsg");
-      btn.disabled = true; btn.textContent = "Saving…";
-      msg.className = "msg";
+  if (file.size > 10 * 1024 * 1024) {
+    showMsg("File too large. Max 10MB.", "error"); return;
+  }
 
-      try {
-        // Upload images first if changed
-        const logoFile = document.getElementById("logoFile").files[0];
-        const coverFile = document.getElementById("coverFile").files[0];
-        let logoUrl = null, coverUrl = null;
+  const croppedBlob = await openCrop(type, file);
+  if (!croppedBlob) return;
 
-        if (logoFile) logoUrl = await uploadFile(logoFile, "logo");
-        if (coverFile) coverUrl = await uploadFile(coverFile, "cover");
+  const barId = type === "logo" ? "logoBar" : "coverBar";
+  document.getElementById(barId).style.display = "block";
 
-        const payload = {
-          business_name: document.getElementById("business_name").value.trim(),
-          business_type: document.getElementById("business_type").value,
-          category_id: document.getElementById("category_id").value,
-          country: document.getElementById("country").value.trim(),
-          city: document.getElementById("city").value.trim(),
-          short_description: document.getElementById("short_description").value.trim(),
-          long_description: document.getElementById("long_description").value.trim(),
-          business_email: document.getElementById("business_email").value.trim(),
-          business_phone: document.getElementById("business_phone").value.trim(),
-          website_url: document.getElementById("website_url").value.trim(),
-          instagram_url: document.getElementById("instagram_url").value.trim(),
-          facebook_url: document.getElementById("facebook_url").value.trim(),
-          twitter_url: document.getElementById("twitter_url").value.trim(),
-          linkedin_url: document.getElementById("linkedin_url").value.trim(),
-        };
-        if (logoUrl) payload.logo_url = logoUrl;
-        if (coverUrl) payload.cover_url = coverUrl;
+  const formData = new FormData();
+  formData.append("file", croppedBlob, "image.jpg");
 
-        const res = await fetch(`${API}/api/business/${business.slug}`, {
-          method: "PUT",
-          headers: authHeaders(),
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-
-        if (data.success) {
-          msg.className = "msg success"; msg.textContent = "Changes saved successfully!";
-          document.getElementById("saveStatus").textContent = "All changes saved";
-          // Update cached business
-          const updated = { ...business, ...payload };
-          localStorage.setItem("dn_business", JSON.stringify(updated));
-        } else {
-          msg.className = "msg error"; msg.textContent = data.error || "Failed to save.";
-        }
-      } catch (e) {
-        msg.className = "msg error"; msg.textContent = "Connection failed: " + e.message;
-      } finally {
-        btn.disabled = false; btn.textContent = "Save changes";
-        setTimeout(() => { msg.className = "msg"; }, 4000);
-      }
-    }
-
-    async function uploadFile(file, type) {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("type", type);
-      const res = await fetch(`${API}/api/upload`, {
-        method: "POST",
-        headers: { "Authorization": "Bearer " + token },
-        body: formData
-      });
-      const data = await res.json();
-      return data.url || null;
-    }
-
-    // Track changes
-    document.querySelectorAll("input, select, textarea").forEach(el => {
-      el.addEventListener("change", () => { document.getElementById("saveStatus").textContent = "Unsaved changes"; });
+  try {
+    const res = await fetch(`${API}/api/upload`, {
+      method: "POST", body: formData
     });
+    const data = await res.json();
 
-    loadBusinessData();
-  </script>
+    if (data.url) {
+      if (type === "logo") {
+        logoUrl = data.url;
+        const img = document.getElementById("logoPreview");
+        img.src = logoUrl; img.style.display = "block";
+        document.getElementById("logoInitial").style.display = "none";
+      } else {
+        coverUrl = data.url;
+        const img = document.getElementById("coverPreview");
+        img.src = coverUrl; img.style.display = "block";
+      }
+      showMsg(type === "logo" ? "Logo uploaded!" : "Cover uploaded!", "success");
+    } else {
+      showMsg("Upload failed. Please try again.", "error");
+    }
+  } catch (e) {
+    showMsg("Upload error: " + e.message, "error");
+  }
+
+  document.getElementById(barId).style.display = "none";
+}
+
+async function saveProfile() {
+  const btn = document.getElementById("saveBtn");
+  btn.disabled = true; btn.textContent = "Saving...";
+
+  const payload = {
+    business_name: document.getElementById("business_name").value.trim(),
+    short_description: document.getElementById("short_description").value.trim(),
+    city: document.getElementById("city").value.trim(),
+    country: document.getElementById("country").value.trim(),
+    business_email: document.getElementById("business_email").value.trim(),
+    business_phone: document.getElementById("business_phone").value.trim(),
+    website: document.getElementById("website").value.trim(),
+    instagram_url: document.getElementById("instagram_url").value.trim(),
+    facebook_url: document.getElementById("facebook_url").value.trim(),
+    linkedin_url: document.getElementById("linkedin_url").value.trim(),
+    twitter_url: document.getElementById("twitter_url").value.trim(),
+    youtube_url: document.getElementById("youtube_url").value.trim(),
+    tiktok_url: document.getElementById("tiktok_url").value.trim(),
+  };
+
+  if (logoUrl) payload.logo_url = logoUrl;
+  if (coverUrl) payload.cover_url = coverUrl;
+
+  try {
+    const res = await fetch(`${API}/api/business/${currentSlug}`, {
+      method: "PUT", headers: authHeaders(), body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.success) {
+      // localStorage'daki business adını güncelle
+      const biz = getBusiness();
+      if (biz) {
+        biz.business_name = data.business.business_name;
+        localStorage.setItem("dn_business", JSON.stringify(biz));
+      }
+      showMsg("Profile saved successfully!", "success");
+      setTimeout(() => { window.location.href = `business.html?slug=${currentSlug}`; }, 1200);
+    } else {
+      showMsg(data.error || "Save failed.", "error");
+    }
+  } catch (e) {
+    showMsg("Connection error: " + e.message, "error");
+  }
+
+  btn.disabled = false; btn.textContent = "Save Changes";
+}
+
+loadBusiness();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script>
+let cropper = null;
+let cropType = null;
+let cropResolve = null;
+
+function openCrop(type, file) {
+  return new Promise((resolve) => {
+    cropType = type;
+    cropResolve = resolve;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.getElementById("cropImage");
+      img.src = e.target.result;
+      document.getElementById("cropModal").classList.add("open");
+      if (cropper) cropper.destroy();
+      const aspectRatio = type === "cover" ? 3.3 : 1;
+      cropper = new Cropper(img, {
+        aspectRatio,
+        viewMode: 1,
+        autoCropArea: 1,
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function confirmCrop() {
+  if (!cropper) return;
+  cropper.getCroppedCanvas().toBlob(blob => {
+    cropResolve(blob);
+    cancelCrop();
+  }, "image/jpeg", 0.9);
+}
+
+function cancelCrop() {
+  document.getElementById("cropModal").classList.remove("open");
+  if (cropper) { cropper.destroy(); cropper = null; }
+  cropResolve(null);
+}
+</script>
 </body>
 </html>
