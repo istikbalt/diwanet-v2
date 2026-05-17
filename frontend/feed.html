@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Feed · Diwanet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <style>
+    .page-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr 240px;
+      gap: 24px;
+      padding: 28px 0 60px;
+      align-items: start;
+    }
+    /* Left sidebar */
+    .sidebar-left {
+      position: sticky;
+      top: 80px;
+    }
+    .sidebar-left .card { padding: 16px; }
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all 0.2s;
+      text-decoration: none;
+      margin-bottom: 2px;
+    }
+    .sidebar-nav a:hover { background: var(--surface2); color: var(--accent); }
+    .sidebar-nav a.active { background: var(--accent-light); color: var(--accent); }
+    .sidebar-nav .icon { width: 28px; height: 28px; display: grid; place-items: center; font-size: 1rem; }
+    .sidebar-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      margin-bottom: 14px;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .sidebar-profile:hover { background: var(--accent-light); }
+    .sidebar-profile-info { flex: 1; min-width: 0; }
+    .sidebar-profile-name { font-size: 0.88rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-profile-role { font-size: 0.76rem; color: var(--muted); }
+
+    /* Feed */
+    .feed-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .feed-header h2 { font-size: 1rem; font-weight: 700; }
+    .feed-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 18px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px;
+    }
+    .feed-tab {
+      flex: 1;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      color: var(--muted);
+      transition: all 0.2s;
+      border: none;
+      background: none;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .feed-tab.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    /* Post card */
+    .post-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 18px 12px;
+    }
+    .post-meta { flex: 1; }
+    .post-biz-name { font-size: 0.9rem; font-weight: 700; }
+    .post-biz-name a { color: var(--text); }
+    .post-biz-name a:hover { color: var(--accent); }
+    .post-time { font-size: 0.76rem; color: var(--muted); }
+    .post-body { padding: 0 18px 14px; }
+    .post-body p {
+      font-size: 0.92rem;
+      line-height: 1.55;
+      color: var(--text);
+      margin-bottom: 12px;
+      white-space: pre-wrap;
+    }
+    .post-images {
+      display: grid;
+      gap: 3px;
+      margin-bottom: 12px;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .post-images.one img { width: 100%; max-height: 400px; object-fit: cover; }
+    .post-images.two { grid-template-columns: 1fr 1fr; }
+    .post-images.two img, .post-images.many img { width: 100%; height: 180px; object-fit: cover; cursor: pointer; }
+    .post-images.many { grid-template-columns: 1fr 1fr; }
+    .post-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      background: none;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .action-btn:hover { background: white; color: var(--accent); }
+    .action-btn.liked { color: #DC2626; }
+
+    /* Right sidebar */
+    .sidebar-right {
+      position: sticky;
+      top: 80px;
+    }
+    .sidebar-right .card { padding: 16px; margin-bottom: 16px; }
+    .sidebar-right h3 { font-size: 0.85rem; font-weight: 700; margin-bottom: 12px; }
+    .trending-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none;
+      color: var(--text);
+    }
+    .trending-item:last-child { border-bottom: 0; padding-bottom: 0; }
+    .trending-item:hover .trending-name { color: var(--accent); }
+    .trending-name { font-size: 0.85rem; font-weight: 600; }
+    .trending-cat { font-size: 0.75rem; color: var(--muted); }
+
+    /* Compose box */
+    .compose-box {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      display: none;
+    }
+    .compose-box.visible { display: block; }
+    .compose-input {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 0.92rem;
+      min-height: 80px;
+      resize: vertical;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .compose-input:focus { outline: none; border-color: var(--accent); }
+    .compose-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+
+    @media (max-width: 1000px) {
+      .page-layout { grid-template-columns: 1fr; }
+      .sidebar-left, .sidebar-right { position: static; display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="index.html" class="brand">
+        <div class="brand-mark">D</div>
+        <span class="brand-name">Diwanet</span>
+      </a>
+      <nav class="topbar-nav">
+        <a href="categories.html">Categories</a>
+        <a href="feed.html" class="active">Feed</a>
+      </nav>
+      <div class="topbar-actions" id="topbarActions"></div>
+      <button class="hamburger" onclick="document.getElementById('mobileMenu').classList.toggle('open')">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="categories.html">Categories</a>
+    <a href="feed.html">Feed</a>
+    <a href="login.html">Sign in</a>
+    <a href="signup.html" class="primary">Sign up</a>
+  </div>
+
+  <main>
+    <div class="container">
+      <div class="page-layout">
+
+        <!-- Left sidebar -->
+        <aside class="sidebar-left">
+          <div class="card">
+            <div id="sidebarUser"></div>
+            <nav class="sidebar-nav">
+              <a href="feed.html" class="active"><span class="icon">🏠</span> Feed</a>
+              <a href="categories.html"><span class="icon">🔍</span> Discover</a>
+              <a href="#" id="sidebarMyPage"><span class="icon">🏢</span> My Business</a>
+              <a href="#" id="sidebarNotifs"><span class="icon">🔔</span> Notifications</a>
+              <a href="#" onclick="doLogout()"><span class="icon">👋</span> Sign out</a>
+            </nav>
+          </div>
+        </aside>
+
+        <!-- Main feed -->
+        <div>
+          <!-- Compose (business owners only) -->
+          <div class="compose-box" id="composeBox">
+            <textarea class="compose-input" id="composeText" placeholder="Share a post, promotion, or update…"></textarea>
+            <div class="compose-actions">
+              <button class="btn btn-ghost btn-sm" onclick="document.getElementById('composeText').value=''">Clear</button>
+              <button class="btn btn-primary btn-sm" onclick="submitPost()">Post</button>
+            </div>
+            <div class="msg" id="composeMsg" style="margin-top:10px;"></div>
+          </div>
+
+          <div class="feed-tabs">
+            <button class="feed-tab active" onclick="switchTab('all', this)">All Posts</button>
+            <button class="feed-tab" onclick="switchTab('following', this)">Following</button>
+          </div>
+
+          <div id="feedContainer">
+            <div class="loading">Loading posts…</div>
+          </div>
+        </div>
+
+        <!-- Right sidebar -->
+        <aside class="sidebar-right">
+          <div class="card">
+            <h3>🔥 Trending Businesses</h3>
+            <div id="trendingList">
+              <div class="trending-item">
+                <div class="biz-avatar biz-avatar-sm">T</div>
+                <div><div class="trending-name">Tulip Furniture</div><div class="trending-cat">Retail</div></div>
+              </div>
+              <div class="trending-item">
+                <div class="biz-avatar biz-avatar-sm" style="background: linear-gradient(135deg,#EA580C,#c2410c);">B</div>
+                <div><div class="trending-name">Blue Bowl Bistro</div><div class="trending-cat">Restaurant</div></div>
+              </div>
+              <div class="trending-item">
+                <div class="biz-avatar biz-avatar-sm" style="background: linear-gradient(135deg,#7C3AED,#6D28D9);">G</div>
+                <div><div class="trending-name">Global Study Centre</div><div class="trending-cat">Education</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>📋 Quick Links</h3>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <a href="create-business.html" class="btn btn-primary btn-sm btn-full">+ Create Business Page</a>
+              <a href="categories.html" class="btn btn-ghost btn-sm btn-full">Browse Categories</a>
+              <a href="privacy-policy.html" style="font-size:0.78rem; color:var(--muted); text-align:center; display:block; padding-top:4px;">Privacy Policy</a>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </main>
+
+  <script src="assets/js/auth.js"></script>
+  <script>
+    renderTopbarAuth("topbarActions");
+
+    const user = getUser();
+    const business = getBusiness();
+
+    // Sidebar user block
+    const sidebarUser = document.getElementById("sidebarUser");
+    if (user) {
+      const name = business ? business.business_name : `${user.first_name} ${user.last_name}`;
+      const profileLink = business ? `business.html?slug=${business.slug}` : `profile.html?id=${user.id}`;
+      const initial = name.charAt(0).toUpperCase();
+      sidebarUser.innerHTML = `
+        <a href="${profileLink}" class="sidebar-profile">
+          <div class="biz-avatar biz-avatar-sm">${escHtml(initial)}</div>
+          <div class="sidebar-profile-info">
+            <div class="sidebar-profile-name">${escHtml(name)}</div>
+            <div class="sidebar-profile-role">${business ? 'Business page' : 'Visitor'}</div>
+          </div>
+        </a>
+      `;
+    } else {
+      sidebarUser.innerHTML = `
+        <div style="margin-bottom:14px;">
+          <a href="login.html" class="btn btn-primary btn-sm btn-full" style="margin-bottom:8px;">Sign in</a>
+          <a href="signup.html" class="btn btn-ghost btn-sm btn-full">Sign up</a>
+        </div>
+      `;
+    }
+
+    // My business link
+    if (business) {
+      document.getElementById("sidebarMyPage").href = `business.html?slug=${business.slug}`;
+    } else {
+      document.getElementById("sidebarMyPage").href = "create-business.html";
+    }
+
+    // Show compose box for business owners
+    if (business) {
+      document.getElementById("composeBox").classList.add("visible");
+    }
+
+    // Active tab
+    let currentTab = "all";
+
+    function switchTab(tab, btn) {
+      currentTab = tab;
+      document.querySelectorAll(".feed-tab").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      loadFeed();
+    }
+
+    // Load feed
+    async function loadFeed() {
+      const container = document.getElementById("feedContainer");
+      container.innerHTML = '<div class="loading">Loading posts…</div>';
+      try {
+        const url = `${API}/api/feed?limit=20`;
+        const headers = getToken() ? { "Authorization": "Bearer " + getToken() } : {};
+        const res = await fetch(url, { headers });
+        const data = await res.json();
+        if (!data.success || !data.posts.length) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <h3>No posts yet</h3>
+              <p>Businesses haven't posted anything recently.</p>
+            </div>`;
+          return;
+        }
+        container.innerHTML = data.posts.map(renderPost).join("");
+      } catch (e) {
+        container.innerHTML = `<div class="msg error">Failed to load feed: ${escHtml(e.message)}</div>`;
+      }
+    }
+
+    function renderPost(post) {
+      const imgs = post.media_urls ? post.media_urls.slice(0, 4) : [];
+      const imgClass = imgs.length === 1 ? "one" : imgs.length === 2 ? "two" : imgs.length > 2 ? "many" : "";
+      const imgsHtml = imgs.length
+        ? `<div class="post-images ${imgClass}">${imgs.map(u => `<img src="${escAttr(u)}" alt="" loading="lazy" onclick="openImg('${escAttr(u)}')">`).join("")}</div>`
+        : "";
+      const initial = (post.business_name || "B").charAt(0).toUpperCase();
+      const logoHtml = post.logo_url
+        ? `<img src="${escAttr(post.logo_url)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+        : escHtml(initial);
+
+      return `
+        <div class="post-card" id="post-${post.id}">
+          <div class="post-header">
+            <a href="business.html?slug=${escAttr(post.slug)}" class="avatar avatar-md">${logoHtml}</a>
+            <div class="post-meta">
+              <div class="post-biz-name"><a href="business.html?slug=${escAttr(post.slug)}">${escHtml(post.business_name)}</a></div>
+              <div class="post-time">${escHtml(post.category_name || "")} · ${timeAgo(post.created_at)}</div>
+            </div>
+          </div>
+          <div class="post-body">
+            ${post.content ? `<p>${escHtml(post.content)}</p>` : ""}
+            ${imgsHtml}
+            <div class="post-actions">
+              <button class="action-btn ${post.user_liked ? 'liked' : ''}" onclick="toggleLike(${post.id}, this)">
+                ♥ <span>${post.like_count || 0}</span>
+              </button>
+              <button class="action-btn">💬 <span>${post.comment_count || 0}</span></button>
+              <button class="action-btn" onclick="sharePost('${escAttr(post.slug)}')">↗ Share</button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    async function toggleLike(postId, btn) {
+      if (!getToken()) { window.location.href = "login.html"; return; }
+      const isLiked = btn.classList.contains("liked");
+      const method = isLiked ? "DELETE" : "POST";
+      try {
+        const res = await fetch(`${API}/api/posts/${postId}/like`, {
+          method,
+          headers: { "Authorization": "Bearer " + getToken() }
+        });
+        const data = await res.json();
+        if (data.success) {
+          btn.classList.toggle("liked");
+          const countEl = btn.querySelector("span");
+          countEl.textContent = data.like_count ?? (parseInt(countEl.textContent) + (isLiked ? -1 : 1));
+        }
+      } catch {}
+    }
+
+    function sharePost(slug) {
+      const url = `${window.location.origin}/business.html?slug=${slug}`;
+      navigator.clipboard.writeText(url).then(() => alert("Link copied!")).catch(() => alert(url));
+    }
+
+    function openImg(url) {
+      const overlay = document.createElement("div");
+      overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:grid;place-items:center;cursor:pointer;";
+      overlay.innerHTML = `<img src="${escAttr(url)}" style="max-width:90vw;max-height:90vh;border-radius:12px;">`;
+      overlay.onclick = () => overlay.remove();
+      document.body.appendChild(overlay);
+    }
+
+    async function submitPost() {
+      const content = document.getElementById("composeText").value.trim();
+      const msg = document.getElementById("composeMsg");
+      if (!content) { msg.className = "msg error"; msg.textContent = "Please write something."; return; }
+      try {
+        const res = await fetch(`${API}/api/posts`, {
+          method: "POST",
+          headers: authHeaders(),
+          body: JSON.stringify({ content })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById("composeText").value = "";
+          msg.className = "msg success"; msg.textContent = "Post published!";
+          setTimeout(() => { msg.className = "msg"; loadFeed(); }, 1000);
+        } else {
+          msg.className = "msg error"; msg.textContent = data.error || "Failed to post.";
+        }
+      } catch (e) {
+        msg.className = "msg error"; msg.textContent = "Connection failed.";
+      }
+    }
+
+    loadFeed();
+  </script>
+</body>
+</html>

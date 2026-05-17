@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Business · Diwanet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <style>
+    .cover {
+      height: 200px;
+      background: linear-gradient(135deg, var(--accent-light), #dbeafe 60%, #d1fae5);
+      position: relative;
+    }
+    .cover img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 18px;
+      padding: 0 32px;
+      margin-top: -36px;
+      margin-bottom: 18px;
+    }
+    .profile-logo {
+      width: 80px; height: 80px;
+      border-radius: 20px;
+      background: var(--accent);
+      border: 4px solid white;
+      display: grid; place-items: center;
+      font-weight: 800; color: white; font-size: 1.8rem;
+      flex-shrink: 0;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .profile-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-info { flex: 1; padding-bottom: 6px; }
+    .profile-info h1 { font-family: 'DM Serif Display', serif; font-size: 1.7rem; letter-spacing: -0.02em; }
+    .profile-info .meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+    .profile-actions { display: flex; gap: 8px; padding-bottom: 6px; }
+
+    .profile-layout {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 24px;
+      padding: 0 0 60px;
+      align-items: start;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 2px;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .tab-btn {
+      padding: 10px 18px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border: none;
+      background: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { color: var(--accent); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* Post cards */
+    .post-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+    .post-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 10px; }
+    .post-time { font-size: 0.76rem; color: var(--muted); }
+    .post-body { padding: 0 16px 12px; font-size: 0.92rem; line-height: 1.55; white-space: pre-wrap; }
+    .post-images { display: grid; gap: 3px; margin-bottom: 10px; }
+    .post-images img { width: 100%; max-height: 360px; object-fit: cover; cursor: pointer; }
+    .post-images.two { grid-template-columns: 1fr 1fr; }
+    .post-images.many { grid-template-columns: 1fr 1fr; }
+    .post-images.two img, .post-images.many img { height: 160px; }
+    .post-footer { display: flex; gap: 4px; padding: 8px 12px; border-top: 1px solid var(--border); background: var(--surface2); }
+    .action-btn {
+      display: flex; align-items: center; gap: 5px;
+      padding: 6px 10px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600; color: var(--muted);
+      cursor: pointer; border: none; background: none;
+      font-family: 'DM Sans', sans-serif; transition: all 0.2s;
+    }
+    .action-btn:hover { background: white; color: var(--accent); }
+    .action-btn.liked { color: #DC2626; }
+
+    /* Sidebar cards */
+    .info-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow); }
+    .info-card h3 { font-size: 0.88rem; font-weight: 700; margin-bottom: 12px; }
+    .info-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+    .info-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .info-row .label { color: var(--muted); width: 90px; flex-shrink: 0; }
+    .info-row .value { color: var(--text); font-weight: 500; flex: 1; word-break: break-word; }
+
+    /* About tab */
+    .about-section { margin-bottom: 20px; }
+    .about-section h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
+    .about-section p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+
+    @media (max-width: 860px) {
+      .profile-layout { grid-template-columns: 1fr; }
+      .profile-row { padding: 0 16px; }
+    }
+    @media (max-width: 600px) {
+      .cover { height: 140px; }
+      .profile-info h1 { font-size: 1.3rem; }
+      .profile-actions { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="index.html" class="brand">
+        <div class="brand-mark">D</div>
+        <span class="brand-name">Diwanet</span>
+      </a>
+      <nav class="topbar-nav">
+        <a href="categories.html">Categories</a>
+        <a href="feed.html">Feed</a>
+      </nav>
+      <div class="topbar-actions" id="topbarActions"></div>
+      <button class="hamburger" onclick="document.getElementById('mobileMenu').classList.toggle('open')">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="categories.html">Categories</a>
+    <a href="feed.html">Feed</a>
+    <a href="login.html">Sign in</a>
+    <a href="signup.html" class="primary">Sign up</a>
+  </div>
+
+  <main>
+    <!-- Cover -->
+    <div class="cover" id="coverDiv"></div>
+
+    <div class="container">
+      <!-- Profile row -->
+      <div class="profile-row">
+        <div class="profile-logo" id="logoDiv"></div>
+        <div class="profile-info">
+          <h1 id="bizName">Loading…</h1>
+          <div class="meta" id="bizMeta"></div>
+        </div>
+        <div class="profile-actions" id="profileActions"></div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('posts', this)">Posts</button>
+        <button class="tab-btn" onclick="switchTab('about', this)">About</button>
+      </div>
+
+      <div class="profile-layout">
+        <!-- Main content -->
+        <div id="mainContent">
+          <div class="loading">Loading…</div>
+        </div>
+
+        <!-- Right sidebar -->
+        <aside>
+          <div class="info-card" id="infoCard" style="display:none;">
+            <h3>Business Info</h3>
+            <div id="infoRows"></div>
+          </div>
+          <div class="info-card">
+            <h3>Share this page</h3>
+            <button class="btn btn-ghost btn-sm btn-full" onclick="copyLink()">Copy link</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <!-- Lightbox -->
+  <div id="lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;place-items:center;cursor:pointer;" onclick="this.style.display='none'">
+    <img id="lightboxImg" style="max-width:90vw;max-height:90vh;border-radius:12px;">
+  </div>
+
+  <script src="assets/js/auth.js"></script>
+  <script>
+    renderTopbarAuth("topbarActions");
+
+    const slug = new URLSearchParams(window.location.search).get("slug");
+    const myBusiness = getBusiness();
+    const myToken = getToken();
+    let bizData = null;
+
+    if (!slug) {
+      document.getElementById("bizName").textContent = "Business not found.";
+    } else {
+      loadBusiness();
+    }
+
+    async function loadBusiness() {
+      try {
+        const headers = myToken ? { "Authorization": "Bearer " + myToken } : {};
+        const res = await fetch(`${API}/api/business/${slug}`, { headers });
+        const data = await res.json();
+        if (!data.success) { document.getElementById("bizName").textContent = "Business not found."; return; }
+        bizData = data.business;
+        renderHeader(bizData);
+        renderInfoSidebar(bizData);
+        loadPosts();
+      } catch (e) {
+        document.getElementById("bizName").textContent = "Failed to load.";
+      }
+    }
+
+    function renderHeader(b) {
+      document.title = `${b.business_name} · Diwanet`;
+
+      // Cover
+      if (b.cover_url) {
+        document.getElementById("coverDiv").innerHTML = `<img src="${escAttr(b.cover_url)}" alt="">`;
+      }
+
+      // Logo
+      const logoDiv = document.getElementById("logoDiv");
+      if (b.logo_url) {
+        logoDiv.innerHTML = `<img src="${escAttr(b.logo_url)}" alt="">`;
+      } else {
+        logoDiv.textContent = (b.business_name || "B").charAt(0).toUpperCase();
+      }
+
+      document.getElementById("bizName").textContent = b.business_name;
+
+      document.getElementById("bizMeta").innerHTML = `
+        ${b.category_name ? `<span class="tag">${escHtml(b.category_name)}</span>` : ""}
+        ${b.city ? `<span class="tag grey">📍 ${escHtml(b.city)}${b.country ? ", " + escHtml(b.country) : ""}</span>` : ""}
+        ${b.business_type ? `<span class="tag grey">${escHtml(b.business_type)}</span>` : ""}
+      `;
+
+      const actions = document.getElementById("profileActions");
+      const isOwner = myBusiness && myBusiness.slug === slug;
+      if (isOwner) {
+        actions.innerHTML = `<a href="edit-business.html" class="btn btn-ghost btn-sm">✏️ Edit page</a>`;
+      } else {
+        if (b.business_phone) actions.innerHTML += `<a href="tel:${escAttr(b.business_phone)}" class="btn btn-ghost btn-sm">📞 Call</a>`;
+        if (b.business_email) actions.innerHTML += `<a href="mailto:${escAttr(b.business_email)}" class="btn btn-primary btn-sm">✉️ Email</a>`;
+      }
+    }
+
+    function renderInfoSidebar(b) {
+      const rows = [
+        b.business_type && ["Type", b.business_type],
+        b.city && ["Location", `${b.city}${b.country ? ", " + b.country : ""}`],
+        b.business_email && ["Email", `<a href="mailto:${escAttr(b.business_email)}" style="color:var(--accent)">${escHtml(b.business_email)}</a>`],
+        b.business_phone && ["Phone", `<a href="tel:${escAttr(b.business_phone)}" style="color:var(--accent)">${escHtml(b.business_phone)}</a>`],
+        b.website_url && ["Website", `<a href="${escAttr(b.website_url)}" target="_blank" style="color:var(--accent)">Visit ↗</a>`],
+        b.created_at && ["Member since", new Date(b.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })],
+      ].filter(Boolean);
+
+      document.getElementById("infoRows").innerHTML = rows.map(([label, value]) =>
+        `<div class="info-row"><span class="label">${label}</span><span class="value">${value}</span></div>`
+      ).join("");
+      document.getElementById("infoCard").style.display = "block";
+    }
+
+    let currentTab = "posts";
+
+    function switchTab(tab, btn) {
+      currentTab = tab;
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      if (tab === "posts") loadPosts();
+      else renderAbout();
+    }
+
+    async function loadPosts() {
+      const container = document.getElementById("mainContent");
+      container.innerHTML = '<div class="loading">Loading posts…</div>';
+      try {
+        const res = await fetch(`${API}/api/posts?slug=${encodeURIComponent(slug)}&limit=20`);
+        const data = await res.json();
+        if (!data.success || !data.posts.length) {
+          container.innerHTML = `<div class="empty-state"><h3>No posts yet</h3><p>This business hasn't posted anything yet.</p></div>`;
+          return;
+        }
+        container.innerHTML = data.posts.map(renderPost).join("");
+      } catch (e) {
+        container.innerHTML = `<div class="msg error">Failed to load posts.</div>`;
+      }
+    }
+
+    function renderPost(post) {
+      const imgs = post.media_urls ? post.media_urls.slice(0, 4) : [];
+      const imgClass = imgs.length === 1 ? "one" : imgs.length === 2 ? "two" : imgs.length > 2 ? "many" : "";
+      const imgsHtml = imgs.length
+        ? `<div class="post-images ${imgClass}">${imgs.map(u => `<img src="${escAttr(u)}" alt="" loading="lazy" onclick="openImg('${escAttr(u)}')">`).join("")}</div>`
+        : "";
+      const isOwner = myBusiness && myBusiness.slug === slug;
+      const editBtn = isOwner
+        ? `<button class="action-btn" onclick="deletePost(${post.id})">🗑️ Delete</button>`
+        : "";
+
+      return `
+        <div class="post-card" id="post-${post.id}">
+          <div class="post-header">
+            <span class="post-time">${timeAgo(post.created_at)}</span>
+            ${editBtn}
+          </div>
+          <div class="post-body">
+            ${post.content ? escHtml(post.content) : ""}
+            ${imgsHtml}
+          </div>
+          <div class="post-footer">
+            <button class="action-btn ${post.user_liked ? 'liked' : ''}" onclick="toggleLike(${post.id}, this)">
+              ♥ <span>${post.like_count || 0}</span>
+            </button>
+            <button class="action-btn">💬 ${post.comment_count || 0}</button>
+          </div>
+        </div>`;
+    }
+
+    function renderAbout() {
+      const b = bizData;
+      if (!b) return;
+      document.getElementById("mainContent").innerHTML = `
+        <div class="info-card">
+          ${b.short_description ? `<div class="about-section"><h3>About</h3><p>${escHtml(b.short_description)}</p></div>` : ""}
+          ${b.long_description ? `<div class="about-section"><h3>Our Story</h3><p>${escHtml(b.long_description)}</p></div>` : ""}
+          <div class="about-section">
+            <h3>Details</h3>
+            <div class="info-row"><span class="label">Type</span><span class="value">${escHtml(b.business_type || "-")}</span></div>
+            <div class="info-row"><span class="label">Category</span><span class="value">${escHtml(b.category_name || "-")}</span></div>
+            <div class="info-row"><span class="label">Location</span><span class="value">${escHtml(b.city || "")}${b.country ? ", " + escHtml(b.country) : ""}</span></div>
+            ${b.business_email ? `<div class="info-row"><span class="label">Email</span><span class="value"><a href="mailto:${escAttr(b.business_email)}" style="color:var(--accent)">${escHtml(b.business_email)}</a></span></div>` : ""}
+            ${b.business_phone ? `<div class="info-row"><span class="label">Phone</span><span class="value"><a href="tel:${escAttr(b.business_phone)}" style="color:var(--accent)">${escHtml(b.business_phone)}</a></span></div>` : ""}
+          </div>
+        </div>`;
+    }
+
+    async function toggleLike(postId, btn) {
+      if (!myToken) { window.location.href = "login.html"; return; }
+      const isLiked = btn.classList.contains("liked");
+      try {
+        const res = await fetch(`${API}/api/posts/${postId}/like`, {
+          method: isLiked ? "DELETE" : "POST",
+          headers: { "Authorization": "Bearer " + myToken }
+        });
+        const data = await res.json();
+        if (data.success) {
+          btn.classList.toggle("liked");
+          const countEl = btn.querySelector("span");
+          countEl.textContent = data.like_count ?? (parseInt(countEl.textContent) + (isLiked ? -1 : 1));
+        }
+      } catch {}
+    }
+
+    async function deletePost(postId) {
+      if (!confirm("Delete this post?")) return;
+      try {
+        const res = await fetch(`${API}/api/posts/${postId}`, {
+          method: "DELETE",
+          headers: { "Authorization": "Bearer " + myToken }
+        });
+        const data = await res.json();
+        if (data.success) document.getElementById(`post-${postId}`).remove();
+      } catch {}
+    }
+
+    function openImg(url) {
+      document.getElementById("lightboxImg").src = url;
+      document.getElementById("lightbox").style.display = "grid";
+    }
+
+    function copyLink() {
+      navigator.clipboard.writeText(window.location.href).then(() => alert("Link copied!")).catch(() => alert(window.location.href));
+    }
+  </script>
+</body>
+</html>

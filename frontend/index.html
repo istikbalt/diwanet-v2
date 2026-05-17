@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diwanet · Business-First Social Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <style>
+    /* ---- Hero ---- */
+    .hero {
+      padding: 72px 0 56px;
+      text-align: center;
+    }
+    .hero-eyebrow {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: var(--accent-light);
+      color: var(--accent);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-bottom: 22px;
+    }
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      letter-spacing: -0.03em;
+      line-height: 1.08;
+      max-width: 720px;
+      margin: 0 auto 20px;
+    }
+    .hero p {
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto 34px;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .hero-search {
+      margin-top: 48px;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 6px 6px 22px;
+      box-shadow: var(--shadow-lg);
+    }
+    .hero-search input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 0.95rem;
+      padding: 8px 0;
+      border-radius: 0;
+    }
+    .hero-search input:focus { outline: none; }
+    /* ---- Stats ---- */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin: 48px 0;
+    }
+    .stat-box {
+      text-align: center;
+      padding: 24px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .stat-num {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem;
+      color: var(--accent);
+      display: block;
+    }
+    .stat-lbl { font-size: 0.82rem; color: var(--muted); margin-top: 4px; }
+    /* ---- Categories ---- */
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .cat-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.2s;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .cat-card:hover { border-color: var(--accent); box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+    .cat-icon {
+      width: 46px; height: 46px;
+      border-radius: 13px;
+      background: var(--accent-light);
+      display: grid; place-items: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .cat-card h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; }
+    .cat-card span { font-size: 0.78rem; color: var(--muted); }
+    /* ---- Biz cards ---- */
+    .biz-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .biz-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: all 0.2s;
+    }
+    .biz-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+    .biz-cover {
+      height: 100px;
+      background: linear-gradient(135deg, var(--accent-light), #dbeafe);
+    }
+    .biz-body { padding: 0 18px 18px; }
+    .biz-logo-wrap {
+      margin-top: -26px;
+      margin-bottom: 12px;
+    }
+    .biz-logo {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: var(--accent);
+      display: grid; place-items: center;
+      font-weight: 800;
+      color: white;
+      font-size: 1.1rem;
+      border: 3px solid white;
+    }
+    .biz-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+    .biz-card p { font-size: 0.82rem; color: var(--muted); margin-bottom: 12px; line-height: 1.4; }
+    .biz-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    /* ---- How it works ---- */
+    .how-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .how-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      box-shadow: var(--shadow);
+    }
+    .how-num {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      display: grid; place-items: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+    .how-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    .how-card p { font-size: 0.88rem; color: var(--muted); line-height: 1.5; }
+    /* ---- CTA ---- */
+    .cta-box {
+      background: var(--accent);
+      border-radius: var(--radius);
+      padding: 52px 40px;
+      text-align: center;
+      color: white;
+    }
+    .cta-box h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      margin-bottom: 12px;
+    }
+    .cta-box p { font-size: 0.95rem; opacity: 0.82; margin-bottom: 28px; }
+    .btn-white { background: white; color: var(--accent); font-weight: 700; }
+    .btn-white:hover { background: var(--accent-light); }
+    .btn-white-outline {
+      background: transparent;
+      color: white;
+      border: 1.5px solid rgba(255,255,255,0.5);
+    }
+    .btn-white-outline:hover { background: rgba(255,255,255,0.12); }
+    /* ---- Section header ---- */
+    .section-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      gap: 16px;
+    }
+    /* ---- Footer ---- */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+      margin-top: 80px;
+    }
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-size: 0.85rem; color: var(--muted); }
+    .footer-links a:hover { color: var(--accent); }
+
+    @media (max-width: 900px) {
+      .cat-grid { grid-template-columns: repeat(2, 1fr); }
+      .biz-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .how-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .cat-grid { grid-template-columns: 1fr 1fr; }
+      .biz-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="index.html" class="brand">
+        <div class="brand-mark">D</div>
+        <span class="brand-name">Diwanet</span>
+      </a>
+      <nav class="topbar-nav">
+        <a href="categories.html">Categories</a>
+        <a href="feed.html">Feed</a>
+        <a href="index.html#how">How it works</a>
+      </nav>
+      <div class="topbar-actions" id="topbarActions"></div>
+      <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="categories.html">Categories</a>
+    <a href="feed.html">Feed</a>
+    <a href="login.html">Sign in</a>
+    <a href="signup.html" class="primary">Sign up free</a>
+  </div>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-eyebrow">Only businesses can be members</div>
+        <h1>Where Businesses Connect, Grow & Get Discovered</h1>
+        <p>Diwanet is the first social platform built exclusively for companies, stores, restaurants, and institutions.</p>
+        <div class="hero-actions">
+          <a href="create-business.html" class="btn btn-primary btn-lg">Create your business page</a>
+          <a href="categories.html" class="btn btn-ghost btn-lg">Explore businesses</a>
+        </div>
+        <div class="hero-search">
+          <input id="heroSearch" type="text" placeholder="Search businesses, categories, cities…" onkeydown="if(event.key==='Enter')doSearch()" />
+          <button class="btn btn-primary" onclick="doSearch()">Search</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <section style="padding-bottom: 0;">
+      <div class="container">
+        <div class="stats-row">
+          <div class="stat-box">
+            <span class="stat-num">25K+</span>
+            <div class="stat-lbl">Business Pages</div>
+          </div>
+          <div class="stat-box">
+            <span class="stat-num">180K+</span>
+            <div class="stat-lbl">Monthly Visitors</div>
+          </div>
+          <div class="stat-box">
+            <span class="stat-num">12</span>
+            <div class="stat-lbl">Main Categories</div>
+          </div>
+          <div class="stat-box">
+            <span class="stat-num">107</span>
+            <div class="stat-lbl">Subcategories</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CATEGORIES -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <div class="section-label">Browse by type</div>
+            <h2 class="section-title">Main Categories</h2>
+          </div>
+          <a href="categories.html" class="btn btn-ghost btn-sm">View all →</a>
+        </div>
+        <div class="cat-grid" id="catGrid">
+          <a href="categories.html?cat=restaurants" class="cat-card">
+            <div class="cat-icon">🍽️</div>
+            <div><h3>Restaurants</h3><span>Food & Dining</span></div>
+          </a>
+          <a href="categories.html?cat=retail" class="cat-card">
+            <div class="cat-icon">🛍️</div>
+            <div><h3>Retail & Stores</h3><span>Shopping</span></div>
+          </a>
+          <a href="categories.html?cat=education" class="cat-card">
+            <div class="cat-icon">🎓</div>
+            <div><h3>Education</h3><span>Schools & Courses</span></div>
+          </a>
+          <a href="categories.html?cat=health" class="cat-card">
+            <div class="cat-icon">🏥</div>
+            <div><h3>Health & Clinics</h3><span>Medical Services</span></div>
+          </a>
+          <a href="categories.html?cat=services" class="cat-card">
+            <div class="cat-icon">⚙️</div>
+            <div><h3>Services</h3><span>Agencies & Pros</span></div>
+          </a>
+          <a href="categories.html?cat=beauty" class="cat-card">
+            <div class="cat-icon">💅</div>
+            <div><h3>Beauty & Wellness</h3><span>Salons & Spas</span></div>
+          </a>
+          <a href="categories.html?cat=real-estate" class="cat-card">
+            <div class="cat-icon">🏠</div>
+            <div><h3>Real Estate</h3><span>Agents & Brokers</span></div>
+          </a>
+          <a href="categories.html" class="cat-card" style="background: var(--accent-light); border-color: var(--accent);">
+            <div class="cat-icon" style="background: white;">➕</div>
+            <div><h3 style="color:var(--accent);">More Categories</h3><span>View all 12</span></div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURED BUSINESSES -->
+    <section class="section" style="background: white; padding: 48px 0;">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <div class="section-label">Recently joined</div>
+            <h2 class="section-title">Featured Businesses</h2>
+          </div>
+          <a href="feed.html" class="btn btn-ghost btn-sm">See feed →</a>
+        </div>
+        <div class="biz-grid" id="bizGrid">
+          <!-- JS renders here, fallback below -->
+          <div class="biz-card">
+            <div class="biz-cover"></div>
+            <div class="biz-body">
+              <div class="biz-logo-wrap"><div class="biz-logo">TF</div></div>
+              <h3>Tulip Furniture</h3>
+              <p>Modern furniture showroom with seasonal collections and weekly promotions.</p>
+              <div class="biz-meta">
+                <span class="tag">Retail</span>
+                <span class="tag grey">Toronto</span>
+              </div>
+            </div>
+          </div>
+          <div class="biz-card">
+            <div class="biz-cover" style="background: linear-gradient(135deg, #fed7aa, #fff7ed);"></div>
+            <div class="biz-body">
+              <div class="biz-logo-wrap"><div class="biz-logo" style="background: #EA580C;">BB</div></div>
+              <h3>Blue Bowl Bistro</h3>
+              <p>Restaurant with daily lunch posts, customer reviews, and booking options.</p>
+              <div class="biz-meta">
+                <span class="tag">Restaurant</span>
+                <span class="tag grey">North York</span>
+              </div>
+            </div>
+          </div>
+          <div class="biz-card">
+            <div class="biz-cover" style="background: linear-gradient(135deg, #ddd6fe, #f5f3ff);"></div>
+            <div class="biz-body">
+              <div class="biz-logo-wrap"><div class="biz-logo" style="background: #7C3AED;">GS</div></div>
+              <h3>Global Study Centre</h3>
+              <p>Programs, enrollment dates, and weekly announcements for prospective students.</p>
+              <div class="biz-meta">
+                <span class="tag">Education</span>
+                <span class="tag grey">Scarborough</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section" id="how">
+      <div class="container">
+        <div style="text-align: center; margin-bottom: 40px;">
+          <div class="section-label">Simple & fast</div>
+          <h2 class="section-title">How it works</h2>
+          <p class="section-sub" style="margin: 0 auto;">Get your business discovered in three easy steps.</p>
+        </div>
+        <div class="how-grid">
+          <div class="how-card">
+            <div class="how-num">1</div>
+            <h3>Create your page</h3>
+            <p>Sign up, fill in your business details, and publish your page in minutes. No technical skills needed.</p>
+          </div>
+          <div class="how-card">
+            <div class="how-num">2</div>
+            <h3>Post & update</h3>
+            <p>Share promotions, product launches, announcements, and videos to keep your audience engaged.</p>
+          </div>
+          <div class="how-card">
+            <div class="how-num">3</div>
+            <h3>Get discovered</h3>
+            <p>Visitors browse by category, city, and keyword. Your business shows up exactly when people are looking.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section style="padding: 0 0 72px;">
+      <div class="container">
+        <div class="cta-box">
+          <h2>Ready to put your business on the map?</h2>
+          <p>Join thousands of businesses already growing on Diwanet.</p>
+          <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <a href="create-business.html" class="btn btn-white btn-lg">Create free business page</a>
+            <a href="categories.html" class="btn btn-white-outline btn-lg">Browse businesses</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <a href="index.html" class="brand">
+          <div class="brand-mark">D</div>
+          <span class="brand-name">Diwanet</span>
+        </a>
+        <div class="footer-links">
+          <a href="categories.html">Categories</a>
+          <a href="feed.html">Feed</a>
+          <a href="create-business.html">Create Page</a>
+          <a href="privacy-policy.html">Privacy Policy</a>
+        </div>
+        <div style="font-size: 0.82rem; color: var(--muted);">© 2025 Diwanet. All rights reserved.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/auth.js"></script>
+  <script>
+    renderTopbarAuth("topbarActions");
+
+    function toggleMenu() {
+      document.getElementById("mobileMenu").classList.toggle("open");
+    }
+
+    function doSearch() {
+      const q = document.getElementById("heroSearch").value.trim();
+      if (q) window.location.href = `categories.html?q=${encodeURIComponent(q)}`;
+    }
+  </script>
+</body>
+</html>

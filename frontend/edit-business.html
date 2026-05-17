@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Business · Diwanet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <style>
+    .page-wrap { max-width: 860px; margin: 0 auto; padding: 32px 24px 80px; }
+    .page-header { margin-bottom: 28px; }
+    .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 1.9rem; letter-spacing: -0.02em; }
+    .page-header p { color: var(--muted); margin-top: 6px; }
+
+    .section-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 20px; box-shadow: var(--shadow); }
+    .section-head { padding: 16px 22px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .section-head h2 { font-size: 0.92rem; font-weight: 700; }
+    .section-head p { font-size: 0.8rem; color: var(--muted); margin-top: 3px; }
+    .section-body { padding: 22px; }
+
+    /* Image upload */
+    .upload-row { display: flex; align-items: center; gap: 18px; margin-bottom: 16px; }
+    .upload-preview {
+      width: 80px; height: 80px;
+      border-radius: 18px;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      display: grid; place-items: center;
+      overflow: hidden; flex-shrink: 0;
+      font-size: 1.8rem; font-weight: 800; color: var(--accent);
+    }
+    .upload-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .upload-preview.cover-preview { width: 160px; height: 80px; border-radius: 12px; font-size: 0.8rem; color: var(--muted); }
+    .upload-info { flex: 1; }
+    .upload-info p { font-size: 0.82rem; color: var(--muted); margin-top: 4px; }
+
+    input[type="file"] { display: none; }
+
+    .sticky-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: white;
+      border-top: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      z-index: 50;
+      box-shadow: 0 -4px 20px rgba(15,76,129,0.08);
+    }
+    .sticky-bar-left { font-size: 0.85rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="index.html" class="brand">
+        <div class="brand-mark">D</div>
+        <span class="brand-name">Diwanet</span>
+      </a>
+      <nav class="topbar-nav">
+        <a href="feed.html">Feed</a>
+      </nav>
+      <div class="topbar-actions" id="topbarActions"></div>
+    </div>
+  </header>
+
+  <div class="page-wrap">
+    <div class="page-header">
+      <h1>Edit Business Page</h1>
+      <p>Update your business information, photos, and contact details.</p>
+    </div>
+
+    <!-- Logo & Cover -->
+    <div class="section-card">
+      <div class="section-head">
+        <h2>Photos</h2>
+        <p>Your logo and cover image are the first things visitors see.</p>
+      </div>
+      <div class="section-body">
+        <div class="upload-row">
+          <div class="upload-preview" id="logoPreview">?</div>
+          <div class="upload-info">
+            <label for="logoFile" class="btn btn-ghost btn-sm" style="cursor:pointer;">Upload logo</label>
+            <input type="file" id="logoFile" accept="image/*" onchange="previewImage('logoFile','logoPreview')">
+            <p>Square image recommended. Max 5 MB.</p>
+          </div>
+        </div>
+        <div class="upload-row">
+          <div class="upload-preview cover-preview" id="coverPreview">Cover photo</div>
+          <div class="upload-info">
+            <label for="coverFile" class="btn btn-ghost btn-sm" style="cursor:pointer;">Upload cover</label>
+            <input type="file" id="coverFile" accept="image/*" onchange="previewImage('coverFile','coverPreview')">
+            <p>Landscape image recommended (1200×400). Max 10 MB.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Basic Info -->
+    <div class="section-card">
+      <div class="section-head">
+        <h2>Business Information</h2>
+        <p>Basic details about your business.</p>
+      </div>
+      <div class="section-body">
+        <div class="form-grid">
+          <div class="field">
+            <label>Business Name</label>
+            <input id="business_name" type="text" />
+          </div>
+          <div class="field">
+            <label>Slug <span class="optional">(URL)</span></label>
+            <input id="slug" type="text" readonly style="background:var(--surface2);color:var(--muted);" />
+          </div>
+          <div class="field">
+            <label>Business Type</label>
+            <select id="business_type">
+              <option value="">Select type</option>
+              <option value="store">Store</option>
+              <option value="restaurant">Restaurant</option>
+              <option value="service">Service</option>
+              <option value="education">Education</option>
+              <option value="clinic">Clinic</option>
+              <option value="agency">Agency</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Category</label>
+            <select id="category_id">
+              <option value="">Loading…</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Country</label>
+            <input id="country" type="text" />
+          </div>
+          <div class="field">
+            <label>City</label>
+            <input id="city" type="text" />
+          </div>
+        </div>
+        <div class="field" style="margin-top:16px;">
+          <label>Short Description</label>
+          <textarea id="short_description" rows="3" placeholder="One or two sentences that describe your business."></textarea>
+        </div>
+        <div class="field">
+          <label>About / Full Description <span class="optional">(optional)</span></label>
+          <textarea id="long_description" rows="5" placeholder="Tell your story, what you offer, your mission…"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact -->
+    <div class="section-card">
+      <div class="section-head">
+        <h2>Contact Information</h2>
+        <p>Help visitors reach you easily.</p>
+      </div>
+      <div class="section-body">
+        <div class="form-grid">
+          <div class="field">
+            <label>Business Email <span class="optional">(optional)</span></label>
+            <input id="business_email" type="email" />
+          </div>
+          <div class="field">
+            <label>Business Phone <span class="optional">(optional)</span></label>
+            <input id="business_phone" type="tel" />
+          </div>
+          <div class="field full">
+            <label>Website URL <span class="optional">(optional)</span></label>
+            <input id="website_url" type="url" placeholder="https://yourwebsite.com" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Social links -->
+    <div class="section-card">
+      <div class="section-head">
+        <h2>Social Media <span style="font-weight:400;color:var(--muted);">(optional)</span></h2>
+      </div>
+      <div class="section-body">
+        <div class="form-grid">
+          <div class="field">
+            <label>Instagram</label>
+            <input id="instagram_url" type="url" placeholder="https://instagram.com/yourpage" />
+          </div>
+          <div class="field">
+            <label>Facebook</label>
+            <input id="facebook_url" type="url" placeholder="https://facebook.com/yourpage" />
+          </div>
+          <div class="field">
+            <label>Twitter / X</label>
+            <input id="twitter_url" type="url" placeholder="https://x.com/yourpage" />
+          </div>
+          <div class="field">
+            <label>LinkedIn</label>
+            <input id="linkedin_url" type="url" placeholder="https://linkedin.com/company/yourpage" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="msg" id="pageMsg"></div>
+  </div>
+
+  <!-- Sticky save bar -->
+  <div class="sticky-bar">
+    <div class="sticky-bar-left" id="saveStatus">Unsaved changes</div>
+    <div style="display:flex;gap:8px;">
+      <a id="viewPageBtn" href="#" class="btn btn-ghost btn-sm">View page ↗</a>
+      <button class="btn btn-primary" onclick="saveChanges()">Save changes</button>
+    </div>
+  </div>
+
+  <script src="assets/js/auth.js"></script>
+  <script>
+    if (!requireBusiness()) throw new Error("redirect");
+    renderTopbarAuth("topbarActions");
+
+    const business = getBusiness();
+    const token = getToken();
+
+    document.getElementById("viewPageBtn").href = `business.html?slug=${business.slug}`;
+
+    // Load categories
+    async function loadCategories() {
+      try {
+        const res = await fetch(`${API}/api/categories`);
+        const data = await res.json();
+        const sel = document.getElementById("category_id");
+        if (data.success) {
+          sel.innerHTML = '<option value="">Select category</option>' +
+            data.categories.map(c => `<option value="${c.id}">${escHtml(c.name)}</option>`).join("");
+        }
+      } catch {}
+    }
+
+    // Load existing data
+    async function loadBusinessData() {
+      try {
+        const res = await fetch(`${API}/api/business/${business.slug}`, {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        const data = await res.json();
+        if (!data.success) return;
+        const b = data.business;
+
+        document.getElementById("business_name").value = b.business_name || "";
+        document.getElementById("slug").value = b.slug || "";
+        document.getElementById("business_type").value = b.business_type || "";
+        document.getElementById("country").value = b.country || "";
+        document.getElementById("city").value = b.city || "";
+        document.getElementById("short_description").value = b.short_description || "";
+        document.getElementById("long_description").value = b.long_description || "";
+        document.getElementById("business_email").value = b.business_email || "";
+        document.getElementById("business_phone").value = b.business_phone || "";
+        document.getElementById("website_url").value = b.website_url || "";
+        document.getElementById("instagram_url").value = b.instagram_url || "";
+        document.getElementById("facebook_url").value = b.facebook_url || "";
+        document.getElementById("twitter_url").value = b.twitter_url || "";
+        document.getElementById("linkedin_url").value = b.linkedin_url || "";
+
+        // Logo preview
+        const logoP = document.getElementById("logoPreview");
+        if (b.logo_url) {
+          logoP.innerHTML = `<img src="${escAttr(b.logo_url)}" alt="">`;
+        } else {
+          logoP.textContent = (b.business_name || "B").charAt(0).toUpperCase();
+        }
+        // Cover preview
+        if (b.cover_url) {
+          document.getElementById("coverPreview").innerHTML = `<img src="${escAttr(b.cover_url)}" alt="">`;
+        }
+
+        // Set category
+        await loadCategories();
+        document.getElementById("category_id").value = b.category_id || "";
+
+        document.getElementById("saveStatus").textContent = "All changes saved";
+      } catch (e) {
+        document.getElementById("pageMsg").className = "msg error";
+        document.getElementById("pageMsg").textContent = "Failed to load business data.";
+      }
+    }
+
+    function previewImage(inputId, previewId) {
+      const file = document.getElementById(inputId).files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById(previewId).innerHTML = `<img src="${e.target.result}" alt="">`;
+      };
+      reader.readAsDataURL(file);
+      document.getElementById("saveStatus").textContent = "Unsaved changes";
+    }
+
+    async function saveChanges() {
+      const btn = document.querySelector('.sticky-bar .btn-primary');
+      const msg = document.getElementById("pageMsg");
+      btn.disabled = true; btn.textContent = "Saving…";
+      msg.className = "msg";
+
+      try {
+        // Upload images first if changed
+        const logoFile = document.getElementById("logoFile").files[0];
+        const coverFile = document.getElementById("coverFile").files[0];
+        let logoUrl = null, coverUrl = null;
+
+        if (logoFile) logoUrl = await uploadFile(logoFile, "logo");
+        if (coverFile) coverUrl = await uploadFile(coverFile, "cover");
+
+        const payload = {
+          business_name: document.getElementById("business_name").value.trim(),
+          business_type: document.getElementById("business_type").value,
+          category_id: document.getElementById("category_id").value,
+          country: document.getElementById("country").value.trim(),
+          city: document.getElementById("city").value.trim(),
+          short_description: document.getElementById("short_description").value.trim(),
+          long_description: document.getElementById("long_description").value.trim(),
+          business_email: document.getElementById("business_email").value.trim(),
+          business_phone: document.getElementById("business_phone").value.trim(),
+          website_url: document.getElementById("website_url").value.trim(),
+          instagram_url: document.getElementById("instagram_url").value.trim(),
+          facebook_url: document.getElementById("facebook_url").value.trim(),
+          twitter_url: document.getElementById("twitter_url").value.trim(),
+          linkedin_url: document.getElementById("linkedin_url").value.trim(),
+        };
+        if (logoUrl) payload.logo_url = logoUrl;
+        if (coverUrl) payload.cover_url = coverUrl;
+
+        const res = await fetch(`${API}/api/business/${business.slug}`, {
+          method: "PUT",
+          headers: authHeaders(),
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          msg.className = "msg success"; msg.textContent = "Changes saved successfully!";
+          document.getElementById("saveStatus").textContent = "All changes saved";
+          // Update cached business
+          const updated = { ...business, ...payload };
+          localStorage.setItem("dn_business", JSON.stringify(updated));
+        } else {
+          msg.className = "msg error"; msg.textContent = data.error || "Failed to save.";
+        }
+      } catch (e) {
+        msg.className = "msg error"; msg.textContent = "Connection failed: " + e.message;
+      } finally {
+        btn.disabled = false; btn.textContent = "Save changes";
+        setTimeout(() => { msg.className = "msg"; }, 4000);
+      }
+    }
+
+    async function uploadFile(file, type) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("type", type);
+      const res = await fetch(`${API}/api/upload`, {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + token },
+        body: formData
+      });
+      const data = await res.json();
+      return data.url || null;
+    }
+
+    // Track changes
+    document.querySelectorAll("input, select, textarea").forEach(el => {
+      el.addEventListener("change", () => { document.getElementById("saveStatus").textContent = "Unsaved changes"; });
+    });
+
+    loadBusinessData();
+  </script>
+</body>
+</html>
