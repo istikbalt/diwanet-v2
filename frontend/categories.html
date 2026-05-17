@@ -8,99 +8,276 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/main.css">
   <style>
-    .wrap { max-width: 1100px; margin: 0 auto; padding: 48px 24px; }
-    .page-title { font-family: 'DM Serif Display', serif; font-size: 2.4rem; margin-bottom: 8px; }
-    .page-sub { color: var(--muted); margin-bottom: 40px; }
-    .main-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-    .cat-section { background: white; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
-    .cat-header { padding: 20px 24px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; text-decoration: none; color: var(--text); }
-    .cat-header:hover { background: var(--accent-light); }
-    .cat-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--accent-light); display: grid; place-items: center; font-size: 1.3rem; flex-shrink: 0; }
-    .cat-name { font-weight: 700; font-size: 1rem; }
-    .cat-count { font-size: 0.78rem; color: var(--muted2); margin-top: 2px; }
-    .sub-list { padding: 8px 0; }
-    .sub-item { display: block; padding: 10px 24px; font-size: 0.88rem; color: var(--muted); text-decoration: none; transition: all 0.2s; }
-    .sub-item:hover { background: var(--accent-light); color: var(--accent); padding-left: 30px; }
-    @media (max-width: 900px) { .main-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 600px) { .main-grid { grid-template-columns: 1fr; } .page-title { font-size: 1.8rem; } }
+    .page-header {
+      padding: 40px 0 32px;
+    }
+    .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 2rem; letter-spacing: -0.02em; margin-bottom: 8px; }
+    .page-header p { color: var(--muted); }
+
+    .search-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .search-row input {
+      flex: 1;
+      border-radius: 999px;
+      padding: 12px 20px;
+    }
+    .search-row button { border-radius: 999px; padding: 12px 24px; }
+
+    /* Category pills */
+    .cat-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+    .cat-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1.5px solid var(--border);
+      background: white;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text);
+      transition: all 0.2s;
+    }
+    .cat-pill:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+    .cat-pill.active { border-color: var(--accent); background: var(--accent); color: white; }
+
+    /* Business grid */
+    .biz-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+    .biz-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: all 0.2s;
+      text-decoration: none;
+      color: var(--text);
+      display: block;
+    }
+    .biz-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+    .biz-cover { height: 90px; background: linear-gradient(135deg, var(--accent-light), #dbeafe); }
+    .biz-cover img { width: 100%; height: 100%; object-fit: cover; }
+    .biz-body { padding: 0 16px 16px; }
+    .biz-logo-wrap { margin-top: -22px; margin-bottom: 10px; }
+    .biz-logo {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: var(--accent);
+      display: grid; place-items: center;
+      font-weight: 800; color: white; font-size: 0.95rem;
+      border: 3px solid white;
+      overflow: hidden;
+    }
+    .biz-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .biz-card h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; }
+    .biz-card p { font-size: 0.8rem; color: var(--muted); margin-bottom: 10px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .biz-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .results-count { font-size: 0.85rem; color: var(--muted); }
+
+    @media (max-width: 900px) { .biz-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .biz-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
-
-<header class="topbar">
-  <div class="topbar-inner">
-    <a href="index.html" class="brand">
-      <div class="brand-mark">D</div>
-      <span class="brand-name">Diwanet</span>
-    </a>
-    <nav class="topbar-nav">
-      <a href="feed.html">Feed</a>
-      <a href="categories.html" class="active">Categories</a>
-    </nav>
-    <div class="topbar-actions" id="authArea"></div>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="index.html" class="brand">
+        <div class="brand-mark">D</div>
+        <span class="brand-name">Diwanet</span>
+      </a>
+      <nav class="topbar-nav">
+        <a href="categories.html" class="active">Categories</a>
+        <a href="feed.html">Feed</a>
+      </nav>
+      <div class="topbar-actions" id="topbarActions"></div>
+      <button class="hamburger" onclick="document.getElementById('mobileMenu').classList.toggle('open')">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="categories.html">Categories</a>
+    <a href="feed.html">Feed</a>
+    <a href="login.html">Sign in</a>
+    <a href="signup.html" class="primary">Sign up</a>
   </div>
-</header>
 
-<div class="wrap">
-  <h1 class="page-title">All Categories</h1>
-  <p class="page-sub">Browse businesses by industry. Click any subcategory to explore businesses in that field.</p>
-  <div class="main-grid" id="catGrid"><div class="loading">Loading categories...</div></div>
-</div>
-
-<script src="assets/js/auth.js"></script>
-<script>
-renderTopbarAuth("authArea");
-
-const CAT_ICONS = {
-  'food-dining': '🍽️', 'technology-it': '💻', 'health-wellness': '🏥',
-  'home-living': '🏠', 'education': '📚', 'professional-services': '💼',
-  'retail': '🛍️', 'automotive': '🚗', 'beauty-personal-care': '💇',
-  'travel-hospitality': '✈️', 'arts-entertainment': '🎭', 'government-nonprofit': '⚖️'
-};
-
-async function load() {
-  try {
-    const [catRes, subRes] = await Promise.all([
-      fetch(`${API}/api/categories`),
-      fetch(`${API}/api/categories/subcategories/all`)
-    ]);
-    const catData = await catRes.json();
-
-    let subsByCategory = {};
-    try {
-      const subData = await subRes.json();
-      if (subData.success) {
-        subData.subcategories.forEach(s => {
-          if (!subsByCategory[s.category_id]) subsByCategory[s.category_id] = [];
-          subsByCategory[s.category_id].push(s);
-        });
-      }
-    } catch {}
-
-    if (!catData.success) { document.getElementById("catGrid").innerHTML = '<div class="loading">Could not load categories.</div>'; return; }
-
-    document.getElementById("catGrid").innerHTML = catData.categories.map(c => `
-      <div class="cat-section">
-        <a href="feed.html?category=${c.slug}" class="cat-header">
-          <div class="cat-icon">${CAT_ICONS[c.slug] || "🏢"}</div>
-          <div>
-            <div class="cat-name">${escHtml(c.name)}</div>
-            <div class="cat-count">${(subsByCategory[c.id] || []).length} subcategories</div>
-          </div>
-        </a>
-        <div class="sub-list">
-          ${(subsByCategory[c.id] || []).map(s => `
-            <a href="feed.html?category=${c.slug}&sub=${s.slug}" class="sub-item">${escHtml(s.name)}</a>
-          `).join("")}
-        </div>
+  <main>
+    <div class="container">
+      <div class="page-header">
+        <h1>Explore Businesses</h1>
+        <p>Browse by category or search by name, city, or keyword.</p>
       </div>
-    `).join("");
-  } catch (e) {
-    document.getElementById("catGrid").innerHTML = `<div class="loading">Connection error: ${escHtml(e.message)}</div>`;
-  }
-}
 
-load();
-</script>
+      <!-- Search -->
+      <div class="search-row">
+        <input id="searchInput" type="text" placeholder="Search businesses, keywords, cities…" onkeydown="if(event.key==='Enter')doSearch()" />
+        <button class="btn btn-primary" onclick="doSearch()">Search</button>
+      </div>
+
+      <!-- Category pills -->
+      <div class="cat-pills" id="catPills">
+        <div class="cat-pill active" onclick="filterByCategory(null, this)" data-id="">All</div>
+      </div>
+
+      <!-- Results -->
+      <div class="results-header">
+        <div class="results-count" id="resultsCount"></div>
+      </div>
+
+      <div id="bizGrid" class="biz-grid">
+        <div class="loading" style="grid-column:1/-1;">Loading businesses…</div>
+      </div>
+    </div>
+  </main>
+
+  <script src="assets/js/auth.js"></script>
+  <script>
+    renderTopbarAuth("topbarActions");
+
+    const params = new URLSearchParams(window.location.search);
+    let currentQuery = params.get("q") || "";
+    let currentCatId = null;
+
+    if (currentQuery) document.getElementById("searchInput").value = currentQuery;
+
+    const CATEGORY_ICONS = {
+      "restaurant": "🍽️", "food": "🍽️", "retail": "🛍️", "store": "🛍️",
+      "education": "🎓", "health": "🏥", "clinic": "🏥", "service": "⚙️",
+      "beauty": "💅", "real estate": "🏠", "agency": "💼", "tech": "💻",
+      "fitness": "💪", "automotive": "🚗"
+    };
+
+    function getIcon(name) {
+      const lower = (name || "").toLowerCase();
+      for (const [k, v] of Object.entries(CATEGORY_ICONS)) {
+        if (lower.includes(k)) return v;
+      }
+      return "🏢";
+    }
+
+    // Load categories
+    async function loadCategories() {
+      try {
+        const res = await fetch(`${API}/api/categories`);
+        const data = await res.json();
+        if (!data.success) return;
+        const pills = document.getElementById("catPills");
+        data.categories.forEach(c => {
+          const pill = document.createElement("div");
+          pill.className = "cat-pill";
+          pill.dataset.id = c.id;
+          pill.innerHTML = `${getIcon(c.name)} ${escHtml(c.name)}`;
+          pill.onclick = () => filterByCategory(c.id, pill);
+          pills.appendChild(pill);
+        });
+
+        // Auto-select from URL param
+        const catParam = params.get("cat");
+        if (catParam) {
+          const match = data.categories.find(c => c.slug === catParam || c.name.toLowerCase().includes(catParam));
+          if (match) {
+            const targetPill = pills.querySelector(`[data-id="${match.id}"]`);
+            if (targetPill) filterByCategory(match.id, targetPill);
+            return;
+          }
+        }
+        loadBusinesses();
+      } catch {
+        loadBusinesses();
+      }
+    }
+
+    function filterByCategory(id, el) {
+      currentCatId = id;
+      document.querySelectorAll(".cat-pill").forEach(p => p.classList.remove("active"));
+      el.classList.add("active");
+      loadBusinesses();
+    }
+
+    function doSearch() {
+      currentQuery = document.getElementById("searchInput").value.trim();
+      loadBusinesses();
+    }
+
+    async function loadBusinesses() {
+      const grid = document.getElementById("bizGrid");
+      grid.innerHTML = '<div class="loading" style="grid-column:1/-1;">Loading…</div>';
+      document.getElementById("resultsCount").textContent = "";
+
+      try {
+        let url = `${API}/api/search?limit=30`;
+        if (currentQuery) url += `&q=${encodeURIComponent(currentQuery)}`;
+        if (currentCatId) url += `&category_id=${currentCatId}`;
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!data.success || !data.businesses || !data.businesses.length) {
+          grid.innerHTML = `
+            <div class="empty-state" style="grid-column:1/-1;">
+              <h3>No businesses found</h3>
+              <p>Try a different search term or category.</p>
+            </div>`;
+          document.getElementById("resultsCount").textContent = "0 results";
+          return;
+        }
+
+        document.getElementById("resultsCount").textContent = `${data.businesses.length} business${data.businesses.length !== 1 ? "es" : ""} found`;
+        grid.innerHTML = data.businesses.map(renderBizCard).join("");
+      } catch (e) {
+        grid.innerHTML = `<div class="msg error" style="grid-column:1/-1;">Failed to load businesses: ${escHtml(e.message)}</div>`;
+      }
+    }
+
+    function renderBizCard(b) {
+      const initial = (b.business_name || "B").charAt(0).toUpperCase();
+      const logoHtml = b.logo_url
+        ? `<img src="${escAttr(b.logo_url)}" alt="">`
+        : initial;
+      const coverStyle = b.cover_url
+        ? `style="background:none;"`
+        : "";
+      const coverImg = b.cover_url ? `<img src="${escAttr(b.cover_url)}" alt="">` : "";
+
+      return `
+        <a href="business.html?slug=${escAttr(b.slug)}" class="biz-card">
+          <div class="biz-cover" ${coverStyle}>${coverImg}</div>
+          <div class="biz-body">
+            <div class="biz-logo-wrap">
+              <div class="biz-logo">${logoHtml}</div>
+            </div>
+            <h3>${escHtml(b.business_name)}</h3>
+            <p>${escHtml(b.short_description || "")}</p>
+            <div class="biz-meta">
+              ${b.category_name ? `<span class="tag">${escHtml(b.category_name)}</span>` : ""}
+              ${b.city ? `<span class="tag grey">📍 ${escHtml(b.city)}</span>` : ""}
+            </div>
+          </div>
+        </a>`;
+    }
+
+    loadCategories();
+  </script>
 </body>
 </html>
