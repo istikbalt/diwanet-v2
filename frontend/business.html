@@ -324,7 +324,7 @@ async function loadTagged() {
     container.innerHTML = data.tagged_posts.map(t => `
       <div class="post">
         <div class="post-header">
-          <div class="post-avatar">${t.business_name.charAt(0)}</div>
+          <div class="avatar avatar-md">${t.logo_url ? `<img src="${escAttr(t.logo_url)}" alt="">` : t.business_name.charAt(0)}</div>
           <div>
             <div class="post-author"><a href="business.html?slug=${t.business_slug}" style="color:var(--text);text-decoration:none;">${escHtml(t.business_name)}</a> tagged this page</div>
             <div class="post-time">${timeAgo(t.created_at)}</div>
@@ -367,7 +367,7 @@ function renderPost(p) {
 
   return `<div class="post" id="post-${p.id}">
     <div class="post-header">
-      <div class="post-avatar">${(p.business_name || "B").charAt(0)}</div>
+      <div class="avatar avatar-md">${(p.business_name || "B").charAt(0)}</div>
       <div><div class="post-author">${escHtml(p.business_name)}</div><div class="post-time">${timeAgo(p.created_at)}</div></div>
     </div>
     <div class="post-body">

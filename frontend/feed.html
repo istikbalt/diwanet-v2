@@ -307,7 +307,7 @@ function renderPost(p) {
 
   return `<article class="post" id="post-${p.id}">
     <div class="post-header">
-      <a href="${authorLink}" class="${avatarClass}">${authorName.charAt(0)}</a>
+      <a href="${authorLink}" class="avatar avatar-md ${isBiz ? '' : 'individual'}">${p.logo_url ? `<img src="${p.logo_url}" alt="">` : authorName.charAt(0)}</a>
       <div class="post-meta">
         <div class="post-author"><a href="${authorLink}">${authorName}</a></div>
         <div class="post-time">${timeAgo(p.created_at)}${isShare ? " · shared a post" : ""}</div>
