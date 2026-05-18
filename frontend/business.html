@@ -350,19 +350,20 @@ function renderPost(p) {
        ${ownerActions}`
     : `<span class="action-btn" style="cursor:default;">🤍 ${p.like_count}</span><div class="action-sep"></div><span class="action-btn" style="cursor:default;">💬 ${p.comment_count}</span><div class="action-sep"></div><a href="login.html" class="action-btn" style="text-decoration:none;color:var(--accent);font-weight:600;">Sign in to interact</a>`;
 
-  const mediaHtml = (() => {
-    const imgs = p.images ? (typeof p.images === "string" ? JSON.parse(p.images) : p.images) : null;
-    if (imgs && imgs.length > 1) {
-      const grid = imgs.length === 2 ? "grid-template-columns:1fr 1fr;" : "grid-template-columns:1fr 1fr;";
-      const urlsJson = JSON.stringify(imgs).replace(/"/g, "&quot;");
-      return `<div style="display:grid;${grid}gap:4px;margin-top:10px;border-radius:10px;overflow:hidden;">${imgs.map((url, i) => `<img src="${escHtml(url)}" style="width:100%;height:200px;object-fit:cover;cursor:pointer;" loading="lazy" onclick="openLightbox(JSON.parse(this.dataset.urls),${i})" data-urls="${urlsJson}" />`).join("")}</div>`;
-    } else if (p.image_url) {
-      return p.image_url.match(/\.(mp4|webm|mov|avi)$/i)
-        ? `<video class="post-image" src="${escHtml(p.image_url)}" controls style="width:100%;border-radius:10px;margin-top:10px;" onclick="openLightbox(['${escHtml(p.image_url)}'],0)"></video>`
-        : `<img class="post-image" src="${escHtml(p.image_url)}" loading="lazy" onclick="openLightbox(['${escHtml(p.image_url)}'],0)" />`;
-    }
-    return "";
-  })();
+      const mediaHtml = (() => {
+      const imgs = p.images ? (typeof p.images === "string" ? JSON.parse(p.images) : p.images) : null;
+      if (imgs && imgs.length > 1) {
+        const grid = imgs.length === 2 ? "grid-template-columns:1fr 1fr;" : "grid-template-columns:1fr 1fr;";
+        const urlsJson = JSON.stringify(imgs).replace(/"/g, "&quot;");
+        return `<div style="display:grid;${grid}gap:4px;margin-top:10px;border-radius:10px;overflow:hidden;">${imgs.map((url, i) => `<img src="${escHtml(url)}" style="width:100%;height:200px;object-fit:cover;cursor:pointer;" loading="lazy" onclick="openLightbox(JSON.parse(this.dataset.urls),${i})" data-urls="${urlsJson}" />`).join("")}</div>`;
+      } else if (p.image_url || (p.post_type === "share" && p.original_post?.image_url)) {
+        const imgUrl = p.image_url || p.original_post.image_url;
+        return imgUrl.match(/\.(mp4|webm|mov|avi)$/i)
+          ? `<video class="post-image" src="${escHtml(imgUrl)}" controls style="width:100%;border-radius:10px;margin-top:10px;"></video>`
+          : `<img class="post-image" src="${escHtml(imgUrl)}" loading="lazy" onclick="openLightbox(['${escHtml(imgUrl)}'],0)" />`;
+      }
+      return "";
+    })(); 
 
   return `<div class="post" id="post-${p.id}">
     <div class="post-header">
