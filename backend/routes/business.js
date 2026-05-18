@@ -267,7 +267,7 @@ router.get("/:slug/posts", async (req, res) => {
        ${isLikedExpr} AS is_liked
        FROM posts p
        LEFT JOIN businesses b ON p.author_business_id = b.id
-       WHERE p.author_business_id = ${businessId} AND p.post_type = 'post' AND p.status = 'published'
+       WHERE p.author_business_id = ${businessId} AND p.status = 'published'
        ORDER BY p.created_at DESC LIMIT ${limit} OFFSET ${offset}`
     );
 
@@ -281,9 +281,22 @@ router.get("/:slug/posts", async (req, res) => {
       [businessId]
     );
 
+    const sharedIds = posts.filter(p => p.shared_post_id).map(p => p.shared_post_id);
+    let sharedPosts = {};
+    if (sharedIds.length > 0) {
+      const placeholders = sharedIds.map(() => "?").join(",");
+      const [originals] = await pool.execute(
+        `SELECT p.id, p.content, p.image_url, p.images, b.business_name, b.slug AS business_slug
+         FROM posts p LEFT JOIN businesses b ON p.author_business_id = b.id
+         WHERE p.id IN (${placeholders})`,
+        sharedIds
+      );
+      originals.forEach(o => { sharedPosts[o.id] = o; });
+    }
+
     return res.json({
       success: true,
-      posts: posts.map(p => ({ ...p, is_liked: Number(p.is_liked) > 0 })),
+      posts: posts.map(p => ({ ...p, is_liked: Number(p.is_liked) > 0, original_post: p.shared_post_id ? sharedPosts[p.shared_post_id] || null : null })),
       tagged_posts: taggedPosts,
       page,
       has_more: posts.length === limit

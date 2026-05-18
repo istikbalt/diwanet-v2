@@ -70,7 +70,7 @@
     .comment-text { font-size: 0.87rem; line-height: 1.5; }
     .comment-time { font-size: 0.74rem; color: var(--muted2); margin-top: 4px; }
     .comment-input-row { display: flex; gap: 8px; }
-    .comment-input { flex: 1; background: white; border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 12px; font-size: 0.87rem; color: var(--text); font-family: 'DM Sans', sans-serif; resize: none; }
+    .comment-input { flex: 1; background: white; border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 12px; font-size: 0.87rem; color: var(--text); font-family: 'DM Sans', sans-serif; resize: none; min-height: 40px; max-height: 200px; overflow-y: auto; }
     .comment-input:focus { outline: none; border-color: var(--accent); }
     .comment-send { padding: 9px 16px; border-radius: 10px; border: none; background: var(--accent); color: white; font-size: 0.84rem; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 
@@ -289,7 +289,8 @@ function renderPost(p) {
   const sharedBlock = isShare && p.original_post
     ? `<div class="shared-post"><div class="shared-from">Originally posted by <a href="business.html?slug=${p.original_post.business_slug}">${escHtml(p.original_post.business_name)}</a></div><div class="shared-content">${escHtml(p.original_post.content).substring(0, 200)}${p.original_post.content.length > 200 ? "…" : ""}</div></div>`
     : "";
-  const imageBlock = p.image_url ? `<img class="post-image" src="${escHtml(p.image_url)}" alt="" loading="lazy" />` : "";
+  const imgUrl = p.image_url || (p.post_type === "share" && p.original_post?.image_url ? p.original_post.image_url : null);
+  const imageBlock = imgUrl ? `<img class="post-image" src="${escHtml(imgUrl)}" alt="" loading="lazy" />` : "";
   const user = getUser(), canInteract = !!user;
   const likedClass = p.is_liked ? "action-btn liked" : "action-btn";
   const likedIcon = p.is_liked ? "❤️" : "🤍";
@@ -322,7 +323,7 @@ function renderPost(p) {
     <div class="comments-box" id="comments-${p.id}">
       <div class="comment-list" id="comment-list-${p.id}"></div>
       ${canInteract
-        ? `<div class="comment-input-row"><textarea class="comment-input" id="comment-input-${p.id}" placeholder="Write a comment..." rows="1"></textarea><button class="comment-send" onclick="submitComment(${p.id})">Send</button></div>`
+        ? `<div class="comment-input-row"><textarea class="comment-input" id="comment-input-${p.id}" placeholder="Write a comment..." rows="1" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea><button class="comment-send" onclick="submitComment(${p.id})">Send</button></div>`
         : `<a href="login.html" style="font-size:0.84rem;color:var(--accent);text-decoration:none;font-weight:600;">Sign in to comment</a>`}
     </div>
   </article>`;
@@ -353,6 +354,7 @@ async function toggleComments(postId) {
 async function loadComments(postId) {
   const list = document.getElementById(`comment-list-${postId}`);
   list.innerHTML = '<div style="color:var(--muted2);font-size:0.84rem;">Loading...</div>';
+  const user = getUser(), biz = getBusiness();
   try {
     const res = await fetch(`${API}/api/posts/${postId}/comments`);
     const data = await res.json();
@@ -361,16 +363,101 @@ async function loadComments(postId) {
       const isBiz = c.commenter_type === "business";
       const name = isBiz ? escHtml(c.business_name) : escHtml(`${c.first_name} ${c.last_name}`);
       const link = isBiz ? `business.html?slug=${c.business_slug}` : `profile.html?id=${c.commenter_user_id}`;
-      return `<div class="comment">
+      const isMyComment = biz ? c.commenter_business_id === biz.id : (user && c.commenter_user_id === user.id);
+      const menuBtn = isMyComment ? `<div class="c-menu-wrap" style="position:relative;margin-left:auto;">
+        <button class="c-menu-btn" onclick="toggleCommentMenu(this)" style="background:none;border:none;cursor:pointer;color:var(--muted2);font-size:1.1rem;padding:2px 6px;border-radius:6px;line-height:1;">···</button>
+        <div class="c-menu-dropdown" style="display:none;position:absolute;right:0;top:24px;background:white;border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-lg);z-index:10;min-width:120px;overflow:hidden;">
+          <button onclick="editComment(${c.id},this)" style="display:block;width:100%;text-align:left;padding:10px 14px;border:none;background:none;cursor:pointer;font-size:0.88rem;font-family:'DM Sans',sans-serif;color:var(--text);">✏️ Edit</button>
+          <button onclick="deleteComment(${postId},${c.id},this)" style="display:block;width:100%;text-align:left;padding:10px 14px;border:none;background:none;cursor:pointer;font-size:0.88rem;font-family:'DM Sans',sans-serif;color:var(--danger);">🗑️ Delete</button>
+        </div>
+      </div>` : "";
+      return `<div class="comment" id="comment-item-${c.id}">
         <div class="comment-avatar ${isBiz ? "" : "individual"}">${name.charAt(0)}</div>
-        <div class="comment-bubble">
-          <div class="comment-name"><a href="${link}">${name}</a></div>
-          <div class="comment-text">${escHtml(c.content)}</div>
+        <div class="comment-bubble" style="flex:1;">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+            <div>
+              <div class="comment-name"><a href="${link}">${name}</a></div>
+              <div class="comment-text" id="comment-text-${c.id}">${escHtml(c.content)}</div>
+            </div>
+            ${menuBtn}
+          </div>
           <div class="comment-time">${timeAgo(c.created_at)}</div>
         </div>
       </div>`;
     }).join("");
   } catch { list.innerHTML = ""; }
+}
+
+function toggleCommentMenu(btn) {
+  const dropdown = btn.nextElementSibling;
+  const isOpen = dropdown.style.display === "block";
+  document.querySelectorAll(".c-menu-dropdown").forEach(d => d.style.display = "none");
+  dropdown.style.display = isOpen ? "none" : "block";
+}
+
+document.addEventListener("click", e => {
+  if (!e.target.classList.contains("c-menu-btn")) {
+    document.querySelectorAll(".c-menu-dropdown").forEach(d => d.style.display = "none");
+  }
+});
+
+function editComment(commentId, btn) {
+  btn.closest(".c-menu-dropdown").style.display = "none";
+  const textEl = document.getElementById("comment-text-" + commentId);
+  const original = textEl.textContent;
+  textEl.innerHTML = `
+    <textarea style="width:100%;border:1.5px solid var(--accent);border-radius:8px;padding:8px 10px;font-size:0.87rem;font-family:'DM Sans',sans-serif;resize:none;margin-top:4px;" rows="2">${original}</textarea>
+    <div style="display:flex;gap:6px;margin-top:6px;">
+      <button onclick="saveEditComment(${commentId},this)" style="padding:5px 14px;border-radius:999px;background:var(--accent);color:white;border:none;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Save</button>
+      <button onclick="cancelEditComment(${commentId},'${original.replace(/'/g,"\'")}',this)" style="padding:5px 14px;border-radius:999px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);font-size:0.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
+    </div>`;
+  textEl.querySelector("textarea").focus();
+}
+
+function cancelEditComment(commentId, original, btn) {
+  const textEl = document.getElementById("comment-text-" + commentId);
+  textEl.textContent = original;
+}
+
+async function saveEditComment(commentId, btn) {
+  const textEl = document.getElementById("comment-text-" + commentId);
+  const newContent = textEl.querySelector("textarea").value.trim();
+  if (!newContent) return;
+  btn.textContent = "Saving..."; btn.disabled = true;
+  try {
+    const res = await fetch(`${API}/api/posts/0/comments/${commentId}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify({ content: newContent }) });
+    const data = await res.json();
+    if (data.success) { textEl.textContent = newContent; showToast("Comment updated."); }
+    else { showToast(data.error || "Failed."); cancelEditComment(commentId, textEl.querySelector("textarea").value, btn); }
+  } catch { showToast("Connection error."); }
+}
+
+async function deleteComment(postId, commentId, btn) {
+  btn.closest(".c-menu-dropdown").style.display = "none";
+  const modal = document.getElementById("deleteCommentModal");
+  modal.style.display = "flex";
+  modal.dataset.postId = postId;
+  modal.dataset.commentId = commentId;
+}
+
+async function confirmDeleteComment() {
+  const modal = document.getElementById("deleteCommentModal");
+  const postId = modal.dataset.postId;
+  const commentId = modal.dataset.commentId;
+  const btn = modal.querySelector(".modal-delete-btn");
+  btn.textContent = "Deleting..."; btn.disabled = true;
+  try {
+    const res = await fetch(`${API}/api/posts/${postId}/comments/${commentId}`, { method: "DELETE", headers: authHeaders() });
+    const data = await res.json();
+    modal.style.display = "none";
+    if (data.success) { showToast("Comment deleted."); await loadComments(postId); }
+    else showToast(data.error || "Failed.");
+  } catch { showToast("Connection error."); }
+  btn.textContent = "Delete"; btn.disabled = false;
+}
+
+function closeDeleteCommentModal() {
+  document.getElementById("deleteCommentModal").style.display = "none";
 }
 
 async function submitComment(postId) {
@@ -432,5 +519,15 @@ async function confirmShare() {
 
 (async () => { setupUI(); await loadFeed(true); })();
 </script>
+<div id="deleteCommentModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+  <div style="background:white;border-radius:16px;padding:28px;width:90%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;">
+    <h3 style="font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:10px;">Delete Comment?</h3>
+    <p style="color:var(--muted);font-size:0.9rem;margin-bottom:24px;">Are you sure you want to delete this comment? This cannot be undone.</p>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="closeDeleteCommentModal()" style="padding:10px 24px;border-radius:999px;border:1.5px solid var(--border);background:white;color:var(--text);font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">No, keep it</button>
+      <button class="modal-delete-btn" onclick="confirmDeleteComment()" style="padding:10px 24px;border-radius:999px;border:none;background:var(--danger);color:white;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Delete</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

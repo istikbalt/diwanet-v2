@@ -184,7 +184,7 @@ router.get("/:id/comments", async (req, res) => {
   try {
     const postId = Number(req.params.id);
     const [comments] = await pool.execute(
-      `SELECT c.id, c.commenter_type, c.content, c.created_at,
+      `SELECT c.id, c.commenter_type, c.content, c.created_at, c.commenter_business_id,
        b.business_name, b.slug AS business_slug, b.logo_url,
        u.first_name, u.last_name, u.avatar_url, u.id AS commenter_user_id
        FROM comments c
@@ -261,6 +261,52 @@ router.post("/:id/share", async (req, res) => {
       [authorType, bizId, userId, postId, content || ""]
     );
     return res.json({ success: true, share_id: result.insertId });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// DELETE /api/posts/:postId/comments/:commentId
+router.delete("/:postId/comments/:commentId", async (req, res) => {
+  const pool = req.app.locals.pool;
+  const session = await requireAuth(pool, req, res);
+  if (!session) return;
+  try {
+    const [comments] = await pool.execute(
+      "SELECT id, commenter_type, commenter_business_id, commenter_user_id FROM comments WHERE id = ? LIMIT 1",
+      [req.params.commentId]
+    );
+    if (!comments.length) return res.status(404).json({ success: false, error: "Comment not found." });
+    const c = comments[0];
+    const isOwner = (session.user_type === "business" && c.commenter_business_id === session.business_id) ||
+                    (session.user_type === "individual" && c.commenter_user_id === session.user_id);
+    if (!isOwner) return res.status(403).json({ success: false, error: "Not authorized." });
+    await pool.execute("DELETE FROM comments WHERE id = ?", [req.params.commentId]);
+    return res.json({ success: true });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// PUT /api/posts/:postId/comments/:commentId
+router.put("/:postId/comments/:commentId", async (req, res) => {
+  const pool = req.app.locals.pool;
+  const session = await requireAuth(pool, req, res);
+  if (!session) return;
+  const { content } = req.body;
+  if (!content || !content.trim()) return res.status(400).json({ success: false, error: "Content required." });
+  try {
+    const [comments] = await pool.execute(
+      "SELECT id, commenter_business_id, commenter_user_id FROM comments WHERE id = ? LIMIT 1",
+      [req.params.commentId]
+    );
+    if (!comments.length) return res.status(404).json({ success: false, error: "Comment not found." });
+    const c = comments[0];
+    const isOwner = (session.user_type === "business" && c.commenter_business_id === session.business_id) ||
+                    (session.user_type === "individual" && c.commenter_user_id === session.user_id);
+    if (!isOwner) return res.status(403).json({ success: false, error: "Not authorized." });
+    await pool.execute("UPDATE comments SET content = ? WHERE id = ?", [content.trim(), req.params.commentId]);
+    return res.json({ success: true });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
   }

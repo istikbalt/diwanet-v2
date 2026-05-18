@@ -28,7 +28,8 @@ router.get("/", async (req, res) => {
     if (category) { query += " AND c.slug = ?"; params.push(category); }
     if (city) { query += " AND b.city LIKE ?"; params.push(`%${city}%`); }
 
-    query += " ORDER BY follower_count DESC LIMIT 30";
+    const limitVal = Math.min(parseInt(req.query.limit) || 30, 30);
+    query += ` ORDER BY follower_count DESC LIMIT ${limitVal}`;
 
     const [businesses] = await pool.execute(query, params);
     return res.json({ success: true, businesses });
