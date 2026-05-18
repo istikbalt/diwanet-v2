@@ -471,17 +471,49 @@
   </footer>
 
   <script src="assets/js/auth.js"></script>
-  <script>
-    renderTopbarAuth("topbarActions");
+<script>
+  renderTopbarAuth("topbarActions");
 
-    function toggleMenu() {
-      document.getElementById("mobileMenu").classList.toggle("open");
-    }
+  function toggleMenu() {
+    document.getElementById("mobileMenu").classList.toggle("open");
+  }
 
-    function doSearch() {
-      const q = document.getElementById("heroSearch").value.trim();
-      if (q) window.location.href = `categories.html?q=${encodeURIComponent(q)}`;
-    }
-  </script>
+  function doSearch() {
+    const q = document.getElementById("heroSearch").value.trim();
+    if (q) window.location.href = `categories.html?q=${encodeURIComponent(q)}`;
+  }
+
+  async function loadFeaturedBusinesses() {
+    try {
+      const res = await fetch(`${API}/api/search?limit=3`);
+      const data = await res.json();
+      if (!data.success || !data.businesses.length) return;
+      document.getElementById("bizGrid").innerHTML = data.businesses.map(b => {
+        const initial = (b.business_name || "B").charAt(0).toUpperCase();
+        const logoHtml = b.logo_url
+          ? `<img src="${escAttr(b.logo_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">`
+          : initial;
+        const coverStyle = b.cover_url
+          ? `style="background-image:url(${escAttr(b.cover_url)});background-size:cover;background-position:center;"`
+          : "";
+        return `
+          <a href="business.html?slug=${escAttr(b.slug)}" class="biz-card" style="text-decoration:none;color:inherit;display:block;">
+            <div class="biz-cover" ${coverStyle}></div>
+            <div class="biz-body">
+              <div class="biz-logo-wrap"><div class="biz-logo">${logoHtml}</div></div>
+              <h3>${escHtml(b.business_name)}</h3>
+              <p>${escHtml(b.short_description || "")}</p>
+              <div class="biz-meta">
+                ${b.category_name ? `<span class="tag">${escHtml(b.category_name)}</span>` : ""}
+                ${b.city ? `<span class="tag grey">${escHtml(b.city)}</span>` : ""}
+              </div>
+            </div>
+          </a>`;
+      }).join("");
+    } catch {}
+  }
+
+  loadFeaturedBusinesses();
+</script>
 </body>
 </html>
