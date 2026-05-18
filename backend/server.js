@@ -33,6 +33,7 @@ app.locals.pool = pool;
 // Routes
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/categories", require("./routes/categories"));
+app.use("/api/auth", require("./routes/password-reset"));
 app.use("/api/subcategories", require("./routes/categories")); // subcategories aynı dosyada
 app.use("/api/business", require("./routes/business"));
 app.use("/api/posts", require("./routes/posts"));
