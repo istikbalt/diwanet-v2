@@ -90,10 +90,11 @@ router.get("/:slug", async (req, res) => {
        b.business_email, b.business_phone, b.country, b.city,
        b.logo_url, b.cover_url, b.website,
        b.instagram_url, b.facebook_url, b.linkedin_url, b.twitter_url, b.youtube_url, b.tiktok_url,
-       b.created_at, c.name AS category_name,
+       b.created_at, c.name AS category_name, s.name AS subcategory_name,
        (SELECT COUNT(*) FROM follows WHERE following_business_id = b.id) AS follower_count
        FROM businesses b
        LEFT JOIN categories c ON b.category_id = c.id
+       LEFT JOIN subcategories s ON b.subcategory_id = s.id
        WHERE b.slug = ? LIMIT 1`,
       [slug]
     );
@@ -136,7 +137,7 @@ router.put("/:slug", async (req, res) => {
   const { slug } = req.params;
   const {
     business_name, short_description, business_email, business_phone,
-    city, country, logo_url, cover_url, website,
+    city, country, logo_url, cover_url, website, category_id, subcategory_id,
     instagram_url, facebook_url, linkedin_url, twitter_url, youtube_url, tiktok_url
   } = req.body;
 
@@ -161,6 +162,8 @@ router.put("/:slug", async (req, res) => {
     if (logo_url !== undefined) { updates.push("logo_url = ?"); params.push(logo_url || null); }
     if (cover_url !== undefined) { updates.push("cover_url = ?"); params.push(cover_url || null); }
     if (website !== undefined) { updates.push("website = ?"); params.push(website || null); }
+    if (category_id !== undefined && category_id !== "") { updates.push("category_id = ?"); params.push(Number(category_id)); }
+    if (subcategory_id !== undefined && subcategory_id !== "") { updates.push("subcategory_id = ?"); params.push(Number(subcategory_id)); }
     if (instagram_url !== undefined) { updates.push("instagram_url = ?"); params.push(instagram_url || null); }
     if (facebook_url !== undefined) { updates.push("facebook_url = ?"); params.push(facebook_url || null); }
     if (linkedin_url !== undefined) { updates.push("linkedin_url = ?"); params.push(linkedin_url || null); }
@@ -173,7 +176,7 @@ router.put("/:slug", async (req, res) => {
     params.push(biz.id);
     await pool.execute(`UPDATE businesses SET ${updates.join(", ")} WHERE id = ?`, params);
     const [updated] = await pool.execute(
-      "SELECT b.*, c.name AS category_name FROM businesses b LEFT JOIN categories c ON b.category_id = c.id WHERE b.id = ?",
+      "SELECT b.*, c.name AS category_name, s.name AS subcategory_name FROM businesses b LEFT JOIN categories c ON b.category_id = c.id LEFT JOIN subcategories s ON b.subcategory_id = s.id WHERE b.id = ?",
       [biz.id]
     );
     return res.json({ success: true, business: updated[0] });

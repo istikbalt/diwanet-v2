@@ -274,7 +274,7 @@ function renderPage() {
           </div>
           <div class="biz-name">${escHtml(b.business_name)}</div>
           <div style="font-size:0.88rem;color:var(--muted);margin-bottom:6px;">
-            <span style="font-weight:600;color:var(--accent);">${escHtml(b.category_name || "")}</span>
+            <span style="font-weight:600;color:var(--accent);">${escHtml(b.category_name || "")}</span>${b.subcategory_name ? ` · <span style="color:var(--muted);">${escHtml(b.subcategory_name)}</span>` : ""}
             ${b.business_type ? ` · ${escHtml(b.business_type)}` : ""}
             ${b.city ? ` · 📍 ${escHtml(b.city)}, ${escHtml(b.country)}` : ""}
           </div>
@@ -316,7 +316,7 @@ function renderPage() {
         ${b.business_email ? `<div class="info-row"><div class="info-lbl">Email</div><div class="info-val">${escHtml(b.business_email)}</div></div>` : ""}
         ${b.business_phone ? `<div class="info-row"><div class="info-lbl">Phone</div><div class="info-val">${escHtml(b.business_phone)}</div></div>` : ""}
         <div class="info-row"><div class="info-lbl">Location</div><div class="info-val">${escHtml(b.city ? b.city + ", " + b.country : b.country)}</div></div>
-        <div class="info-row"><div class="info-lbl">Category</div><div class="info-val">${escHtml(b.category_name || "-")}</div></div>
+        <div class="info-row"><div class="info-lbl">Category</div><div class="info-val">${escHtml(b.category_name || "-")}${b.subcategory_name ? ` · ${escHtml(b.subcategory_name)}` : ""}</div></div>
         <div class="info-row"><div class="info-lbl">Type</div><div class="info-val" style="text-transform:capitalize;">${escHtml(b.business_type || "-")}</div></div>
         ${b.website ? `<div class="info-row"><div class="info-lbl">Website</div><div class="info-val"><a href="${escAttr(b.website)}" target="_blank" style="color:var(--accent);text-decoration:none;">${escHtml(b.website.replace(/https?:\/\//, ""))}</a></div></div>` : ""}
         ${(b.instagram_url || b.facebook_url || b.linkedin_url || b.twitter_url || b.youtube_url || b.tiktok_url) ? `

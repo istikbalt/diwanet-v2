@@ -176,6 +176,18 @@
       <div id="descHint" style="font-size:0.82rem;margin-top:5px;color:#e53e3e;display:none;">⚠️ Please write at least 20 characters to describe your business.</div>
       <div id="descCount" style="font-size:0.82rem;margin-top:4px;color:#718096;text-align:right;">0 characters</div>
     </div>
+    <div class="field">
+      <label>Category</label>
+      <select id="category_id" onchange="loadSubcategories(this.value)">
+        <option value="">Select a category</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Subcategory</label>
+      <select id="subcategory_id">
+        <option value="">Select a subcategory</option>
+      </select>
+    </div>
     <div class="grid2">
       <div class="field">
         <label>City</label>
@@ -249,6 +261,25 @@ function showMsg(text, type) {
   msg.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
+async function loadSubcategories(categoryId, selectedId = null) {
+  const select = document.getElementById("subcategory_id");
+  select.innerHTML = '<option value="">Select a subcategory</option>';
+  if (!categoryId) return;
+  try {
+    const res = await fetch(`${API}/api/categories/subcategories/${categoryId}`, { credentials: "include" });
+    const data = await res.json();
+    if (data.success) {
+      data.subcategories.forEach(sub => {
+        const opt = document.createElement("option");
+        opt.value = sub.id;
+        opt.textContent = sub.name;
+        if (selectedId && sub.id === selectedId) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+  } catch(e) { console.error("Subcategory load error", e); }
+}
+
 function updateCharCount(el) {
   const len = el.value.trim().length;
   const hint = document.getElementById("descHint");
@@ -280,6 +311,25 @@ async function loadBusiness() {
     const data = await res.json();
     if (!data.success) return;
     const b = data.business;
+    // Kategorileri yükle
+    try {
+      const catRes = await fetch(`${API}/api/categories`, { credentials: "include" });
+      const catData = await catRes.json();
+      const catSelect = document.getElementById("category_id");
+      if (catData.success) {
+        catData.categories.forEach(cat => {
+          const opt = document.createElement("option");
+          opt.value = cat.id;
+          opt.textContent = cat.name;
+          if (cat.id === b.category_id) opt.selected = true;
+          catSelect.appendChild(opt);
+        });
+      }
+      if (b.category_id) {
+        await loadSubcategories(b.category_id, b.subcategory_id);
+      }
+    } catch(e) { console.error("Category load error", e); }
+
     document.getElementById("business_name").value = b.business_name || "";
     document.getElementById("short_description").value = b.short_description || "";
     document.getElementById("city").value = b.city || "";
@@ -345,6 +395,8 @@ async function saveProfile() {
   btn.disabled = true; btn.textContent = "Saving...";
   const payload = {
     business_name: document.getElementById("business_name").value.trim(),
+    category_id: document.getElementById("category_id").value,
+    subcategory_id: document.getElementById("subcategory_id").value,
     short_description: document.getElementById("short_description").value.trim(),
     city: document.getElementById("city").value.trim(),
     country: document.getElementById("country").value.trim(),
