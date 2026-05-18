@@ -240,3 +240,28 @@ router.post("/:id/comments", async (req, res) => {
 });
 
 module.exports = router;
+
+// POST /api/posts/:id/share
+router.post("/:id/share", async (req, res) => {
+  const pool = req.app.locals.pool;
+  const session = await requireAuth(pool, req, res);
+  if (!session) return;
+  const { content } = req.body;
+  const postId = Number(req.params.id);
+  try {
+    const [original] = await pool.execute(
+      "SELECT id, author_business_id FROM posts WHERE id = ? AND status = 'published' LIMIT 1", [postId]
+    );
+    if (!original.length) return res.status(404).json({ success: false, error: "Post not found." });
+    const authorType = session.user_type === "individual" ? "individual" : "business";
+    const bizId = session.user_type === "business" ? session.business_id : null;
+    const userId = session.user_type === "individual" ? session.user_id : null;
+    const [result] = await pool.execute(
+      "INSERT INTO posts (author_type, author_business_id, author_user_id, post_type, shared_post_id, content, status) VALUES (?, ?, ?, 'share', ?, ?, 'published')",
+      [authorType, bizId, userId, postId, content || ""]
+    );
+    return res.json({ success: true, share_id: result.insertId });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
