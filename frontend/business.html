@@ -208,16 +208,57 @@ async function loadBusiness() {
   } catch { document.getElementById("mainWrap").innerHTML = '<div class="loading">Connection error.</div>'; }
 }
 
+function getCompletionScore(b) {
+  const steps = [
+    { key: "logo", done: !!b.logo_url, label: "Add a profile photo" },
+    { key: "cover", done: !!b.cover_url, label: "Add a cover photo" },
+    { key: "desc", done: !!(b.short_description && b.short_description.trim().length > 10), label: "Write a short description" },
+    { key: "website", done: !!b.website, label: "Add your website" },
+    { key: "contact", done: !!(b.business_phone || b.business_email), label: "Add phone or email" },
+  ];
+  const done = steps.filter(s => s.done).length;
+  const pct = Math.round((done / steps.length) * 100);
+  return { steps, done, pct };
+}
+
+function renderCompletionBar(b) {
+  if (!b) return "";
+  const { steps, pct } = getCompletionScore(b);
+  if (pct === 100) return "";
+  const missing = steps.filter(s => !s.done);
+  const color = pct < 40 ? "#e53e3e" : pct < 80 ? "#dd6b20" : "#38a169";
+  return `
+    <div style="margin:16px 0;padding:16px 20px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-weight:700;font-size:0.95rem;color:#1a202c;">Profile completion</span>
+        <span style="font-weight:800;font-size:1rem;color:${color};">${pct}%</span>
+      </div>
+      <div style="height:8px;background:#e2e8f0;border-radius:999px;overflow:hidden;margin-bottom:12px;">
+        <div style="height:100%;width:${pct}%;background:${color};border-radius:999px;transition:width 0.4s;"></div>
+      </div>
+      <div style="display:grid;gap:6px;">
+        ${missing.map(s => `
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:0.85rem;">
+            <span style="color:#718096;">⚠️ ${s.label}</span>
+            <a href="edit-business.html" style="color:#3b82f6;font-weight:600;font-size:0.82rem;">Fix →</a>
+          </div>`).join("")}
+      </div>
+    </div>`;
+}
+
 function renderPage() {
   const b = bizData, user = getUser(), myBiz = getBusiness(), isOwner = myBiz && myBiz.slug === b.slug;
   const initial = b.business_name.charAt(0).toUpperCase();
   const joinDate = new Date(b.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
+  const reportBtnHtml = !isOwner
+    ? `<button onclick="openReportModal()" style="background:none;border:none;color:#a0aec0;font-size:0.82rem;cursor:pointer;padding:4px 8px;">⚑ Report</button>`
+    : "";
   const followBtnHtml = user && !isOwner
-    ? `<button class="follow-btn ${b.is_following ? "following" : "not-following"}" id="followBtn" onclick="toggleFollow()">${b.is_following ? "✓ Following" : "+ Follow"}</button>`
+    ? `<button class="follow-btn ${b.is_following ? "following" : "not-following"}" id="followBtn" onclick="toggleFollow()">${b.is_following ? "✓ Following" : "+ Follow"}</button> ${reportBtnHtml}`
     : isOwner
     ? `<span class="btn btn-ghost btn-sm" style="cursor:default;">Your page</span> <a href="edit-business.html" class="btn btn-primary btn-sm">✏️ Edit Profile</a>`
-    : `<a href="login.html" class="btn btn-primary btn-sm">+ Follow</a>`;
+    : `<a href="login.html" class="btn btn-primary btn-sm">+ Follow</a> ${reportBtnHtml}`;
 
   const wrap = document.getElementById("mainWrap");
   wrap.style.cssText = "max-width:1060px;margin:0 auto;padding:28px 24px;display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start;";
@@ -246,6 +287,7 @@ function renderPage() {
       </div>
     </div>
     <div>
+      ${isOwner ? renderCompletionBar(b) : ""}
       <div class="compose ${isOwner ? "visible" : ""}" id="composeBox">
         <div class="compose-label">New Post</div>
         <textarea id="composeText" placeholder="Share an update or tag another business with @slug..."></textarea>
@@ -423,6 +465,7 @@ async function toggleComments(postId) {
 async function loadComments(postId) {
   const list = document.getElementById(`clist-${postId}`);
   list.innerHTML = '<p style="color:var(--muted2);font-size:0.83rem;">Loading...</p>';
+  const user = getUser(), biz = getBusiness();
   try {
     const res = await fetch(`${API}/api/posts/${postId}/comments`);
     const data = await res.json();
@@ -431,9 +474,85 @@ async function loadComments(postId) {
       const isBiz = c.commenter_type === "business";
       const name = isBiz ? escHtml(c.business_name) : escHtml(`${c.first_name} ${c.last_name}`);
       const link = isBiz ? `business.html?slug=${c.business_slug}` : `profile.html?id=${c.commenter_user_id}`;
-      return `<div class="comment"><div class="c-avatar ${isBiz ? "" : "ind"}">${name.charAt(0)}</div><div class="c-bubble"><div class="c-name"><a href="${link}">${name}</a></div><div class="c-text">${escHtml(c.content)}</div><div class="c-time">${timeAgo(c.created_at)}</div></div></div>`;
+      const isMyComment = biz ? c.commenter_business_id === biz.id : (user && c.commenter_user_id === user.id);
+      const menuBtn = isMyComment ? `<div class="c-menu-wrap" style="position:relative;margin-left:auto;">
+        <button class="c-menu-btn" onclick="toggleCommentMenu(this)" style="background:none;border:none;cursor:pointer;color:var(--muted2);font-size:1.1rem;padding:2px 6px;border-radius:6px;line-height:1;">···</button>
+        <div class="c-menu-dropdown" style="display:none;position:absolute;right:0;top:24px;background:white;border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-lg);z-index:10;min-width:120px;overflow:hidden;">
+          <button onclick="editComment(${c.id},this)" style="display:block;width:100%;text-align:left;padding:10px 14px;border:none;background:none;cursor:pointer;font-size:0.88rem;font-family:'DM Sans',sans-serif;color:var(--text);">✏️ Edit</button>
+          <button onclick="bizDeleteComment(${postId},${c.id},this)" style="display:block;width:100%;text-align:left;padding:10px 14px;border:none;background:none;cursor:pointer;font-size:0.88rem;font-family:'DM Sans',sans-serif;color:var(--danger);">🗑️ Delete</button>
+        </div>
+      </div>` : "";
+      return `<div class="comment" id="comment-item-${c.id}"><div class="c-avatar ${isBiz ? "" : "ind"}">${name.charAt(0)}</div><div class="c-bubble" style="flex:1;"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;"><div><div class="c-name"><a href="${link}">${name}</a></div><div class="c-text" id="comment-text-${c.id}">${escHtml(c.content)}</div></div>${menuBtn}</div><div class="c-time">${timeAgo(c.created_at)}</div></div></div>`;
     }).join("");
   } catch { list.innerHTML = ""; }
+}
+
+function toggleCommentMenu(btn) {
+  const dropdown = btn.nextElementSibling;
+  const isOpen = dropdown.style.display === "block";
+  document.querySelectorAll(".c-menu-dropdown").forEach(d => d.style.display = "none");
+  dropdown.style.display = isOpen ? "none" : "block";
+}
+
+document.addEventListener("click", e => {
+  if (!e.target.classList.contains("c-menu-btn")) {
+    document.querySelectorAll(".c-menu-dropdown").forEach(d => d.style.display = "none");
+  }
+});
+
+function editComment(commentId, btn) {
+  btn.closest(".c-menu-dropdown").style.display = "none";
+  const textEl = document.getElementById("comment-text-" + commentId);
+  const original = textEl.textContent;
+  textEl.innerHTML = '<textarea style="width:100%;border:1.5px solid var(--accent);border-radius:8px;padding:8px 10px;font-size:0.87rem;font-family:DM Sans,sans-serif;resize:none;margin-top:4px;" rows="2">' + original + '</textarea><div style="display:flex;gap:6px;margin-top:6px;"><button onclick="saveEditComment(' + commentId + ',this)" style="padding:5px 14px;border-radius:999px;background:var(--accent);color:white;border:none;font-size:0.8rem;font-weight:600;cursor:pointer;">Save</button><button onclick="cancelEditComment(' + commentId + ',this)" style="padding:5px 14px;border-radius:999px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);font-size:0.8rem;cursor:pointer;">Cancel</button></div>';
+  textEl.querySelector("textarea").focus();
+}
+
+function cancelEditComment(commentId, btn) {
+  const textEl = document.getElementById("comment-text-" + commentId);
+  const original = textEl.querySelector("textarea").value;
+  textEl.textContent = textEl.querySelector("textarea").defaultValue;
+}
+
+async function saveEditComment(commentId, btn) {
+  const textEl = document.getElementById("comment-text-" + commentId);
+  const newContent = textEl.querySelector("textarea").value.trim();
+  if (!newContent) return;
+  btn.textContent = "Saving..."; btn.disabled = true;
+  try {
+    const res = await fetch(`${API}/api/posts/0/comments/${commentId}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify({ content: newContent }) });
+    const data = await res.json();
+    if (data.success) { textEl.textContent = newContent; showToast("Comment updated."); }
+    else showToast(data.error || "Failed.");
+  } catch { showToast("Connection error."); }
+}
+
+function bizDeleteComment(postId, commentId, btn) {
+  btn.closest(".c-menu-dropdown").style.display = "none";
+  const modal = document.getElementById("bizDeleteCommentModal");
+  modal.style.display = "flex";
+  modal.dataset.postId = postId;
+  modal.dataset.commentId = commentId;
+}
+
+async function confirmBizDeleteComment() {
+  const modal = document.getElementById("bizDeleteCommentModal");
+  const postId = modal.dataset.postId;
+  const commentId = modal.dataset.commentId;
+  const btn = modal.querySelector(".modal-delete-btn");
+  btn.textContent = "Deleting..."; btn.disabled = true;
+  try {
+    const res = await fetch(`${API}/api/posts/${postId}/comments/${commentId}`, { method: "DELETE", headers: authHeaders() });
+    const data = await res.json();
+    modal.style.display = "none";
+    if (data.success) { showToast("Comment deleted."); await loadComments(postId); }
+    else showToast(data.error || "Failed.");
+  } catch { showToast("Connection error."); }
+  btn.textContent = "Delete"; btn.disabled = false;
+}
+
+function closeBizDeleteCommentModal() {
+  document.getElementById("bizDeleteCommentModal").style.display = "none";
 }
 
 async function submitComment(postId) {
@@ -627,6 +746,89 @@ function lightboxNav(dir) { lightboxIdx = (lightboxIdx + dir + lightboxUrls.leng
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeLightbox(); if (e.key === "ArrowRight") lightboxNav(1); if (e.key === "ArrowLeft") lightboxNav(-1); });
 
 setupNav(); loadNotifications(); loadBusiness();
+</script>
+<div id="bizDeleteCommentModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+  <div style="background:white;border-radius:16px;padding:28px;width:90%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;">
+    <h3 style="font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:10px;">Delete Comment?</h3>
+    <p style="color:var(--muted);font-size:0.9rem;margin-bottom:24px;">Are you sure you want to delete this comment?</p>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="closeBizDeleteCommentModal()" style="padding:10px 24px;border-radius:999px;border:1.5px solid var(--border);background:white;color:var(--text);font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">No, keep it</button>
+      <button class="modal-delete-btn" onclick="confirmBizDeleteComment()" style="padding:10px 24px;border-radius:999px;border:none;background:var(--danger);color:white;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Delete</button>
+    </div>
+  </div>
+</div>
+<!-- Report Modal -->
+<div id="reportModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:28px;width:min(90%,480px);box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+    <h3 style="margin:0 0 6px;font-size:1.1rem;">Report this page</h3>
+    <p style="margin:0 0 18px;font-size:0.88rem;color:#718096;">Help us keep Diwanet trustworthy. Select a reason below.</p>
+    <div style="display:grid;gap:8px;margin-bottom:16px;">
+      <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:0.9rem;color:#2d3748;text-transform:none;">
+        <input type="radio" name="reportReason" value="Fake or impersonating a real business" style="width:16px;height:16px;accent-color:#3b82f6;flex-shrink:0;"> Fake or impersonating a real business
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:0.9rem;color:#2d3748;text-transform:none;">
+        <input type="radio" name="reportReason" value="Spam or misleading content" style="width:16px;height:16px;accent-color:#3b82f6;flex-shrink:0;"> Spam or misleading content
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:0.9rem;color:#2d3748;text-transform:none;">
+        <input type="radio" name="reportReason" value="Inappropriate content" style="width:16px;height:16px;accent-color:#3b82f6;flex-shrink:0;"> Inappropriate content
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:0.9rem;color:#2d3748;text-transform:none;">
+        <input type="radio" name="reportReason" value="Other" style="width:16px;height:16px;accent-color:#3b82f6;flex-shrink:0;"> Other
+      </label>
+    </div>
+    <textarea id="reportDesc" placeholder="Additional details (optional)" style="width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:0.9rem;resize:vertical;min-height:80px;margin-bottom:16px;"></textarea>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="closeReportModal()" style="padding:10px 18px;border:1px solid #e2e8f0;border-radius:999px;background:#fff;cursor:pointer;font-size:0.9rem;">Cancel</button>
+      <button onclick="submitReport()" style="padding:10px 18px;border:none;border-radius:999px;background:#e53e3e;color:#fff;font-weight:700;cursor:pointer;font-size:0.9rem;">Submit Report</button>
+    </div>
+    <div id="reportMsg" style="margin-top:12px;font-size:0.85rem;text-align:center;display:none;"></div>
+  </div>
+</div>
+
+<script>
+function openReportModal() {
+  document.getElementById("reportModal").style.display = "flex";
+}
+function closeReportModal() {
+  document.getElementById("reportModal").style.display = "none";
+  document.getElementById("reportMsg").style.display = "none";
+  document.getElementById("reportDesc").value = "";
+  document.querySelectorAll('input[name="reportReason"]').forEach(r => r.checked = false);
+}
+async function submitReport() {
+  const reason = document.querySelector('input[name="reportReason"]:checked')?.value;
+  const description = document.getElementById("reportDesc").value.trim();
+  const msg = document.getElementById("reportMsg");
+  if (!reason) {
+    msg.style.display = "block";
+    msg.style.color = "#e53e3e";
+    msg.textContent = "Please select a reason.";
+    return;
+  }
+  try {
+    const slug = new URLSearchParams(window.location.search).get("slug");
+    const res = await fetch(`${API}/api/business/${slug}/report`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ reason, description })
+    });
+    const data = await res.json();
+    msg.style.display = "block";
+    if (data.success) {
+      msg.style.color = "#38a169";
+      msg.textContent = "✓ Report submitted. Thank you.";
+      setTimeout(closeReportModal, 2000);
+    } else {
+      msg.style.color = "#e53e3e";
+      msg.textContent = data.error || "Something went wrong.";
+    }
+  } catch(e) {
+    msg.style.display = "block";
+    msg.style.color = "#e53e3e";
+    msg.textContent = "Connection error.";
+  }
+}
 </script>
 </body>
 </html>

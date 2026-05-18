@@ -172,7 +172,9 @@
     </div>
     <div class="field">
       <label>Short Description</label>
-      <textarea id="short_description" placeholder="Describe your business in a few sentences..."></textarea>
+      <textarea id="short_description" minlength="20" oninput="updateCharCount(this)" placeholder="Describe your business in a few sentences..."></textarea>
+      <div id="descHint" style="font-size:0.82rem;margin-top:5px;color:#e53e3e;display:none;">⚠️ Please write at least 20 characters to describe your business.</div>
+      <div id="descCount" style="font-size:0.82rem;margin-top:4px;color:#718096;text-align:right;">0 characters</div>
     </div>
     <div class="grid2">
       <div class="field">
@@ -245,6 +247,20 @@ function showMsg(text, type) {
   const msg = document.getElementById("msg");
   msg.className = "msg " + type; msg.textContent = text;
   msg.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function updateCharCount(el) {
+  const len = el.value.trim().length;
+  const hint = document.getElementById("descHint");
+  const count = document.getElementById("descCount");
+  count.textContent = len + " characters";
+  if (len > 0 && len < 20) {
+    hint.style.display = "block";
+    count.style.color = "#e53e3e";
+  } else {
+    hint.style.display = "none";
+    count.style.color = len >= 20 ? "#38a169" : "#718096";
+  }
 }
 
 function updatePreview() {

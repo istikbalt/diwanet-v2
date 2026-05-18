@@ -307,3 +307,31 @@ router.get("/:slug/posts", async (req, res) => {
 });
 
 module.exports = router;
+
+// POST /api/business/:slug/report
+router.post("/:slug/report", async (req, res) => {
+  const pool = req.app.locals.pool;
+  const { slug } = req.params;
+  const { reason, description } = req.body;
+  const session = req.session;
+
+  if (!reason) {
+    return res.status(400).json({ success: false, error: "Reason is required." });
+  }
+
+  try {
+    const [biz] = await pool.execute("SELECT id FROM businesses WHERE slug = ? LIMIT 1", [slug]);
+    if (biz.length === 0) return res.status(404).json({ success: false, error: "Business not found." });
+
+    const reporterBizId = session?.business_id || null;
+
+    await pool.execute(
+      "INSERT INTO reports (reported_business_id, reporter_business_id, reason, description) VALUES (?, ?, ?, ?)",
+      [biz[0].id, reporterBizId, reason, description || null]
+    );
+
+    return res.json({ success: true, message: "Report submitted." });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
