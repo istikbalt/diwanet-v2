@@ -4,26 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Edit Business · Diwanet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
   <style>
-    :root {
-      --bg:#f5f7f2; --surface:#fff; --surface2:#f0f4ec; --border:#e2e8da;
-      --text:#1a2418; --muted:#6b7d65; --muted2:#a0b09a;
-      --accent:#6aaa2a; --accent-dark:#4d8a18; --accent-light:#edf7e3;
-      --danger:#e05252; --shadow:0 2px 12px rgba(26,36,24,0.07);
-      --shadow-lg:0 8px 32px rgba(26,36,24,0.1);
-    }
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
-    .topbar { position:sticky; top:0; z-index:100; background:rgba(255,255,255,0.96); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); box-shadow:0 1px 8px rgba(26,36,24,0.06); }
-    .topbar-inner { max-width:800px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding:14px 24px; }
-    .brand { display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text); }
-    .brand-mark { width:36px; height:36px; border-radius:10px; background:var(--accent); display:grid; place-items:center; font-family:'DM Serif Display',serif; color:white; }
-    .brand-name { font-weight:700; font-size:1rem; }
-    .btn-sm { padding:8px 18px; border-radius:999px; font-size:0.88rem; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; font-family:'DM Sans',sans-serif; border:none; transition:all 0.2s; }
-    .btn-ghost { background:white; color:var(--text); border:1.5px solid var(--border); }
-    .btn-ghost:hover { border-color:var(--accent); color:var(--accent); }
-
+    /* Sadece edit-business'a özel stiller */
     .wrap { max-width:800px; margin:0 auto; padding:28px 24px; }
 
     /* COVER + LOGO PREVIEW */
@@ -33,9 +19,8 @@
     }
     .cover-area {
       height:160px; position:relative; cursor:pointer;
-      background:linear-gradient(135deg,#d4edbc,#eaf7d8 50%,#c8e8a8);
-      display:flex; align-items:center; justify-content:center;
-      overflow:hidden;
+      background:linear-gradient(135deg, var(--accent-light), #dbeafe 50%, #bfdbfe);
+      display:flex; align-items:center; justify-content:center; overflow:hidden;
     }
     .cover-area img { width:100%; height:100%; object-fit:cover; }
     .cover-overlay {
@@ -53,10 +38,9 @@
     .logo-wrap { position:relative; cursor:pointer; }
     .logo-circle {
       width:80px; height:80px; border-radius:20px;
-      background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+      background:linear-gradient(135deg, var(--accent), var(--accent-dark));
       display:grid; place-items:center; font-size:2rem; font-weight:800;
-      color:white; border:4px solid white; box-shadow:var(--shadow-lg);
-      overflow:hidden;
+      color:white; border:4px solid white; box-shadow:var(--shadow-lg); overflow:hidden;
     }
     .logo-circle img { width:100%; height:100%; object-fit:cover; }
     .logo-badge {
@@ -67,24 +51,14 @@
     .biz-preview-name { font-family:'DM Serif Display',serif; font-size:1.4rem; }
     .biz-preview-cat { font-size:0.82rem; color:var(--muted2); margin-top:2px; }
 
-    /* FORM */
-    .card { background:white; border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:16px; box-shadow:var(--shadow); }
+    /* FORM CARDS */
+    .edit-card { background:white; border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:16px; box-shadow:var(--shadow); }
     .card-title { font-size:0.8rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:18px; }
     .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-    .field { margin-bottom:16px; }
-    .field:last-child { margin-bottom:0; }
-    label { display:block; font-size:0.83rem; font-weight:600; color:var(--muted); margin-bottom:7px; }
-    input, textarea {
-      width:100%; background:var(--surface2); border:1.5px solid var(--border);
-      border-radius:12px; padding:11px 14px; font-size:0.92rem; color:var(--text);
-      font-family:'DM Sans',sans-serif; transition:border-color 0.2s;
-    }
-    input:focus, textarea:focus { outline:none; border-color:var(--accent); background:white; }
-    textarea { resize:vertical; min-height:100px; }
 
     /* UPLOAD AREA */
     .upload-area {
-      border:2px dashed var(--border); border-radius:12px; padding:24px;
+      border:2px dashed var(--border); border-radius:var(--radius-sm); padding:24px;
       text-align:center; cursor:pointer; transition:all 0.2s; position:relative;
     }
     .upload-area:hover { border-color:var(--accent); background:var(--accent-light); }
@@ -92,39 +66,33 @@
     .upload-icon { font-size:2rem; margin-bottom:8px; }
     .upload-text { font-size:0.88rem; color:var(--muted); }
     .upload-text strong { color:var(--accent); }
-    .upload-preview { margin-top:12px; }
-    .upload-preview img { max-height:120px; border-radius:10px; }
-    .uploading-bar {
-      height:4px; background:var(--surface2); border-radius:2px; margin-top:10px; overflow:hidden; display:none;
-    }
+    .uploading-bar { height:4px; background:var(--surface2); border-radius:2px; margin-top:10px; overflow:hidden; display:none; }
     .uploading-bar .bar { height:100%; background:var(--accent); border-radius:2px; animation:progress 1.5s ease-in-out infinite; }
     @keyframes progress { 0%{width:0%} 50%{width:70%} 100%{width:100%} }
 
     .save-btn {
-      width:100%; padding:14px; border-radius:12px; border:none;
+      width:100%; padding:14px; border-radius:var(--radius-sm); border:none;
       background:var(--accent); color:white; font-size:1rem; font-weight:700;
-      cursor:pointer; font-family:'DM Sans',sans-serif; transition:background 0.2s;
-      margin-top:8px;
+      cursor:pointer; font-family:'DM Sans',sans-serif; transition:background 0.2s; margin-top:8px;
     }
     .save-btn:hover { background:var(--accent-dark); }
     .save-btn:disabled { opacity:0.5; cursor:not-allowed; }
-    .msg { padding:12px 14px; border-radius:10px; font-size:0.88rem; font-weight:500; display:none; margin-top:12px; }
-    .msg.error { display:block; background:#fef2f2; color:var(--danger); border:1px solid #fecaca; }
-    .msg.success { display:block; background:var(--accent-light); color:var(--accent-dark); border:1px solid rgba(106,170,42,0.3); }
+
+    /* CROP MODAL */
+    .crop-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; flex-direction:column; gap:16px; }
+    .crop-modal.open { display:flex; }
+    .crop-container { width:90vw; max-width:1000px; height:80vh; background:#000; border-radius:12px; overflow:hidden; }
+    .crop-container img { max-width:100%; display:block; }
+    .crop-actions { display:flex; gap:12px; }
+    .crop-btn { padding:10px 24px; border-radius:999px; font-size:0.9rem; font-weight:600; cursor:pointer; border:none; font-family:'DM Sans',sans-serif; }
+    .crop-confirm { background:var(--accent); color:white; }
+    .crop-cancel { background:white; color:var(--text); }
+
+    /* Topbar override - max-width */
+    .topbar-inner { max-width:800px; }
 
     @media (max-width:600px) { .grid2 { grid-template-columns:1fr; } .wrap { padding:16px; } }
   </style>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
-<style>
-  .crop-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; flex-direction:column; gap:16px; }
-  .crop-modal.open { display:flex; }
-  .crop-container { width:90vw; max-width:1000px; height:80vh; background:#000; border-radius:12px; overflow:hidden; }
-  .crop-container img { max-width:100%; display:block; }
-  .crop-actions { display:flex; gap:12px; }
-  .crop-btn { padding:10px 24px; border-radius:999px; font-size:0.9rem; font-weight:600; cursor:pointer; border:none; font-family:'DM Sans',sans-serif; }
-  .crop-confirm { background:#6aaa2a; color:white; }
-  .crop-cancel { background:white; color:#333; }
-</style>
 </head>
 <body>
 
@@ -137,6 +105,7 @@
     <button class="crop-btn crop-cancel" onclick="cancelCrop()">Cancel</button>
   </div>
 </div>
+
 <header class="topbar">
   <div class="topbar-inner">
     <a href="index.html" class="brand">
@@ -144,14 +113,13 @@
       <span class="brand-name">Diwanet</span>
     </a>
     <div style="display:flex;gap:8px;">
-      <a id="viewPageBtn" href="#" class="btn-sm btn-ghost">View Page</a>
+      <a id="viewPageBtn" href="#" class="btn btn-ghost btn-sm">View Page</a>
     </div>
   </div>
 </header>
 
 <div class="wrap">
 
-  <!-- PREVIEW -->
   <div class="profile-preview">
     <div class="cover-area" id="coverArea" onclick="document.getElementById('coverInput').click()">
       <img id="coverPreview" src="" alt="" style="display:none;" />
@@ -176,8 +144,7 @@
     </div>
   </div>
 
-  <!-- LOGO UPLOAD -->
-  <div class="card">
+  <div class="edit-card">
     <div class="card-title">Logo / Profile Image</div>
     <div class="upload-area">
       <input type="file" id="logoInput" accept="image/*" onchange="uploadImage('logo', this)" />
@@ -187,8 +154,7 @@
     </div>
   </div>
 
-  <!-- COVER UPLOAD -->
-  <div class="card">
+  <div class="edit-card">
     <div class="card-title">Cover Photo</div>
     <div class="upload-area">
       <input type="file" id="coverInput" accept="image/*" onchange="uploadImage('cover', this)" />
@@ -198,8 +164,7 @@
     </div>
   </div>
 
-  <!-- BUSINESS INFO -->
-  <div class="card">
+  <div class="edit-card">
     <div class="card-title">Business Information</div>
     <div class="field">
       <label>Business Name</label>
@@ -235,7 +200,7 @@
     </div>
   </div>
 
-  <div class="card">
+  <div class="edit-card">
     <div class="card-title">Social Media</div>
     <div class="grid2">
       <div class="field">
@@ -270,20 +235,11 @@
 
 </div>
 
+<script src="assets/js/auth.js"></script>
 <script>
-const API = "https://diwanet.com";
-
 let currentSlug = "";
 let logoUrl = null;
 let coverUrl = null;
-
-function getToken() { return localStorage.getItem("dn_token"); }
-function getUser() { try { return JSON.parse(localStorage.getItem("dn_user")); } catch { return null; } }
-function getBusiness() { try { return JSON.parse(localStorage.getItem("dn_business")); } catch { return null; } }
-
-function authHeaders() {
-  return { "Authorization": "Bearer " + getToken(), "Content-Type": "application/json" };
-}
 
 function showMsg(text, type) {
   const msg = document.getElementById("msg");
@@ -300,20 +256,14 @@ function updatePreview() {
 async function loadBusiness() {
   const user = getUser();
   const biz = getBusiness();
-
-  if (!user || !biz) {
-    window.location.href = "login.html"; return;
-  }
-
+  if (!user || !biz) { window.location.href = "login.html"; return; }
   currentSlug = biz.slug;
   document.getElementById("viewPageBtn").href = `business.html?slug=${currentSlug}`;
-
   try {
     const res = await fetch(`${API}/api/business/${currentSlug}`);
     const data = await res.json();
     if (!data.success) return;
     const b = data.business;
-
     document.getElementById("business_name").value = b.business_name || "";
     document.getElementById("short_description").value = b.short_description || "";
     document.getElementById("city").value = b.city || "";
@@ -327,18 +277,15 @@ async function loadBusiness() {
     document.getElementById("twitter_url").value = b.twitter_url || "";
     document.getElementById("youtube_url").value = b.youtube_url || "";
     document.getElementById("tiktok_url").value = b.tiktok_url || "";
-
     document.getElementById("previewName").textContent = b.business_name;
     document.getElementById("previewCat").textContent = b.category_name || "";
     document.getElementById("logoInitial").textContent = b.business_name.charAt(0).toUpperCase();
-
     if (b.logo_url) {
       logoUrl = b.logo_url;
       const img = document.getElementById("logoPreview");
       img.src = b.logo_url; img.style.display = "block";
       document.getElementById("logoInitial").style.display = "none";
     }
-
     if (b.cover_url) {
       coverUrl = b.cover_url;
       const img = document.getElementById("coverPreview");
@@ -350,26 +297,16 @@ async function loadBusiness() {
 async function uploadImage(type, input) {
   const file = input.files[0];
   if (!file) return;
-
-  if (file.size > 10 * 1024 * 1024) {
-    showMsg("File too large. Max 10MB.", "error"); return;
-  }
-
+  if (file.size > 10 * 1024 * 1024) { showMsg("File too large. Max 10MB.", "error"); return; }
   const croppedBlob = await openCrop(type, file);
   if (!croppedBlob) return;
-
   const barId = type === "logo" ? "logoBar" : "coverBar";
   document.getElementById(barId).style.display = "block";
-
   const formData = new FormData();
   formData.append("file", croppedBlob, "image.jpg");
-
   try {
-    const res = await fetch(`${API}/api/upload`, {
-      method: "POST", body: formData
-    });
+    const res = await fetch(`${API}/api/upload`, { method: "POST", body: formData });
     const data = await res.json();
-
     if (data.url) {
       if (type === "logo") {
         logoUrl = data.url;
@@ -382,20 +319,14 @@ async function uploadImage(type, input) {
         img.src = coverUrl; img.style.display = "block";
       }
       showMsg(type === "logo" ? "Logo uploaded!" : "Cover uploaded!", "success");
-    } else {
-      showMsg("Upload failed. Please try again.", "error");
-    }
-  } catch (e) {
-    showMsg("Upload error: " + e.message, "error");
-  }
-
+    } else { showMsg("Upload failed.", "error"); }
+  } catch (e) { showMsg("Upload error: " + e.message, "error"); }
   document.getElementById(barId).style.display = "none";
 }
 
 async function saveProfile() {
   const btn = document.getElementById("saveBtn");
   btn.disabled = true; btn.textContent = "Saving...";
-
   const payload = {
     business_name: document.getElementById("business_name").value.trim(),
     short_description: document.getElementById("short_description").value.trim(),
@@ -411,31 +342,20 @@ async function saveProfile() {
     youtube_url: document.getElementById("youtube_url").value.trim(),
     tiktok_url: document.getElementById("tiktok_url").value.trim(),
   };
-
   if (logoUrl) payload.logo_url = logoUrl;
   if (coverUrl) payload.cover_url = coverUrl;
-
   try {
     const res = await fetch(`${API}/api/business/${currentSlug}`, {
       method: "PUT", headers: authHeaders(), body: JSON.stringify(payload)
     });
     const data = await res.json();
     if (data.success) {
-      // localStorage'daki business adını güncelle
       const biz = getBusiness();
-      if (biz) {
-        biz.business_name = data.business.business_name;
-        localStorage.setItem("dn_business", JSON.stringify(biz));
-      }
+      if (biz) { biz.business_name = data.business.business_name; localStorage.setItem("dn_business", JSON.stringify(biz)); }
       showMsg("Profile saved successfully!", "success");
       setTimeout(() => { window.location.href = `business.html?slug=${currentSlug}`; }, 1200);
-    } else {
-      showMsg(data.error || "Save failed.", "error");
-    }
-  } catch (e) {
-    showMsg("Connection error: " + e.message, "error");
-  }
-
+    } else { showMsg(data.error || "Save failed.", "error"); }
+  } catch (e) { showMsg("Connection error: " + e.message, "error"); }
   btn.disabled = false; btn.textContent = "Save Changes";
 }
 
@@ -444,12 +364,10 @@ loadBusiness();
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
 let cropper = null;
-let cropType = null;
 let cropResolve = null;
 
 function openCrop(type, file) {
   return new Promise((resolve) => {
-    cropType = type;
     cropResolve = resolve;
     const reader = new FileReader();
     reader.onload = e => {
@@ -457,11 +375,9 @@ function openCrop(type, file) {
       img.src = e.target.result;
       document.getElementById("cropModal").classList.add("open");
       if (cropper) cropper.destroy();
-      const aspectRatio = type === "cover" ? 3.3 : 1;
       cropper = new Cropper(img, {
-        aspectRatio,
-        viewMode: 1,
-        autoCropArea: 1,
+        aspectRatio: type === "cover" ? 3.3 : 1,
+        viewMode: 1, autoCropArea: 1,
       });
     };
     reader.readAsDataURL(file);
@@ -471,8 +387,7 @@ function openCrop(type, file) {
 function confirmCrop() {
   if (!cropper) return;
   cropper.getCroppedCanvas().toBlob(blob => {
-    cropResolve(blob);
-    cancelCrop();
+    cropResolve(blob); cancelCrop();
   }, "image/jpeg", 0.9);
 }
 
