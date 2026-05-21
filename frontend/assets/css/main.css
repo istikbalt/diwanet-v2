@@ -82,6 +82,16 @@ img { max-width: 100%; display: block; }
   font-size: 1.05rem;
   color: var(--text);
 }
+
+/* Brand logo image - topbar & footer */
+.brand-logo {
+  height: 72px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+  margin-left: 24px;
+}
+
 .topbar-nav {
   display: flex;
   align-items: center;
