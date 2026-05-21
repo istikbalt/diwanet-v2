@@ -92,6 +92,13 @@ img { max-width: 100%; display: block; }
   margin-left: 40px;
 }
 
+@media (max-width: 768px) {
+  .brand-logo {
+    height: 80px;
+    margin-left: 0;
+  }
+}
+
 .topbar-nav {
   display: flex;
   align-items: center;
