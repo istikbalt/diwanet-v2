@@ -85,11 +85,11 @@ img { max-width: 100%; display: block; }
 
 /* Brand logo image - topbar & footer */
 .brand-logo {
-  height: 90px;
+  height: 105px;
   width: auto;
   display: block;
   object-fit: contain;
-  margin-left: 16px;
+  margin-left: 40px;
 }
 
 .topbar-nav {
