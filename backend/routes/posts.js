@@ -159,9 +159,12 @@ router.delete("/:id", async (req, res) => {
   const session = await requireAuth(pool, req, res);
   if (!session) return;
   try {
-    const [posts] = await pool.execute("SELECT author_business_id FROM posts WHERE id = ? LIMIT 1", [req.params.id]);
+    const [posts] = await pool.execute("SELECT author_business_id, author_user_id, author_type FROM posts WHERE id = ? LIMIT 1", [req.params.id]);
     if (!posts.length) return res.status(404).json({ success: false, error: "Post not found." });
-    if (posts[0].author_business_id !== session.business_id) {
+    const p = posts[0];
+    const isOwner = (session.user_type === "business" && p.author_business_id === session.business_id) ||
+                    (session.user_type === "individual" && p.author_user_id === session.user_id);
+    if (!isOwner) {
       return res.status(403).json({ success: false, error: "Not authorized." });
     }
     await pool.execute("DELETE FROM posts WHERE id = ?", [req.params.id]);
@@ -181,9 +184,12 @@ router.put("/:id", async (req, res) => {
     return res.status(400).json({ success: false, error: "Content required." });
   }
   try {
-    const [posts] = await pool.execute("SELECT author_business_id FROM posts WHERE id = ? LIMIT 1", [req.params.id]);
+    const [posts] = await pool.execute("SELECT author_business_id, author_user_id, author_type FROM posts WHERE id = ? LIMIT 1", [req.params.id]);
     if (!posts.length) return res.status(404).json({ success: false, error: "Post not found." });
-    if (posts[0].author_business_id !== session.business_id) {
+    const p = posts[0];
+    const isOwner = (session.user_type === "business" && p.author_business_id === session.business_id) ||
+                    (session.user_type === "individual" && p.author_user_id === session.user_id);
+    if (!isOwner) {
       return res.status(403).json({ success: false, error: "Not authorized." });
     }
     await pool.execute("UPDATE posts SET content = ? WHERE id = ?", [content.trim(), req.params.id]);
