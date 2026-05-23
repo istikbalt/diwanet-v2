@@ -488,6 +488,15 @@ async function loadComments(postId) {
       const link = isBiz ? `/b/${c.business_slug}` : `/profile.html?id=${c.commenter_user_id}`;
       const isMyComment = biz ? c.commenter_business_id === biz.id : (user && c.commenter_user_id === user.id);
       
+      const likeBtn = `
+        <span style="color:var(--muted2);margin:0 4px;">·</span>
+        <button class="comment-action-btn comment-like-btn" onclick="toggleCommentLike(${postId},${c.id},this)" data-liked="${c.is_liked ? "1" : "0"}" style="background:none;border:none;cursor:pointer;color:${c.is_liked ? "var(--danger)" : "var(--muted2)"};font-size:0.75rem;font-weight:600;padding:0;font-family:inherit;transition:opacity 0.2s;display:inline-flex;align-items:center;gap:3px;">
+          <span>${c.is_liked ? "❤️" : "🤍"}</span>
+          <span>Like</span>
+          <span class="like-count" style="font-weight:normal;">(${c.like_count || 0})</span>
+        </button>
+      `;
+
       const actionLinks = isMyComment ? `
         <span style="color:var(--muted2);margin:0 4px;">·</span>
         <button class="comment-action-btn" onclick="editComment(${c.id},this)" style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:0.75rem;font-weight:600;padding:0;font-family:inherit;transition:opacity 0.2s;">✏️ Edit</button>
@@ -502,6 +511,7 @@ async function loadComments(postId) {
           <div class="c-text" id="comment-text-${c.id}">${escHtml(c.content)}</div>
           <div class="c-time" style="display:flex;align-items:center;margin-top:4px;">
             <span>${timeAgo(c.created_at)}</span>
+            ${likeBtn}
             ${actionLinks}
           </div>
         </div>
@@ -578,6 +588,51 @@ async function confirmBizDeleteComment() {
 
 function closeBizDeleteCommentModal() {
   document.getElementById("bizDeleteCommentModal").style.display = "none";
+}
+
+async function toggleCommentLike(postId, commentId, btn) {
+  if (!getUser() && !getBusiness()) {
+    showToast("Please log in to like comments.");
+    return;
+  }
+  const liked = btn.dataset.liked === "1";
+  const heartSpan = btn.firstElementChild;
+  const countSpan = btn.querySelector(".like-count");
+  
+  const newLiked = !liked;
+  btn.dataset.liked = newLiked ? "1" : "0";
+  btn.style.color = newLiked ? "var(--danger)" : "var(--muted2)";
+  heartSpan.textContent = newLiked ? "❤️" : "🤍";
+  
+  let currentCount = parseInt(countSpan.textContent.replace(/[^0-9]/g, "")) || 0;
+  let newCount = newLiked ? currentCount + 1 : Math.max(0, currentCount - 1);
+  countSpan.textContent = `(${newCount})`;
+
+  try {
+    const res = await fetch(`${API}/api/posts/${postId}/comments/${commentId}/like`, {
+      method: "POST",
+      headers: authHeaders()
+    });
+    const data = await res.json();
+    if (data.success) {
+      btn.dataset.liked = data.liked ? "1" : "0";
+      btn.style.color = data.liked ? "var(--danger)" : "var(--muted2)";
+      heartSpan.textContent = data.liked ? "❤️" : "🤍";
+      countSpan.textContent = `(${data.like_count || 0})`;
+    } else {
+      btn.dataset.liked = liked ? "1" : "0";
+      btn.style.color = liked ? "var(--danger)" : "var(--muted2)";
+      heartSpan.textContent = liked ? "❤️" : "🤍";
+      countSpan.textContent = `(${currentCount})`;
+      showToast(data.error || "Failed to toggle like.");
+    }
+  } catch (err) {
+    btn.dataset.liked = liked ? "1" : "0";
+    btn.style.color = liked ? "var(--danger)" : "var(--muted2)";
+    heartSpan.textContent = liked ? "❤️" : "🤍";
+    countSpan.textContent = `(${currentCount})`;
+    showToast("Connection error.");
+  }
 }
 
 async function submitComment(postId) {

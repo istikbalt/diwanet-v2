@@ -1,7 +1,7 @@
 // routes/posts.js
 const express = require("express");
 const router = express.Router();
-const { requireAuth } = require("../middleware/auth");
+const { requireAuth, getSession } = require("../middleware/auth");
 
 // GET /api/posts?slug=...
 router.get("/", async (req, res) => {
@@ -183,16 +183,29 @@ router.get("/:id/comments", async (req, res) => {
   const pool = req.app.locals.pool;
   try {
     const postId = Number(req.params.id);
+    const session = await getSession(pool, req);
+    const likerUserId = (session && session.user_type === "individual") ? session.user_id : -1;
+    const likerBusinessId = (session && session.user_type === "business") ? session.business_id : -1;
+
     const [comments] = await pool.execute(
       `SELECT c.id, c.commenter_type, c.content, c.created_at, c.commenter_business_id,
        b.business_name, b.slug AS business_slug, b.logo_url,
-       u.first_name, u.last_name, u.avatar_url, u.id AS commenter_user_id
+       u.first_name, u.last_name, u.avatar_url, u.id AS commenter_user_id,
+       (SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id) AS like_count,
+       (SELECT COUNT(*) FROM comment_likes 
+        WHERE comment_id = c.id 
+          AND (
+            (liker_type = 'individual' AND liker_user_id = ?) 
+            OR 
+            (liker_type = 'business' AND liker_business_id = ?)
+          )
+       ) AS is_liked
        FROM comments c
        LEFT JOIN businesses b ON c.commenter_business_id = b.id
        LEFT JOIN users u ON c.commenter_user_id = u.id
        WHERE c.post_id = ? AND c.status = 'visible'
        ORDER BY c.created_at ASC`,
-      [postId]
+      [likerUserId, likerBusinessId, postId]
     );
     return res.json({ success: true, comments });
   } catch (error) {
@@ -305,6 +318,58 @@ router.put("/:postId/comments/:commentId", async (req, res) => {
     if (!isOwner) return res.status(403).json({ success: false, error: "Not authorized." });
     await pool.execute("UPDATE comments SET content = ? WHERE id = ?", [content.trim(), req.params.commentId]);
     return res.json({ success: true });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// POST /api/posts/:postId/comments/:commentId/like
+router.post("/:postId/comments/:commentId/like", async (req, res) => {
+  const pool = req.app.locals.pool;
+  const session = await requireAuth(pool, req, res);
+  if (!session) return;
+  const commentId = Number(req.params.commentId);
+  try {
+    const [comments] = await pool.execute("SELECT id FROM comments WHERE id = ? LIMIT 1", [commentId]);
+    if (!comments.length) return res.status(404).json({ success: false, error: "Comment not found." });
+    let existing;
+    if (session.user_type === "individual") {
+      [existing] = await pool.execute("SELECT id FROM comment_likes WHERE comment_id = ? AND liker_user_id = ? LIMIT 1", [commentId, session.user_id]);
+    } else {
+      [existing] = await pool.execute("SELECT id FROM comment_likes WHERE comment_id = ? AND liker_business_id = ? LIMIT 1", [commentId, session.business_id]);
+    }
+    if (existing.length > 0) {
+      await pool.execute("DELETE FROM comment_likes WHERE id = ?", [existing[0].id]);
+      const [[{ cnt }]] = await pool.execute("SELECT COUNT(*) AS cnt FROM comment_likes WHERE comment_id = ?", [commentId]);
+      return res.json({ success: true, liked: false, like_count: Number(cnt) });
+    } else {
+      if (session.user_type === "individual") {
+        await pool.execute("INSERT INTO comment_likes (comment_id, liker_type, liker_user_id) VALUES (?, 'individual', ?)", [commentId, session.user_id]);
+      } else {
+        await pool.execute("INSERT INTO comment_likes (comment_id, liker_type, liker_business_id) VALUES (?, 'business', ?)", [commentId, session.business_id]);
+      }
+      const [[{ cnt }]] = await pool.execute("SELECT COUNT(*) AS cnt FROM comment_likes WHERE comment_id = ?", [commentId]);
+      return res.json({ success: true, liked: true, like_count: Number(cnt) });
+    }
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// DELETE /api/posts/:postId/comments/:commentId/like
+router.delete("/:postId/comments/:commentId/like", async (req, res) => {
+  const pool = req.app.locals.pool;
+  const session = await requireAuth(pool, req, res);
+  if (!session) return;
+  const commentId = Number(req.params.commentId);
+  try {
+    if (session.user_type === "individual") {
+      await pool.execute("DELETE FROM comment_likes WHERE comment_id = ? AND liker_user_id = ?", [commentId, session.user_id]);
+    } else {
+      await pool.execute("DELETE FROM comment_likes WHERE comment_id = ? AND liker_business_id = ?", [commentId, session.business_id]);
+    }
+    const [[{ cnt }]] = await pool.execute("SELECT COUNT(*) AS cnt FROM comment_likes WHERE comment_id = ?", [commentId]);
+    return res.json({ success: true, like_count: Number(cnt) });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
   }
