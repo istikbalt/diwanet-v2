@@ -499,7 +499,7 @@ async function toggleFollow() {
   const btn = document.getElementById("followBtn");
   if (!btn) return; btn.disabled = true;
   try {
-    const slug = new URLSearchParams(window.location.search).get("slug");
+    const slug = getProfileSlug();
     const res = await fetch(`${API}/api/business/${slug}/follow`, { method: "POST", headers: authHeaders() });
     const data = await res.json();
     if (data.success) {
@@ -943,7 +943,7 @@ async function submitReport() {
     return;
   }
   try {
-    const slug = new URLSearchParams(window.location.search).get("slug");
+    const slug = getProfileSlug();
     const res = await fetch(`${API}/api/business/${slug}/report`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
