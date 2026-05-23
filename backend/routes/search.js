@@ -21,7 +21,7 @@ router.get("/", async (req, res) => {
     `;
     const params = [];
 
-    if (q && q.length >= 2) {
+    if (q && q.length >= 1) {
       query += " AND (b.business_name LIKE ? OR b.short_description LIKE ?)";
       params.push(`%${q}%`, `%${q}%`);
     }
