@@ -387,7 +387,7 @@ function renderPost(p) {
       ${isShare ? '<span class="post-type-badge">🔁 Share</span>' : ""}
     </div>
     <div class="post-body">
-      <div class="post-content">${escHtml(p.content || "")}</div>
+      <div class="post-content">${formatPostText(p.content || "")}</div>
       ${imageBlock}${sharedBlock}
     </div>
     <div class="post-actions">${actionsHtml}</div>
@@ -456,7 +456,7 @@ async function loadComments(postId) {
         <div class="comment-avatar ${isBiz ? "" : "individual"}">${name.charAt(0)}</div>
         <div class="comment-bubble" style="flex:1;">
           <div class="comment-name"><a href="${link}">${name}</a></div>
-          <div class="comment-text" id="comment-text-${c.id}">${escHtml(c.content)}</div>
+          <div class="comment-text" id="comment-text-${c.id}">${formatPostText(c.content)}</div>
           <div class="comment-time" style="display:flex;align-items:center;margin-top:4px;font-size:0.75rem;color:var(--muted2);">
             <span>${timeAgo(c.created_at)}</span>
             ${likeBtn}

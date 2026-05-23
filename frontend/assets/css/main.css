@@ -35,6 +35,8 @@ body {
   line-height: 1.6;
 }
 a { text-decoration: none; color: inherit; }
+.mention-link { color: var(--accent) !important; font-weight: 700 !important; text-decoration: none !important; }
+.mention-link:hover { text-decoration: underline !important; }
 img { max-width: 100%; display: block; }
 
 /* ============================================

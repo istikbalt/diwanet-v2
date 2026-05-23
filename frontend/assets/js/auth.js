@@ -85,6 +85,13 @@ function escHtml(s) {
     .replace(/"/g, "&quot;");
 }
 
+// Utility: format post text with mentions links
+function formatPostText(content) {
+  if (!content) return "";
+  const escaped = escHtml(content);
+  return escaped.replace(/@([a-zA-Z0-9-]+)/g, '<a href="/b/$1" class="mention-link">@$1</a>');
+}
+
 // Utility: escape attribute
 function escAttr(s) {
   if (!s) return "";

@@ -344,7 +344,7 @@
                 <div class="card-label">
                   <span>📝 Posted about <a href="business.html?slug=${s.tagged_business_slug}">${escHtml(s.tagged_business_name)}</a></span>
                 </div>
-                <div class="card-content" style="margin-top:8px;font-size:0.95rem;line-height:1.6;white-space:pre-wrap;">${escHtml(s.content)}</div>
+                <div class="card-content" style="margin-top:8px;font-size:0.95rem;line-height:1.6;white-space:pre-wrap;">${formatPostText(s.content)}</div>
                 ${mediaHtml}
                 <div class="card-meta">${timeAgo(s.created_at)}</div>
                 ${isMyProfile ? `
@@ -373,10 +373,10 @@
               <div class="card-label">
                 <span>🔁 Shared from <a href="business.html?slug=${s.original_business_slug}">${escHtml(s.original_business_name)}</a></span>
               </div>
-              ${s.content ? `<div class="card-content" style="margin-bottom:10px;white-space:pre-wrap;">${escHtml(s.content)}</div>` : ""}
+              ${s.content ? `<div class="card-content" style="margin-bottom:10px;white-space:pre-wrap;">${formatPostText(s.content)}</div>` : ""}
               <div class="shared-preview">
                 <div class="from">Original by <a href="business.html?slug=${s.original_business_slug}">${escHtml(s.original_business_name)}</a></div>
-                <div class="text" style="white-space:pre-wrap;">${escHtml((s.original_content || "").substring(0, 180))}${(s.original_content || "").length > 180 ? "…" : ""}</div>
+                <div class="text" style="white-space:pre-wrap;">${formatPostText((s.original_content || "").substring(0, 180) + ((s.original_content || "").length > 180 ? "…" : ""))}</div>
                 ${mediaHtml}
               </div>
               <div class="card-meta">${timeAgo(s.created_at)}</div>
@@ -403,7 +403,7 @@
         document.getElementById("tab-comments").innerHTML = data.comments.map(c => `
           <div class="card">
             <div class="card-label">💬 Commented on <a href="business.html?slug=${c.business_slug}">${escHtml(c.business_name)}</a></div>
-            <div class="card-content">${escHtml(c.content)}</div>
+            <div class="card-content">${formatPostText(c.content)}</div>
             <div class="card-meta">${timeAgo(c.created_at)}</div>
           </div>`).join("");
       }

@@ -499,7 +499,7 @@ async function loadTagged() {
             <div class="post-time">${timeAgo(t.created_at)}</div>
           </div>
         </div>
-        <div class="post-body"><div class="post-content">${escHtml(t.content).substring(0, 200)}${t.content.length > 200 ? "…" : ""}</div></div>
+        <div class="post-body"><div class="post-content">${formatPostText(t.content.substring(0, 200) + (t.content.length > 200 ? "…" : ""))}</div></div>
       </div>`).join("");
   } catch { document.getElementById("tab-tagged").innerHTML = '<div class="empty-state"><h3>Could not load.</h3></div>'; }
 }
@@ -541,7 +541,7 @@ function renderPost(p) {
       <div><div class="post-author">${escHtml(p.business_name)}</div><div class="post-time">${timeAgo(p.created_at)}</div></div>
     </div>
     <div class="post-body">
-      <div class="post-content">${escHtml(p.content || "")}</div>
+      <div class="post-content">${formatPostText(p.content || "")}</div>
       ${mediaHtml}
     </div>
     <div class="post-actions">${actionsHtml}</div>
@@ -624,7 +624,7 @@ async function loadComments(postId) {
         <div class="c-avatar ${isBiz ? "" : "ind"}">${name.charAt(0)}</div>
         <div class="c-bubble" style="flex:1;">
           <div class="c-name"><a href="${link}">${name}</a></div>
-          <div class="c-text" id="comment-text-${c.id}">${escHtml(c.content)}</div>
+          <div class="c-text" id="comment-text-${c.id}">${formatPostText(c.content)}</div>
           <div class="c-time" style="display:flex;align-items:center;margin-top:4px;">
             <span>${timeAgo(c.created_at)}</span>
             ${likeBtn}
