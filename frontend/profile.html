@@ -8,171 +8,53 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/main.css">
   <style>
-    :root {
-      --bg: #0d0f14;
-      --surface: #161a22;
-      --surface2: #1d2230;
-      --border: #252c3a;
-      --text: #e8eaf0;
-      --muted: #6b7491;
-      --muted2: #8a9bb0;
-      --accent: #4f8ef7;
-      --accent-dim: rgba(79,142,247,0.12);
-      --success: #34d399;
-      --danger: #f87171;
-    }
-    
     body { min-height: 100vh; background: var(--bg); color: var(--text); }
     
-    /* Topbar overrides for dark theme */
-    .topbar {
-      background: rgba(13,15,20,0.92) !important;
-      backdrop-filter: blur(16px) !important;
-      border-bottom: 1px solid var(--border) !important;
-      box-shadow: none !important;
-    }
-    .topbar-nav a {
-      color: var(--muted) !important;
-    }
-    .topbar-nav a:hover {
-      color: var(--accent) !important;
-      background: var(--surface2) !important;
-    }
-    .topbar-nav a.active {
-      color: var(--text) !important;
-      background: transparent !important;
-    }
-    .brand-name {
-      color: var(--text) !important;
-    }
-
     .wrap { max-width: 900px; margin: 0 auto; padding: 28px 24px; }
     
     /* Header Card */
-    .profile-header {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      overflow: hidden;
-      margin-bottom: 20px;
-    }
-    .profile-cover {
-      height: 160px;
-      background: linear-gradient(135deg, #1a2a4a 0%, #1d2230 50%, #1a3040 100%);
-    }
+    .profile-header { background: white; border: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-bottom: 20px; box-shadow: var(--shadow); }
+    .profile-cover { height: 120px; background: linear-gradient(135deg, var(--accent-light), #e8f2fc 50%, #cce3f7); }
     .profile-body { padding: 0 24px 24px; position: relative; }
-    .profile-avatar-wrap { margin-top: -46px; margin-bottom: 14px; }
-    .profile-avatar {
-      width: 86px;
-      height: 86px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #34d399, #059669);
-      display: grid;
-      place-items: center;
-      font-size: 2rem;
-      font-weight: 700;
-      color: white;
-      border: 4px solid var(--surface);
-    }
+    .profile-avatar-wrap { margin-top: -34px; margin-bottom: 14px; }
+    .profile-avatar { width: 68px; height: 68px; border-radius: 50%; background: linear-gradient(135deg, #60a5fa, #3b82f6); display: grid; place-items: center; font-size: 1.6rem; font-weight: 700; color: white; border: 3px solid white; box-shadow: var(--shadow); }
     .profile-name { font-family: 'DM Serif Display', serif; font-size: 1.6rem; margin-bottom: 4px; color: var(--text); }
-    .profile-role {
-      display: inline-block;
-      padding: 3px 12px;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      background: var(--accent-dim);
-      color: var(--accent);
-      margin-bottom: 10px;
-    }
+    .profile-role { display: inline-block; padding: 3px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; background: var(--accent-light); color: var(--accent-dark); margin-bottom: 10px; }
     .profile-bio { font-size: 0.9rem; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
     
     /* Stats */
     .profile-stats { display: flex; gap: 28px; border-top: 1px solid var(--border); padding-top: 16px; }
     .stat { text-align: center; }
     .stat-val { font-size: 1.2rem; font-weight: 800; color: var(--accent); }
-    .stat-lbl { font-size: 0.76rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat-lbl { font-size: 0.76rem; color: var(--muted2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
     
     /* Tabs */
-    .tabs {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 20px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 5px;
-    }
-    .tab {
-      flex: 1;
-      padding: 9px;
-      border-radius: 10px;
-      text-align: center;
-      font-size: 0.88rem;
-      font-weight: 600;
-      cursor: pointer;
-      color: var(--muted);
-      border: none;
-      background: none;
-      font-family: 'DM Sans', sans-serif;
-      transition: all 0.15s;
-    }
+    .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: white; border: 1px solid var(--border); border-radius: 14px; padding: 5px; box-shadow: var(--shadow); }
+    .tab { flex: 1; padding: 9px; border-radius: 10px; text-align: center; font-size: 0.88rem; font-weight: 600; cursor: pointer; color: var(--muted); border: none; background: none; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
     .tab.active { background: var(--accent); color: white; font-weight: 700; }
     .tab:hover:not(.active) { background: var(--surface2); }
     
     /* Content Cards */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 18px;
-      margin-bottom: 12px;
-      transition: all 0.2s;
-    }
-    .card:hover { border-color: var(--muted); }
-    .card-label { font-size: 0.76rem; color: var(--muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .card { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 12px; box-shadow: var(--shadow); transition: all 0.2s; }
+    .card:hover { box-shadow: var(--shadow-lg); border-color: rgba(15, 76, 129, 0.2); }
+    .card-label { font-size: 0.76rem; color: var(--muted2); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
     .card-label a { color: var(--accent); text-decoration: none; font-weight: 700; }
     .card-label a:hover { text-decoration: underline; }
     .card-content { font-size: 0.91rem; line-height: 1.6; color: var(--text); }
-    .card-meta { font-size: 0.76rem; color: var(--muted); margin-top: 8px; }
+    .card-meta { font-size: 0.76rem; color: var(--muted2); margin-top: 8px; }
     
-    .shared-preview {
-      margin-top: 10px;
-      padding: 12px;
-      border-radius: 10px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--accent);
-    }
+    .shared-preview { margin-top: 10px; padding: 12px; border-radius: 10px; background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--accent); }
     .shared-preview .from { font-size: 0.76rem; color: var(--muted); margin-bottom: 5px; }
     .shared-preview .from a { color: var(--accent); text-decoration: none; font-weight: 600; }
     .shared-preview .text { font-size: 0.87rem; line-height: 1.5; color: var(--text); }
     
     /* Following Grid */
     .following-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-    .follow-card {
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: 14px;
-      padding: 16px;
-      text-decoration: none;
-      transition: all 0.2s;
-      display: block;
-    }
-    .follow-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-    .follow-card-avatar {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--accent), #6366f1);
-      display: grid;
-      place-items: center;
-      font-weight: 700;
-      color: white;
-      margin-bottom: 10px;
-    }
+    .follow-card { background: white; border: 1.5px solid var(--border); border-radius: 14px; padding: 16px; text-decoration: none; transition: all 0.2s; display: block; box-shadow: var(--shadow); }
+    .follow-card:hover { border-color: var(--accent); box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+    .follow-card-avatar { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); display: grid; place-items: center; font-weight: 700; color: white; margin-bottom: 10px; }
     .follow-card-name { font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-    .follow-card-cat { font-size: 0.76rem; color: var(--muted); }
+    .follow-card-cat { font-size: 0.76rem; color: var(--muted2); }
     
     .tab-content { display: none; }
     .tab-content.active { display: block; }
@@ -181,24 +63,24 @@
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.75);
+      background: rgba(15, 76, 129, 0.3);
       display: none;
       place-items: center;
       z-index: 200;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(4px);
     }
     .modal {
-      background: var(--surface);
+      background: white;
       border: 1px solid var(--border);
-      border-radius: 20px;
+      border-radius: var(--radius);
       padding: 28px;
       width: 90%;
       max-width: 480px;
-      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+      box-shadow: var(--shadow-lg);
     }
     .modal h3 {
       font-family: 'DM Serif Display', serif;
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       margin-bottom: 8px;
       color: var(--text);
     }
@@ -211,25 +93,23 @@
       margin-bottom: 14px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 4px;
     }
     .modal label {
-      font-size: 0.74rem;
+      font-size: 0.78rem;
       font-weight: 700;
       color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
     }
     .modal input, .modal textarea {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
       padding: 10px 14px;
-      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
       font-family: 'DM Sans', sans-serif;
       font-size: 0.9rem;
+      color: var(--text);
       outline: none;
-      transition: border-color 0.15s;
+      transition: border-color 0.2s;
     }
     .modal input:focus, .modal textarea:focus {
       border-color: var(--accent);
@@ -241,14 +121,14 @@
       bottom: 24px;
       left: 50%;
       transform: translateX(-50%) translateY(100px);
-      background: var(--surface2);
+      background: white;
       border: 1px solid var(--border);
       color: var(--text);
       padding: 12px 24px;
       border-radius: 999px;
       font-size: 0.9rem;
       font-weight: 600;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      box-shadow: var(--shadow-lg);
       z-index: 999;
       opacity: 0;
       transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -262,7 +142,7 @@
     .empty-state {
       text-align: center;
       padding: 48px 24px;
-      background: var(--surface);
+      background: white;
       border: 1px solid var(--border);
       border-radius: 16px;
       color: var(--muted);
@@ -396,7 +276,7 @@
       const isMyProfile = loggedInUser && loggedInUser.id === u.id;
       
       const editBtnHtml = isMyProfile 
-        ? `<button onclick="openEditProfileModal()" class="btn btn-ghost btn-sm" style="position:absolute;top:20px;right:24px;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);"><span style="font-size:0.95rem;">✏️</span> Edit Profile</button>`
+        ? `<button onclick="openEditProfileModal()" class="btn btn-primary btn-sm" style="position:absolute;top:20px;right:24px;display:inline-flex;align-items:center;gap:6px;"><span style="font-size:0.95rem;">✏️</span> Edit Profile</button>`
         : "";
 
       const initial = (u.first_name || "?").charAt(0).toUpperCase();
@@ -431,7 +311,7 @@
               <div class="stat-lbl">Following</div>
             </div>
             <div class="stat">
-              <div class="stat-val" style="color:var(--muted);font-size:0.85rem;font-weight:700;padding-top:3px;">${joinDate}</div>
+              <div class="stat-val" style="color:var(--muted2);font-size:0.85rem;font-weight:700;padding-top:3px;">${joinDate}</div>
               <div class="stat-lbl">Joined</div>
             </div>
           </div>
