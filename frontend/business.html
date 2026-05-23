@@ -173,6 +173,18 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="messageModal" style="position:fixed;inset:0;background:rgba(15,76,129,0.3);display:none;place-items:center;z-index:200;backdrop-filter:blur(4px);">
+  <div class="modal" style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:28px;width:90%;max-width:480px;box-shadow:var(--shadow-lg);">
+    <h3 style="font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:8px;">Send Private Message</h3>
+    <p style="color:var(--muted);font-size:0.86rem;margin-bottom:14px;">Your conversation is private. Only you and this business owner will be able to see these messages.</p>
+    <textarea id="quickMessageText" placeholder="Write your private message here..." style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:0.9rem;font-family:'DM Sans',sans-serif;resize:none;min-height:120px;margin-bottom:14px;"></textarea>
+    <div class="modal-footer" style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-ghost btn-sm" onclick="closeMessageModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="sendQuickMessageBtn" onclick="submitQuickMessage()">Send Message</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="/assets/js/auth.js"></script>
@@ -263,20 +275,21 @@ function renderPage() {
   const initial = b.business_name.charAt(0).toUpperCase();
   const joinDate = new Date(b.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
-  const ctaBtnHtml = b.cta_btn_text && b.cta_btn_url
-    ? `<a href="${escAttr(b.cta_btn_url)}" target="_blank" class="btn" style="background:var(--accent);color:white;font-weight:700;padding:8px 16px;border-radius:999px;font-size:0.88rem;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;box-shadow:var(--shadow-md);" onmouseover="this.style.transform='scale(1.03)';this.style.opacity='0.95';" onmouseout="this.style.transform='scale(1)';this.style.opacity='1';">
-        <span>⚡</span> ${escHtml(b.cta_btn_text)}
-       </a>`
-    : "";
-
   const reportBtnHtml = !isOwner
     ? `<button onclick="openReportModal()" style="background:none;border:none;color:#a0aec0;font-size:0.82rem;cursor:pointer;padding:4px 8px;">⚑ Report</button>`
     : "";
+
   const followBtnHtml = user && !isOwner
-    ? `<button class="follow-btn ${b.is_following ? "following" : "not-following"}" id="followBtn" onclick="toggleFollow()">${b.is_following ? "✓ Following" : "+ Follow"}</button> ${reportBtnHtml}`
+    ? `<button class="follow-btn ${b.is_following ? "following" : "not-following"}" id="followBtn" onclick="toggleFollow()">${b.is_following ? "✓ Following" : "+ Follow"}</button>`
     : isOwner
     ? `<span class="btn btn-ghost btn-sm" style="cursor:default;">Your page</span> <a href="/edit-business.html" class="btn btn-primary btn-sm">✏️ Edit Profile</a>`
-    : `<a href="/login.html" class="btn btn-primary btn-sm">+ Follow</a> ${reportBtnHtml}`;
+    : `<a href="/login.html" class="btn btn-primary btn-sm">+ Follow</a>`;
+
+  const messageBtnHtml = !isOwner
+    ? (user 
+        ? `<button class="btn btn-ghost btn-sm" onclick="openMessageModal()" style="display:inline-flex;align-items:center;gap:6px;font-weight:600;"><span style="font-size:1rem;">💬</span> Message</button>`
+        : `<a href="/login.html" class="btn btn-ghost btn-sm" style="display:inline-flex;align-items:center;gap:6px;font-weight:600;"><span style="font-size:1rem;">💬</span> Message</a>`)
+    : "";
 
   const wrap = document.getElementById("mainWrap");
   wrap.style.cssText = "max-width:1060px;margin:0 auto;padding:28px 24px;display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start;";
@@ -288,7 +301,7 @@ function renderPage() {
         <div class="profile-body">
           <div class="logo-wrap">
             <div class="biz-logo">${b.logo_url ? `<img src="${escAttr(b.logo_url)}" style="width:100%;height:100%;object-fit:cover;" />` : initial}</div>
-            <div style="display:flex;gap:8px;align-items:center;">${ctaBtnHtml} ${followBtnHtml}</div>
+            <div style="display:flex;gap:8px;align-items:center;">${followBtnHtml} ${messageBtnHtml} ${reportBtnHtml}</div>
           </div>
           <div class="biz-name">${escHtml(b.business_name)}</div>
           <div style="font-size:0.88rem;color:var(--muted);margin-bottom:6px;">
@@ -964,6 +977,54 @@ async function submitReport() {
     msg.style.display = "block";
     msg.style.color = "#e53e3e";
     msg.textContent = "Connection error.";
+  }
+}
+
+function openMessageModal() {
+  if (!getUser()) {
+    window.location.href = "/login.html";
+    return;
+  }
+  document.getElementById("messageModal").style.display = "flex";
+}
+
+function closeMessageModal() {
+  document.getElementById("messageModal").style.display = "none";
+  document.getElementById("quickMessageText").value = "";
+}
+
+async function submitQuickMessage() {
+  const text = document.getElementById("quickMessageText").value.trim();
+  if (!text) {
+    showToast("Please write a message first.");
+    return;
+  }
+
+  const btn = document.getElementById("sendQuickMessageBtn");
+  btn.disabled = true;
+  btn.textContent = "Sending...";
+
+  try {
+    const res = await fetch(`${API}/api/messages/chat/business/${bizData.id}`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ message: text })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast("Message sent! Redirecting to chat...");
+      closeMessageModal();
+      setTimeout(() => {
+        window.location.href = `/messages.html?type=business&id=${bizData.id}&name=${encodeURIComponent(bizData.business_name)}`;
+      }, 1200);
+    } else {
+      showToast(data.error || "Failed to send message.");
+    }
+  } catch (err) {
+    showToast("Connection error.");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Send Message";
   }
 }
 </script>

@@ -128,6 +128,26 @@ function renderTopbarAuth(containerId, options = {}) {
       <a href="${profileLink}" class="btn btn-ghost btn-sm">${escHtml(name.split(" ")[0])}</a>
       <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign out</button>
     `;
+
+    // Inject Messages link to topbar-nav if logged in
+    const topNav = document.querySelector(".topbar-nav") || document.getElementById("topbarNav");
+    if (topNav) {
+      const hasMsgLink = Array.from(topNav.querySelectorAll("a")).some(a => {
+        const href = a.getAttribute("href");
+        return href && href.includes("messages.html");
+      });
+      if (!hasMsgLink) {
+        const isMessagesActive = window.location.pathname.includes("messages.html");
+        const msgLink = document.createElement("a");
+        msgLink.href = "/messages.html";
+        msgLink.textContent = "Messages";
+        if (isMessagesActive) {
+          msgLink.className = "active";
+          topNav.querySelectorAll("a").forEach(a => a.classList.remove("active"));
+        }
+        topNav.appendChild(msgLink);
+      }
+    }
   } else {
     container.innerHTML = `
       <a href="/login.html" class="btn btn-ghost btn-sm">Sign in</a>

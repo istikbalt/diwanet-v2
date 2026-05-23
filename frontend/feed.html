@@ -135,6 +135,7 @@
       <a class="nav-item active" href="feed.html"><span>🏠</span> Feed</a>
       <a class="nav-item" href="categories.html"><span>🔍</span> Explore</a>
       <a class="nav-item" id="profileNavLink" href="#"><span>👤</span> Profile</a>
+      <a class="nav-item" id="messagesNavLink" href="messages.html" style="display: none;"><span>💬</span> Messages <span id="msgBadge"></span></a>
       <button class="nav-item" id="notifBtn"><span>🔔</span> Notifications <span id="notifBadge"></span></button>
     </div>
   </aside>
@@ -196,17 +197,25 @@ function setupUI() {
       <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign out</button>`;
     const navLink = document.getElementById("profileNavLink");
     navLink.href = user.role === "business_owner" && business ? `/b/${business.slug}` : `profile.html?id=${user.id}`;
+    
+    // Show messages sidebar nav item
+    const msgLink = document.getElementById("messagesNavLink");
+    if (msgLink) msgLink.style.display = "block";
+
     if (user.role === "business_owner" && business) {
       document.getElementById("composeBox").classList.add("visible");
       document.getElementById("composeAvatar").textContent = business.business_name.charAt(0).toUpperCase();
     }
     renderFollowingWidget();
     loadNotifCount();
+    loadUnreadMessagesCount();
   } else {
     authArea.innerHTML = `
       <a href="login.html" class="btn btn-ghost btn-sm">Sign in</a>
       <a href="signup.html" class="btn btn-primary btn-sm">Sign up</a>`;
     document.getElementById("profileNavLink").style.display = "none";
+    const msgLink = document.getElementById("messagesNavLink");
+    if (msgLink) msgLink.style.display = "none";
     renderGuestSidebar();
   }
 }
@@ -255,6 +264,24 @@ async function loadNotifCount() {
       const badge = document.getElementById("notifBadge");
       badge.textContent = data.unread_count;
       badge.style.cssText = "background:var(--danger);color:white;border-radius:999px;padding:1px 7px;font-size:0.74rem;font-weight:700;margin-left:4px;";
+    }
+  } catch {}
+}
+
+async function loadUnreadMessagesCount() {
+  if (!getToken()) return;
+  try {
+    const res = await fetch(`${API}/api/messages/conversations`, { headers: authHeaders() });
+    const data = await res.json();
+    if (data.success && data.conversations) {
+      const unreadCount = data.conversations.reduce((sum, c) => sum + (c.unread_count || 0), 0);
+      if (unreadCount > 0) {
+        const badge = document.getElementById("msgBadge");
+        if (badge) {
+          badge.textContent = unreadCount;
+          badge.style.cssText = "background:var(--danger);color:white;border-radius:999px;padding:1px 7px;font-size:0.74rem;font-weight:700;margin-left:4px;";
+        }
+      }
     }
   } catch {}
 }
