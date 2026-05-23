@@ -1,7 +1,11 @@
 // assets/js/auth.js
 // Tüm sayfalar tarafından kullanılan ortak auth fonksiyonları
 
-const API = "https://diwanet.com";
+const API = (window.location.origin && window.location.origin.startsWith("http"))
+  ? (window.location.origin.includes("localhost") || window.location.origin.includes("127.0.0.1")
+      ? "http://localhost:5000"
+      : window.location.origin)
+  : "https://diwanet.com";
 
 // LocalStorage helpers
 function getToken() {

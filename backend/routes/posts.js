@@ -239,8 +239,6 @@ router.post("/:id/comments", async (req, res) => {
   }
 });
 
-module.exports = router;
-
 // POST /api/posts/:id/share
 router.post("/:id/share", async (req, res) => {
   const pool = req.app.locals.pool;
@@ -311,3 +309,5 @@ router.put("/:postId/comments/:commentId", async (req, res) => {
     return res.status(500).json({ success: false, error: error.message });
   }
 });
+
+module.exports = router;
