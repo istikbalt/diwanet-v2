@@ -53,13 +53,13 @@ async function doLogout() {
     } catch {}
   }
   clearAuth();
-  window.location.href = "index.html";
+  window.location.href = "/index.html";
 }
 
 // Redirect if not logged in
 function requireLogin() {
   if (!getToken()) {
-    window.location.href = "login.html";
+    window.location.href = "/login.html";
     return false;
   }
   return true;
@@ -69,7 +69,7 @@ function requireLogin() {
 function requireBusiness() {
   const user = getUser();
   if (!user || user.role !== "business_owner") {
-    window.location.href = "login.html";
+    window.location.href = "/login.html";
     return false;
   }
   return true;
@@ -123,15 +123,15 @@ function renderTopbarAuth(containerId, options = {}) {
     const name = business ? business.business_name : `${user.first_name} ${user.last_name}`;
     const profileLink = business
       ? `/b/${business.slug}`
-      : `profile.html?id=${user.id}`;
+      : `/profile.html?id=${user.id}`;
     container.innerHTML = `
       <a href="${profileLink}" class="btn btn-ghost btn-sm">${escHtml(name.split(" ")[0])}</a>
       <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign out</button>
     `;
   } else {
     container.innerHTML = `
-      <a href="login.html" class="btn btn-ghost btn-sm">Sign in</a>
-      <a href="signup.html" class="btn btn-primary btn-sm">Sign up</a>
+      <a href="/login.html" class="btn btn-ghost btn-sm">Sign in</a>
+      <a href="/signup.html" class="btn btn-primary btn-sm">Sign up</a>
     `;
   }
 }
@@ -173,8 +173,8 @@ function injectCookieConsent() {
     <div style="font-weight: 500;">
       🍪 <strong>Cookie Consent</strong><br>
       We use cookies to enhance your experience. By continuing to browse, you agree to our 
-      <a href="privacy-policy.html" style="color:#60a5fa;text-decoration:underline;font-weight:600;">Privacy Policy</a> and 
-      <a href="terms.html" style="color:#60a5fa;text-decoration:underline;font-weight:600;">Terms of Service</a>.
+      <a href="/privacy-policy.html" style="color:#60a5fa;text-decoration:underline;font-weight:600;">Privacy Policy</a> and 
+      <a href="/terms.html" style="color:#60a5fa;text-decoration:underline;font-weight:600;">Terms of Service</a>.
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:2px;">
       <button id="cookie-decline-btn" style="background:transparent;color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.3);padding:7px 16px;border-radius:8px;cursor:pointer;font-size:0.78rem;font-weight:600;font-family:inherit;transition:all 0.2s;">Decline</button>

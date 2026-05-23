@@ -6,7 +6,7 @@
   <title>Business · Diwanet</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
   <style>
     .wrap { max-width: 1060px; margin: 0 auto; padding: 28px 24px; display: grid; grid-template-columns: 1fr 300px; gap: 24px; align-items: start; }
 
@@ -150,7 +150,7 @@
 
 <header class="topbar">
   <div class="topbar-inner">
-    <a href="index.html" class="brand">
+    <a href="/index.html" class="brand">
       <div class="brand-mark">D</div>
       <span class="brand-name">Diwanet</span>
     </a>
@@ -175,7 +175,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="assets/js/auth.js"></script>
+<script src="/assets/js/auth.js"></script>
 <script>
 let bizData = null, shareTargetId = null;
 
@@ -188,9 +188,9 @@ function showToast(msg) {
 function setupNav() {
   const user = getUser(), biz = getBusiness(), navRight = document.getElementById("navRight");
   if (user) {
-    navRight.innerHTML = `<a href="feed.html" class="btn btn-ghost btn-sm">Feed</a><button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign out</button>`;
+    navRight.innerHTML = `<a href="/feed.html" class="btn btn-ghost btn-sm">Feed</a><button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign out</button>`;
   } else {
-    navRight.innerHTML = `<a href="login.html" class="btn btn-ghost btn-sm">Sign in</a><a href="signup.html" class="btn btn-primary btn-sm">Join free</a>`;
+    navRight.innerHTML = `<a href="/login.html" class="btn btn-ghost btn-sm">Sign in</a><a href="/signup.html" class="btn btn-primary btn-sm">Join free</a>`;
   }
 }
 
@@ -252,7 +252,7 @@ function renderCompletionBar(b) {
         ${missing.map(s => `
           <div style="display:flex;align-items:center;justify-content:space-between;font-size:0.85rem;">
             <span style="color:#718096;">⚠️ ${s.label}</span>
-            <a href="edit-business.html" style="color:#3b82f6;font-weight:600;font-size:0.82rem;">Fix →</a>
+            <a href="/edit-business.html" style="color:#3b82f6;font-weight:600;font-size:0.82rem;">Fix →</a>
           </div>`).join("")}
       </div>
     </div>`;
@@ -269,8 +269,8 @@ function renderPage() {
   const followBtnHtml = user && !isOwner
     ? `<button class="follow-btn ${b.is_following ? "following" : "not-following"}" id="followBtn" onclick="toggleFollow()">${b.is_following ? "✓ Following" : "+ Follow"}</button> ${reportBtnHtml}`
     : isOwner
-    ? `<span class="btn btn-ghost btn-sm" style="cursor:default;">Your page</span> <a href="edit-business.html" class="btn btn-primary btn-sm">✏️ Edit Profile</a>`
-    : `<a href="login.html" class="btn btn-primary btn-sm">+ Follow</a> ${reportBtnHtml}`;
+    ? `<span class="btn btn-ghost btn-sm" style="cursor:default;">Your page</span> <a href="/edit-business.html" class="btn btn-primary btn-sm">✏️ Edit Profile</a>`
+    : `<a href="/login.html" class="btn btn-primary btn-sm">+ Follow</a> ${reportBtnHtml}`;
 
   const wrap = document.getElementById("mainWrap");
   wrap.style.cssText = "max-width:1060px;margin:0 auto;padding:28px 24px;display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start;";
@@ -341,7 +341,7 @@ function renderPage() {
           ${b.tiktok_url ? `<a href="${escAttr(b.tiktok_url)}" target="_blank" style="color:var(--accent);text-decoration:none;font-size:0.85rem;">TikTok</a>` : ""}
         </div></div>` : ""}
       </div>
-      ${!user ? `<div class="join-widget"><h3>Join Diwanet</h3><p>Follow businesses, like and comment on posts.</p><a href="signup.html" class="j-btn j-primary">Create free account</a><a href="login.html" class="j-btn j-ghost">Sign in</a></div>` : ""}
+      ${!user ? `<div class="join-widget"><h3>Join Diwanet</h3><p>Follow businesses, like and comment on posts.</p><a href="/signup.html" class="j-btn j-primary">Create free account</a><a href="/login.html" class="j-btn j-ghost">Sign in</a></div>` : ""}
     </div>`;
 
   loadPosts();
@@ -402,7 +402,7 @@ function renderPost(p) {
        <div class="action-sep"></div>
        <button class="action-btn" onclick="openShare(${p.id},'${escAttr(p.business_name)}','${escAttr((p.content || "").substring(0, 80))}')">🔁 ${p.share_count}</button>
        ${ownerActions}`
-    : `<span class="action-btn" style="cursor:default;">🤍 ${p.like_count}</span><div class="action-sep"></div><span class="action-btn" style="cursor:default;">💬 ${p.comment_count}</span><div class="action-sep"></div><a href="login.html" class="action-btn" style="text-decoration:none;color:var(--accent);font-weight:600;">Sign in to interact</a>`;
+    : `<span class="action-btn" style="cursor:default;">🤍 ${p.like_count}</span><div class="action-sep"></div><span class="action-btn" style="cursor:default;">💬 ${p.comment_count}</span><div class="action-sep"></div><a href="/login.html" class="action-btn" style="text-decoration:none;color:var(--accent);font-weight:600;">Sign in to interact</a>`;
 
       const mediaHtml = (() => {
       const imgs = p.images ? (typeof p.images === "string" ? JSON.parse(p.images) : p.images) : null;
@@ -433,7 +433,7 @@ function renderPost(p) {
       <div class="comment-list" id="clist-${p.id}"></div>
       ${canInteract
         ? `<div class="c-input-row"><textarea class="c-input" id="cinput-${p.id}" rows="1" placeholder="Write a comment..."></textarea><button class="c-send" onclick="submitComment(${p.id})">Send</button></div>`
-        : `<p style="font-size:0.84rem;color:var(--muted);"><a href="login.html" style="color:var(--accent);font-weight:600;">Sign in</a> to comment</p>`}
+        : `<p style="font-size:0.84rem;color:var(--muted);"><a href="/login.html" style="color:var(--accent);font-weight:600;">Sign in</a> to comment</p>`}
     </div>
   </div>`;
 }
@@ -456,7 +456,7 @@ async function toggleFollow() {
 }
 
 async function toggleLike(postId) {
-  if (!getToken()) { window.location.href = "login.html"; return; }
+  if (!getToken()) { window.location.href = "/login.html"; return; }
   const btn = document.getElementById(`like-${postId}`); btn.disabled = true;
   try {
     const res = await fetch(`${API}/api/posts/${postId}/like`, { method: "POST", headers: authHeaders() });
@@ -485,7 +485,7 @@ async function loadComments(postId) {
     list.innerHTML = data.comments.map(c => {
       const isBiz = c.commenter_type === "business";
       const name = isBiz ? escHtml(c.business_name) : escHtml(`${c.first_name} ${c.last_name}`);
-      const link = isBiz ? `/b/${c.business_slug}` : `profile.html?id=${c.commenter_user_id}`;
+      const link = isBiz ? `/b/${c.business_slug}` : `/profile.html?id=${c.commenter_user_id}`;
       const isMyComment = biz ? c.commenter_business_id === biz.id : (user && c.commenter_user_id === user.id);
       const menuBtn = isMyComment ? `<div class="c-menu-wrap" style="position:relative;margin-left:auto;">
         <button class="c-menu-btn" onclick="toggleCommentMenu(this)" style="background:none;border:none;cursor:pointer;color:var(--muted2);font-size:1.1rem;padding:2px 6px;border-radius:6px;line-height:1;">···</button>
@@ -632,7 +632,7 @@ async function submitPost() {
 }
 
 function openShare(postId, authorName, preview) {
-  if (!getToken()) { window.location.href = "login.html"; return; }
+  if (!getToken()) { window.location.href = "/login.html"; return; }
   shareTargetId = postId;
   document.getElementById("sharePreview").innerHTML = `<strong>${escHtml(authorName)}</strong>${escHtml(preview)}${preview.length >= 80 ? "…" : ""}`;
   document.getElementById("shareComment").value = "";
