@@ -261,7 +261,7 @@
       const coverImg = b.cover_url ? `<img src="${escAttr(b.cover_url)}" alt="">` : "";
 
       return `
-        <a href="business.html?slug=${escAttr(b.slug)}" class="biz-card">
+        <a href="/b/${escAttr(b.slug)}" class="biz-card">
           <div class="biz-cover" ${coverStyle}>${coverImg}</div>
           <div class="biz-body">
             <div class="biz-logo-wrap">

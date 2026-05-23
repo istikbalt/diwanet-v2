@@ -305,7 +305,7 @@ async function loadBusiness() {
   const biz = getBusiness();
   if (!user || !biz) { window.location.href = "login.html"; return; }
   currentSlug = biz.slug;
-  document.getElementById("viewPageBtn").href = `business.html?slug=${currentSlug}`;
+  document.getElementById("viewPageBtn").href = `/b/${currentSlug}`;
   try {
     const res = await fetch(`${API}/api/business/${currentSlug}`);
     const data = await res.json();
@@ -421,7 +421,7 @@ async function saveProfile() {
       const biz = getBusiness();
       if (biz) { biz.business_name = data.business.business_name; localStorage.setItem("dn_business", JSON.stringify(biz)); }
       showMsg("Profile saved successfully!", "success");
-      setTimeout(() => { window.location.href = `business.html?slug=${currentSlug}`; }, 1200);
+      setTimeout(() => { window.location.href = `/b/${currentSlug}`; }, 1200);
     } else { showMsg(data.error || "Save failed.", "error"); }
   } catch (e) { showMsg("Connection error: " + e.message, "error"); }
   btn.disabled = false; btn.textContent = "Save Changes";

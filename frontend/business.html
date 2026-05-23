@@ -194,8 +194,20 @@ function setupNav() {
   }
 }
 
+function getProfileSlug() {
+  let slug = new URLSearchParams(window.location.search).get("slug");
+  if (!slug) {
+    const parts = window.location.pathname.split("/");
+    const bIndex = parts.indexOf("b");
+    if (bIndex !== -1 && parts[bIndex + 1]) {
+      slug = parts[bIndex + 1];
+    }
+  }
+  return slug;
+}
+
 async function loadBusiness() {
-  const slug = new URLSearchParams(window.location.search).get("slug");
+  const slug = getProfileSlug();
   if (!slug) { document.getElementById("mainWrap").innerHTML = '<div class="loading">No business specified.</div>'; return; }
   const headers = getToken() ? { "Authorization": "Bearer " + getToken() } : {};
   try {
@@ -343,7 +355,7 @@ function switchTab(tab) {
 }
 
 async function loadPosts() {
-  const slug = new URLSearchParams(window.location.search).get("slug");
+  const slug = getProfileSlug();
   const headers = getToken() ? { "Authorization": "Bearer " + getToken() } : {};
   try {
     const res = await fetch(`${API}/api/business/${slug}/posts`, { headers });
@@ -355,7 +367,7 @@ async function loadPosts() {
 }
 
 async function loadTagged() {
-  const slug = new URLSearchParams(window.location.search).get("slug");
+  const slug = getProfileSlug();
   const headers = getToken() ? { "Authorization": "Bearer " + getToken() } : {};
   try {
     const res = await fetch(`${API}/api/business/${slug}/posts`, { headers });
@@ -367,7 +379,7 @@ async function loadTagged() {
         <div class="post-header">
           <div class="avatar avatar-md">${t.logo_url ? `<img src="${escAttr(t.logo_url)}" alt="">` : t.business_name.charAt(0)}</div>
           <div>
-            <div class="post-author"><a href="business.html?slug=${t.business_slug}" style="color:var(--text);text-decoration:none;">${escHtml(t.business_name)}</a> tagged this page</div>
+            <div class="post-author"><a href="/b/${t.business_slug}" style="color:var(--text);text-decoration:none;">${escHtml(t.business_name)}</a> tagged this page</div>
             <div class="post-time">${timeAgo(t.created_at)}</div>
           </div>
         </div>
@@ -473,7 +485,7 @@ async function loadComments(postId) {
     list.innerHTML = data.comments.map(c => {
       const isBiz = c.commenter_type === "business";
       const name = isBiz ? escHtml(c.business_name) : escHtml(`${c.first_name} ${c.last_name}`);
-      const link = isBiz ? `business.html?slug=${c.business_slug}` : `profile.html?id=${c.commenter_user_id}`;
+      const link = isBiz ? `/b/${c.business_slug}` : `profile.html?id=${c.commenter_user_id}`;
       const isMyComment = biz ? c.commenter_business_id === biz.id : (user && c.commenter_user_id === user.id);
       const menuBtn = isMyComment ? `<div class="c-menu-wrap" style="position:relative;margin-left:auto;">
         <button class="c-menu-btn" onclick="toggleCommentMenu(this)" style="background:none;border:none;cursor:pointer;color:var(--muted2);font-size:1.1rem;padding:2px 6px;border-radius:6px;line-height:1;">···</button>

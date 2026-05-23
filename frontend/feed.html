@@ -190,12 +190,12 @@ function setupUI() {
   if (user) {
     const name = business ? business.business_name : `${user.first_name} ${user.last_name}`;
     const initial = name.charAt(0).toUpperCase();
-    const profileLink = user.role === "business_owner" ? `business.html?slug=${business?.slug}` : `profile.html?id=${user.id}`;
+    const profileLink = user.role === "business_owner" ? `/b/${business?.slug}` : `profile.html?id=${user.id}`;
     authArea.innerHTML = `
       <a href="${profileLink}" class="btn btn-ghost btn-sm">${initial} ${escHtml(name)}</a>
       <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign out</button>`;
     const navLink = document.getElementById("profileNavLink");
-    navLink.href = user.role === "business_owner" && business ? `business.html?slug=${business.slug}` : `profile.html?id=${user.id}`;
+    navLink.href = user.role === "business_owner" && business ? `/b/${business.slug}` : `profile.html?id=${user.id}`;
     if (user.role === "business_owner" && business) {
       document.getElementById("composeBox").classList.add("visible");
       document.getElementById("composeAvatar").textContent = business.business_name.charAt(0).toUpperCase();
@@ -234,7 +234,7 @@ async function renderFollowingWidget() {
     const following = data.following || [];
     const html = following.length > 0
       ? following.slice(0, 6).map(b => `
-          <a class="business-item" href="business.html?slug=${b.slug}">
+          <a class="business-item" href="/b/${b.slug}">
             <div class="b-avatar">${b.business_name.charAt(0)}</div>
             <div><div class="b-name">${escHtml(b.business_name)}</div><div class="b-cat">${escHtml(b.category_name || "")}</div></div>
           </a>`).join("")
@@ -284,10 +284,10 @@ function loadMore() { page++; loadFeed(false); }
 function renderPost(p) {
   const isShare = p.post_type === "share", isBiz = p.author_type === "business";
   const authorName = isBiz ? escHtml(p.business_name) : escHtml(`${p.first_name} ${p.last_name}`);
-  const authorLink = isBiz ? `business.html?slug=${p.business_slug}` : `profile.html?id=${p.user_id}`;
+  const authorLink = isBiz ? `/b/${p.business_slug}` : `profile.html?id=${p.user_id}`;
   const avatarClass = isBiz ? "post-avatar" : "post-avatar individual";
   const sharedBlock = isShare && p.original_post
-    ? `<div class="shared-post"><div class="shared-from">Originally posted by <a href="business.html?slug=${p.original_post.business_slug}">${escHtml(p.original_post.business_name)}</a></div><div class="shared-content">${escHtml(p.original_post.content).substring(0, 200)}${p.original_post.content.length > 200 ? "…" : ""}</div></div>`
+    ? `<div class="shared-post"><div class="shared-from">Originally posted by <a href="/b/${p.original_post.business_slug}">${escHtml(p.original_post.business_name)}</a></div><div class="shared-content">${escHtml(p.original_post.content).substring(0, 200)}${p.original_post.content.length > 200 ? "…" : ""}</div></div>`
     : "";
   const imgUrl = p.image_url || (p.post_type === "share" && p.original_post?.image_url ? p.original_post.image_url : null);
   const imageBlock = imgUrl ? `<img class="post-image" src="${escHtml(imgUrl)}" alt="" loading="lazy" />` : "";
@@ -362,7 +362,7 @@ async function loadComments(postId) {
     list.innerHTML = data.comments.map(c => {
       const isBiz = c.commenter_type === "business";
       const name = isBiz ? escHtml(c.business_name) : escHtml(`${c.first_name} ${c.last_name}`);
-      const link = isBiz ? `business.html?slug=${c.business_slug}` : `profile.html?id=${c.commenter_user_id}`;
+      const link = isBiz ? `/b/${c.business_slug}` : `profile.html?id=${c.commenter_user_id}`;
       const isMyComment = biz ? c.commenter_business_id === biz.id : (user && c.commenter_user_id === user.id);
       const menuBtn = isMyComment ? `<div class="c-menu-wrap" style="position:relative;margin-left:auto;">
         <button class="c-menu-btn" onclick="toggleCommentMenu(this)" style="background:none;border:none;cursor:pointer;color:var(--muted2);font-size:1.1rem;padding:2px 6px;border-radius:6px;line-height:1;">···</button>

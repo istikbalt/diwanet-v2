@@ -526,6 +526,7 @@
           <a href="feed.html">Feed</a>
           <a href="create-business.html">Create Page</a>
           <a href="privacy-policy.html">Privacy Policy</a>
+          <a href="terms.html">Terms of Service</a>
         </div>
         <div style="font-size: 0.82rem; color: var(--muted);">© 2025 Diwanet. All rights reserved.</div>
       </div>
@@ -559,7 +560,7 @@
           ? `style="background-image:url(${escAttr(b.cover_url)});background-size:cover;background-position:center;"`
           : "";
         return `
-          <a href="business.html?slug=${escAttr(b.slug)}" class="biz-card" style="text-decoration:none;color:inherit;display:block;">
+          <a href="/b/${escAttr(b.slug)}" class="biz-card" style="text-decoration:none;color:inherit;display:block;">
             <div class="biz-cover" ${coverStyle}></div>
             <div class="biz-body">
               <div class="biz-logo-wrap"><div class="biz-logo">${logoHtml}</div></div>

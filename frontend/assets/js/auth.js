@@ -122,7 +122,7 @@ function renderTopbarAuth(containerId, options = {}) {
   if (user) {
     const name = business ? business.business_name : `${user.first_name} ${user.last_name}`;
     const profileLink = business
-      ? `business.html?slug=${business.slug}`
+      ? `/b/${business.slug}`
       : `profile.html?id=${user.id}`;
     container.innerHTML = `
       <a href="${profileLink}" class="btn btn-ghost btn-sm">${escHtml(name.split(" ")[0])}</a>
@@ -134,4 +134,73 @@ function renderTopbarAuth(containerId, options = {}) {
       <a href="signup.html" class="btn btn-primary btn-sm">Sign up</a>
     `;
   }
+}
+
+// Dynamic Cookie Consent Banner Injection
+function injectCookieConsent() {
+  if (localStorage.getItem("dn_cookie_consent")) return;
+  const banner = document.createElement("div");
+  banner.id = "dn-cookie-banner";
+  banner.style.cssText = `
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    right: 24px;
+    max-width: 440px;
+    background: rgba(20, 33, 61, 0.95);
+    color: white;
+    padding: 18px 22px;
+    border-radius: 16px;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.3);
+    z-index: 10000;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+  `;
+  
+  if (window.innerWidth > 600) {
+    banner.style.left = "auto";
+    banner.style.right = "24px";
+  }
+
+  banner.innerHTML = `
+    <div style="font-weight: 500;">
+      🍪 <strong>Cookie Consent</strong><br>
+      We use cookies to enhance your experience. By continuing to browse, you agree to our 
+      <a href="privacy-policy.html" style="color:#60a5fa;text-decoration:underline;font-weight:600;">Privacy Policy</a> and 
+      <a href="terms.html" style="color:#60a5fa;text-decoration:underline;font-weight:600;">Terms of Service</a>.
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:2px;">
+      <button id="cookie-decline-btn" style="background:transparent;color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.3);padding:7px 16px;border-radius:8px;cursor:pointer;font-size:0.78rem;font-weight:600;font-family:inherit;transition:all 0.2s;">Decline</button>
+      <button id="cookie-accept-btn" style="background:#2563eb;color:white;border:none;padding:7px 20px;border-radius:8px;cursor:pointer;font-size:0.78rem;font-weight:700;font-family:inherit;transition:all 0.2s;">Accept</button>
+    </div>
+  `;
+
+  document.body.appendChild(banner);
+
+  document.getElementById("cookie-accept-btn").onmouseover = function() { this.style.background = "#1d4ed8"; };
+  document.getElementById("cookie-accept-btn").onmouseout = function() { this.style.background = "#2563eb"; };
+  document.getElementById("cookie-decline-btn").onmouseover = function() { this.style.background = "rgba(255,255,255,0.1)"; };
+  document.getElementById("cookie-decline-btn").onmouseout = function() { this.style.background = "transparent"; };
+
+  document.getElementById("cookie-accept-btn").onclick = () => {
+    localStorage.setItem("dn_cookie_consent", "accepted");
+    banner.remove();
+  };
+  document.getElementById("cookie-decline-btn").onclick = () => {
+    localStorage.setItem("dn_cookie_consent", "declined");
+    banner.remove();
+  };
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", injectCookieConsent);
+} else {
+  injectCookieConsent();
 }
