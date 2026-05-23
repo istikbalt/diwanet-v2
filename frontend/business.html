@@ -44,6 +44,46 @@
     .post-btn:hover { background: var(--accent-dark); }
     .post-btn:disabled { opacity: 0.5; }
 
+    /* Mentions Dropdown */
+    .mention-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-bottom: 1px solid var(--border);
+    }
+    .mention-item:last-child {
+      border-bottom: none;
+    }
+    .mention-item:hover {
+      background: var(--accent-light);
+    }
+    .mention-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      color: white;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .mention-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .mention-slug {
+      font-size: 0.76rem;
+      color: var(--muted2);
+      margin-top: 1px;
+    }
+
     /* Posts */
     .post { background: white; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 14px; transition: all 0.2s; box-shadow: var(--shadow); }
     .post:hover { box-shadow: var(--shadow-lg); }
@@ -321,7 +361,10 @@ function renderPage() {
       ${isOwner ? renderCompletionBar(b) : ""}
       <div class="compose ${isOwner ? "visible" : ""}" id="composeBox">
         <div class="compose-label">New Post</div>
-        <textarea id="composeText" placeholder="Share an update or tag another business with @slug..."></textarea>
+        <div style="position:relative;">
+          <textarea id="composeText" placeholder="Share an update or tag another business with @slug..."></textarea>
+          <div id="mentionsDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:white;border:1.5px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);z-index:1000;max-height:200px;overflow-y:auto;box-sizing:border-box;"></div>
+        </div>
         <div style="margin-top:10px;">
           <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:0.84rem;color:var(--muted);padding:7px 12px;border-radius:999px;border:1.5px solid var(--border);background:var(--surface2);">
             📷 Add photos/video
@@ -366,6 +409,9 @@ function renderPage() {
     </div>`;
 
   loadPosts();
+  if (isOwner) {
+    setupMentionsAutocomplete();
+  }
 }
 
 function switchTab(tab) {
@@ -894,6 +940,89 @@ function showLightboxMedia(url) {
 function closeLightbox() { document.getElementById("lightbox").classList.remove("open"); document.body.style.overflow = ""; const vid = document.getElementById("lightboxVideo"); vid.pause(); vid.src = ""; }
 function lightboxNav(dir) { lightboxIdx = (lightboxIdx + dir + lightboxUrls.length) % lightboxUrls.length; showLightboxMedia(lightboxUrls[lightboxIdx]); }
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeLightbox(); if (e.key === "ArrowRight") lightboxNav(1); if (e.key === "ArrowLeft") lightboxNav(-1); });
+
+function setupMentionsAutocomplete() {
+  const textarea = document.getElementById("composeText");
+  const dropdown = document.getElementById("mentionsDropdown");
+  if (!textarea || !dropdown) return;
+  
+  let activeTagIndex = -1;
+  let activeTagText = "";
+
+  textarea.addEventListener("input", async (e) => {
+    const val = textarea.value;
+    const cursor = textarea.selectionStart;
+
+    const textBeforeCursor = val.substring(0, cursor);
+    const words = textBeforeCursor.split(/[\s\n]+/);
+    const lastWord = words[words.length - 1];
+
+    if (lastWord && lastWord.startsWith("@")) {
+      const query = lastWord.substring(1);
+      activeTagIndex = textBeforeCursor.lastIndexOf(lastWord);
+      activeTagText = lastWord;
+
+      if (query.length >= 0) {
+        try {
+          const res = await fetch(`${API}/api/search?q=${encodeURIComponent(query)}`);
+          const data = await res.json();
+          if (data.success && data.businesses.length > 0) {
+            renderMentions(data.businesses);
+            dropdown.style.display = "block";
+          } else {
+            dropdown.style.display = "none";
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      } else {
+        dropdown.style.display = "none";
+      }
+    } else {
+      dropdown.style.display = "none";
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#composeBox")) {
+      dropdown.style.display = "none";
+    }
+  });
+
+  window.insertMention = function(slug) {
+    const val = textarea.value;
+    const cursor = textarea.selectionStart;
+    
+    const before = val.substring(0, activeTagIndex);
+    const after = val.substring(cursor);
+    
+    textarea.value = before + "@" + slug + " " + after;
+    dropdown.style.display = "none";
+    textarea.focus();
+    
+    const newCursorPos = activeTagIndex + slug.length + 2; // @ + space
+    textarea.setSelectionRange(newCursorPos, newCursorPos);
+  };
+
+  function renderMentions(businesses) {
+    dropdown.innerHTML = businesses.map(b => {
+      const initial = b.business_name.charAt(0).toUpperCase();
+      const avatarHtml = b.logo_url 
+        ? `<img src="${escHtml(b.logo_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" />`
+        : initial;
+      
+      return `
+        <div class="mention-item" onclick="insertMention('${b.slug}')">
+          <div class="mention-avatar">${avatarHtml}</div>
+          <div style="display:flex;flex-direction:column;min-width:0;text-align:left;">
+            <span class="mention-name">${escHtml(b.business_name)}</span>
+            <span class="mention-slug">@${escHtml(b.slug)}</span>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+}
 
 setupNav(); loadNotifications(); loadBusiness();
 </script>
