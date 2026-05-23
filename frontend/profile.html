@@ -181,16 +181,30 @@
             <p>Shares will appear here when this user shares business posts.</p>
           </div>`;
       } else {
-        document.getElementById("tab-shares").innerHTML = data.shares.map(s => `
-          <div class="card">
-            <div class="card-label">🔁 Shared from <a href="business.html?slug=${s.original_business_slug}">${escHtml(s.original_business_name)}</a></div>
-            ${s.content ? `<div class="card-content">${escHtml(s.content)}</div>` : ""}
-            <div class="shared-preview">
-              <div class="from">Original by <a href="business.html?slug=${s.original_business_slug}">${escHtml(s.original_business_name)}</a></div>
-              <div class="text">${escHtml((s.original_content || "").substring(0, 180))}${(s.original_content || "").length > 180 ? "…" : ""}</div>
+        document.getElementById("tab-shares").innerHTML = data.shares.map(s => {
+          let mediaHtml = "";
+          let images = [];
+          try {
+            images = s.original_images ? JSON.parse(s.original_images) : (s.original_image_url ? [s.original_image_url] : []);
+          } catch (err) {
+            if (s.original_image_url) images = [s.original_image_url];
+          }
+          if (images && images.length > 0 && images[0]) {
+            mediaHtml = `<img src="${escHtml(images[0])}" style="width:100%;max-height:280px;object-fit:cover;border-radius:8px;margin-top:10px;display:block;" />`;
+          }
+          return `
+            <div class="card">
+              <div class="card-label">🔁 Shared from <a href="business.html?slug=${s.original_business_slug}">${escHtml(s.original_business_name)}</a></div>
+              ${s.content ? `<div class="card-content" style="margin-bottom:10px;">${escHtml(s.content)}</div>` : ""}
+              <div class="shared-preview">
+                <div class="from">Original by <a href="business.html?slug=${s.original_business_slug}">${escHtml(s.original_business_name)}</a></div>
+                <div class="text">${escHtml((s.original_content || "").substring(0, 180))}${(s.original_content || "").length > 180 ? "…" : ""}</div>
+                ${mediaHtml}
+              </div>
+              <div class="card-meta">${timeAgo(s.created_at)}</div>
             </div>
-            <div class="card-meta">${timeAgo(s.created_at)}</div>
-          </div>`).join("");
+          `;
+        }).join("");
       }
       
       // Comments Tab

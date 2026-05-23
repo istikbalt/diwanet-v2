@@ -16,7 +16,8 @@ router.get("/:userId", async (req, res) => {
 
     const [shares] = await pool.execute(
       `SELECT p.id, p.content, p.created_at, p.shared_post_id,
-       op.content AS original_content, ob.business_name AS original_business_name, ob.slug AS original_business_slug
+       op.content AS original_content, op.image_url AS original_image_url, op.images AS original_images,
+       ob.business_name AS original_business_name, ob.slug AS original_business_slug
        FROM posts p
        LEFT JOIN posts op ON p.shared_post_id = op.id
        LEFT JOIN businesses ob ON op.author_business_id = ob.id
