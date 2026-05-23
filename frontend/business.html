@@ -263,6 +263,12 @@ function renderPage() {
   const initial = b.business_name.charAt(0).toUpperCase();
   const joinDate = new Date(b.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
+  const ctaBtnHtml = b.cta_btn_text && b.cta_btn_url
+    ? `<a href="${escAttr(b.cta_btn_url)}" target="_blank" class="btn" style="background:var(--accent);color:white;font-weight:700;padding:8px 16px;border-radius:999px;font-size:0.88rem;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;box-shadow:var(--shadow-md);" onmouseover="this.style.transform='scale(1.03)';this.style.opacity='0.95';" onmouseout="this.style.transform='scale(1)';this.style.opacity='1';">
+        <span>⚡</span> ${escHtml(b.cta_btn_text)}
+       </a>`
+    : "";
+
   const reportBtnHtml = !isOwner
     ? `<button onclick="openReportModal()" style="background:none;border:none;color:#a0aec0;font-size:0.82rem;cursor:pointer;padding:4px 8px;">⚑ Report</button>`
     : "";
@@ -282,7 +288,7 @@ function renderPage() {
         <div class="profile-body">
           <div class="logo-wrap">
             <div class="biz-logo">${b.logo_url ? `<img src="${escAttr(b.logo_url)}" style="width:100%;height:100%;object-fit:cover;" />` : initial}</div>
-            <div style="display:flex;gap:8px;align-items:center;">${followBtnHtml}</div>
+            <div style="display:flex;gap:8px;align-items:center;">${ctaBtnHtml} ${followBtnHtml}</div>
           </div>
           <div class="biz-name">${escHtml(b.business_name)}</div>
           <div style="font-size:0.88rem;color:var(--muted);margin-bottom:6px;">
@@ -317,9 +323,11 @@ function renderPage() {
       </div>
       <div class="tabs">
         <button class="tab active" onclick="switchTab('posts')">Posts</button>
+        <button class="tab" onclick="switchTab('services')">Services & Products</button>
         <button class="tab" onclick="switchTab('tagged')">Tagged</button>
       </div>
       <div id="tab-posts" class="tab-content active"><div class="loading">Loading posts...</div></div>
+      <div id="tab-services" class="tab-content"><div class="loading">Loading services & products...</div></div>
       <div id="tab-tagged" class="tab-content"><div class="loading">Loading...</div></div>
     </div>
     <div class="sidebar">
@@ -348,10 +356,59 @@ function renderPage() {
 }
 
 function switchTab(tab) {
-  document.querySelectorAll(".tab").forEach((t, i) => t.classList.toggle("active", ["posts", "tagged"][i] === tab));
+  document.querySelectorAll(".tab").forEach((t, i) => t.classList.toggle("active", ["posts", "services", "tagged"][i] === tab));
   document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
   document.getElementById(`tab-${tab}`).classList.add("active");
   if (tab === "tagged") loadTagged();
+  if (tab === "services") loadServices();
+}
+
+async function loadServices() {
+  const container = document.getElementById("tab-services");
+  container.innerHTML = '<div class="loading">Loading services...</div>';
+  const slug = getProfileSlug();
+  try {
+    const res = await fetch(`${API}/api/business/${slug}/services`);
+    const data = await res.json();
+    if (!data.success || data.services.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state" style="text-align:center;padding:40px 20px;color:var(--muted);">
+          <div style="font-size:3rem;margin-bottom:12px;">📦</div>
+          <h3 style="margin:0;font-size:1.1rem;color:var(--text);">No services or products yet</h3>
+          <p style="margin:6px 0 0;font-size:0.88rem;color:var(--muted2);">This business has not showcased any services or products yet.</p>
+        </div>
+      `;
+      return;
+    }
+    
+    container.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:20px;padding:4px 0;">
+        ${data.services.map(s => `
+          <div class="service-card" style="display:flex;flex-direction:column;border:1px solid var(--border);border-radius:16px;background:white;overflow:hidden;box-shadow:var(--shadow);transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow-md)';" onmouseout="this.style.transform='none';this.style.boxShadow='var(--shadow)';">
+            ${s.image_url 
+              ? `<div style="height:170px;width:100%;border-bottom:1px solid var(--border);position:relative;">
+                   <img src="${escAttr(s.image_url)}" style="width:100%;height:100%;object-fit:cover;" />
+                 </div>` 
+              : `<div style="height:170px;width:100%;display:flex;align-items:center;justify-content:center;background:var(--surface2);border-bottom:1px solid var(--border);font-size:3rem;color:var(--muted);">📦</div>`
+            }
+            <div style="padding:16px;flex:1;display:flex;flex-direction:column;gap:8px;">
+              <h4 style="margin:0;font-size:1.02rem;font-weight:700;color:var(--text);">${escHtml(s.title)}</h4>
+              <p style="margin:0;font-size:0.88rem;color:var(--muted);line-height:1.45;flex:1;">${s.description ? escHtml(s.description) : ""}</p>
+              ${s.price 
+                ? `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
+                     <span style="font-size:0.8rem;color:var(--muted2);font-weight:500;">Fiyat</span>
+                     <span style="font-size:1rem;color:var(--accent);font-weight:800;">${escHtml(s.price)}</span>
+                   </div>` 
+                : ""
+              }
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = '<div class="empty-state"><h3>Could not load services.</h3></div>';
+  }
 }
 
 async function loadPosts() {

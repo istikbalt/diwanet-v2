@@ -245,6 +245,69 @@
     </div>
   </div>
 
+  <div class="edit-card">
+    <div class="card-title">Call to Action (CTA) Button</div>
+    <p style="font-size:0.83rem;color:var(--muted);margin-bottom:14px;line-height:1.4;">Profil sayfanızda, takip et butonunun hemen yanında göz alıcı bir eylem butonu gösterin (Örn: "WhatsApp'tan Yazın", "Teklif Al", "Randevu Al").</p>
+    <div class="grid2">
+      <div class="field">
+        <label>Buton Metni</label>
+        <input id="cta_btn_text" placeholder="Bize Ulaşın, Teklif Al vb. (En fazla 20 karakter)" maxlength="20" />
+      </div>
+      <div class="field">
+        <label>Buton Linki (URL, WhatsApp, Tel veya E-posta)</label>
+        <input id="cta_btn_url" placeholder="https://wa.me/numaraniz, tel:numaraniz, https://..." />
+      </div>
+    </div>
+  </div>
+
+  <div class="edit-card" id="servicesCard">
+    <div class="card-title">Hizmetler & Ürünler Vitrini</div>
+    <p style="font-size:0.83rem;color:var(--muted);margin-bottom:14px;line-height:1.4;">Sunduğunuz hizmetleri veya ürünleri görsel, fiyat ve açıklamalarıyla birlikte listeleyerek müşterilerinize sergileyin.</p>
+    
+    <!-- Hizmet Listesi -->
+    <div id="servicesList" style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;"></div>
+    
+    <!-- Hizmet Formu -->
+    <div id="serviceForm" style="border:1.5px solid var(--border);border-radius:12px;padding:16px;background:var(--surface2);display:none;margin-top:10px;">
+      <h4 id="serviceFormTitle" style="margin-top:0;margin-bottom:12px;font-size:0.95rem;color:var(--text);">Yeni Hizmet / Ürün Ekle</h4>
+      <input type="hidden" id="service_id" />
+      <input type="hidden" id="service_image_url" />
+      
+      <div class="field" style="margin-bottom:10px;">
+        <label style="font-size:0.82rem;font-weight:600;">Başlık *</label>
+        <input id="service_title" placeholder="Hizmet veya ürün adı" />
+      </div>
+      <div class="field" style="margin-bottom:10px;">
+        <label style="font-size:0.82rem;font-weight:600;">Açıklama</label>
+        <textarea id="service_desc" rows="2" placeholder="Hizmet veya ürünün detayları..."></textarea>
+      </div>
+      <div class="field" style="margin-bottom:10px;">
+        <label style="font-size:0.82rem;font-weight:600;">Fiyat (İsteğe Bağlı)</label>
+        <input id="service_price" placeholder="Örn: 500 TL, Başlayan fiyatlarla... " />
+      </div>
+      
+      <!-- Hizmet Resim Yükleme -->
+      <div class="field" style="margin-bottom:14px;">
+        <label style="font-size:0.82rem;font-weight:600;">Görsel</label>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:4px;">
+          <img id="serviceImagePreview" style="width:70px;height:70px;object-fit:cover;border-radius:8px;border:1px solid var(--border);display:none;" />
+          <label style="cursor:pointer;font-size:0.8rem;color:var(--muted);padding:6px 12px;border-radius:999px;border:1.5px solid var(--border);background:white;display:inline-flex;align-items:center;gap:4px;">
+            📷 Fotoğraf Seç
+            <input type="file" id="serviceImageInput" accept="image/*" style="display:none;" onchange="uploadServiceImage(this)" />
+          </label>
+          <div class="uploading-bar" id="serviceBar" style="flex:1;height:4px;display:none;"><div class="bar"></div></div>
+        </div>
+      </div>
+      
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button onclick="saveService()" class="btn btn-accent btn-sm" style="padding:6px 16px;font-size:0.8rem;font-weight:600;background:var(--accent);color:white;border:none;border-radius:999px;cursor:pointer;">Kaydet</button>
+        <button onclick="cancelServiceForm()" class="btn btn-ghost btn-sm" style="padding:6px 16px;font-size:0.8rem;color:var(--muted);background:none;border:1px solid var(--border);border-radius:999px;cursor:pointer;">İptal</button>
+      </div>
+    </div>
+    
+    <button onclick="openNewServiceForm()" class="btn btn-primary btn-sm" style="margin-top:10px;font-weight:600;padding:8px 16px;border-radius:999px;border:none;background:var(--accent);color:white;cursor:pointer;">+ Yeni Hizmet Ekle</button>
+  </div>
+
   <button class="save-btn" id="saveBtn" onclick="saveProfile()">Save Changes</button>
   <div class="msg" id="msg"></div>
 
@@ -344,6 +407,8 @@ async function loadBusiness() {
     document.getElementById("twitter_url").value = b.twitter_url || "";
     document.getElementById("youtube_url").value = b.youtube_url || "";
     document.getElementById("tiktok_url").value = b.tiktok_url || "";
+    document.getElementById("cta_btn_text").value = b.cta_btn_text || "";
+    document.getElementById("cta_btn_url").value = b.cta_btn_url || "";
     document.getElementById("previewName").textContent = b.business_name;
     document.getElementById("previewCat").textContent = b.category_name || "";
     document.getElementById("logoInitial").textContent = b.business_name.charAt(0).toUpperCase();
@@ -353,13 +418,14 @@ async function loadBusiness() {
       img.src = b.logo_url; img.style.display = "block";
       document.getElementById("logoInitial").style.display = "none";
     }
-    if (b.cover_url) {
-      coverUrl = b.cover_url;
-      const img = document.getElementById("coverPreview");
-      img.src = b.cover_url; img.style.display = "block";
-    }
-  } catch (e) { console.error(e); }
-}
+      if (b.cover_url) {
+        coverUrl = b.cover_url;
+        const img = document.getElementById("coverPreview");
+        img.src = b.cover_url; img.style.display = "block";
+      }
+      await loadServicesList();
+    } catch (e) { console.error(e); }
+  }
 
 async function uploadImage(type, input) {
   const file = input.files[0];
@@ -410,6 +476,8 @@ async function saveProfile() {
     twitter_url: document.getElementById("twitter_url").value.trim(),
     youtube_url: document.getElementById("youtube_url").value.trim(),
     tiktok_url: document.getElementById("tiktok_url").value.trim(),
+    cta_btn_text: document.getElementById("cta_btn_text").value.trim(),
+    cta_btn_url: document.getElementById("cta_btn_url").value.trim(),
   };
   if (logoUrl) payload.logo_url = logoUrl;
   if (coverUrl) payload.cover_url = coverUrl;
@@ -426,6 +494,166 @@ async function saveProfile() {
     } else { showMsg(data.error || "Save failed.", "error"); }
   } catch (e) { showMsg("Connection error: " + e.message, "error"); }
   btn.disabled = false; btn.textContent = "Save Changes";
+}
+
+let servicesList = [];
+
+async function loadServicesList() {
+  const container = document.getElementById("servicesList");
+  container.innerHTML = '<p style="font-size:0.83rem;color:var(--muted);">Yükleniyor...</p>';
+  try {
+    const res = await fetch(`${API}/api/business/${currentSlug}/services`);
+    const data = await res.json();
+    if (data.success) {
+      servicesList = data.services;
+      if (servicesList.length === 0) {
+        container.innerHTML = '<p style="font-size:0.83rem;color:var(--muted);font-style:italic;">Henüz hizmet/ürün eklenmemiş.</p>';
+        return;
+      }
+      container.innerHTML = servicesList.map(s => `
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:10px;background:white;box-shadow:var(--shadow-sm);">
+          ${s.image_url ? `<img src="${escAttr(s.image_url)}" style="width:50px;height:50px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" />` : `<div style="width:50px;height:50px;display:flex;align-items:center;justify-content:center;background:var(--surface2);border-radius:6px;border:1px solid var(--border);font-size:1.2rem;">📦</div>`}
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;font-size:0.88rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(s.title)}</div>
+            <div style="font-size:0.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.description ? escHtml(s.description) : ""}</div>
+            ${s.price ? `<div style="font-size:0.8rem;color:var(--accent);font-weight:700;margin-top:2px;">${escHtml(s.price)}</div>` : ""}
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button onclick="editService(${s.id})" style="background:none;border:1px solid var(--border);padding:4px 10px;border-radius:999px;font-size:0.75rem;cursor:pointer;color:var(--text);font-family:inherit;">✏️ Düzenle</button>
+            <button onclick="deleteService(${s.id}, this)" style="background:none;border:1px solid var(--border);padding:4px 10px;border-radius:999px;font-size:0.75rem;cursor:pointer;color:var(--danger);font-family:inherit;">🗑️ Sil</button>
+          </div>
+        </div>
+      `).join("");
+    } else {
+      container.innerHTML = '<p style="font-size:0.83rem;color:var(--danger);">Hizmetler yüklenemedi.</p>';
+    }
+  } catch (err) {
+    container.innerHTML = '<p style="font-size:0.83rem;color:var(--danger);">Hata oluştu.</p>';
+  }
+}
+
+function openNewServiceForm() {
+  document.getElementById("serviceForm").style.display = "block";
+  document.getElementById("serviceFormTitle").textContent = "Yeni Hizmet / Ürün Ekle";
+  document.getElementById("service_id").value = "";
+  document.getElementById("service_title").value = "";
+  document.getElementById("service_desc").value = "";
+  document.getElementById("service_price").value = "";
+  document.getElementById("service_image_url").value = "";
+  document.getElementById("serviceImagePreview").style.display = "none";
+  document.getElementById("service_title").focus();
+}
+
+function cancelServiceForm() {
+  document.getElementById("serviceForm").style.display = "none";
+}
+
+async function uploadServiceImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { showMsg("File too large. Max 5MB.", "error"); return; }
+  
+  const bar = document.getElementById("serviceBar");
+  bar.style.display = "block";
+  const formData = new FormData();
+  formData.append("file", file);
+  try {
+    const res = await fetch(`${API}/api/upload`, { method: "POST", body: formData });
+    const data = await res.json();
+    if (data.url) {
+      document.getElementById("service_image_url").value = data.url;
+      const img = document.getElementById("serviceImagePreview");
+      img.src = data.url;
+      img.style.display = "block";
+      showMsg("Service image uploaded successfully!", "success");
+    } else {
+      showMsg("Upload failed.", "error");
+    }
+  } catch (err) {
+    showMsg("Upload error: " + err.message, "error");
+  }
+  bar.style.display = "none";
+}
+
+async function saveService() {
+  const serviceId = document.getElementById("service_id").value;
+  const title = document.getElementById("service_title").value.trim();
+  const description = document.getElementById("service_desc").value.trim();
+  const price = document.getElementById("service_price").value.trim();
+  const imageUrl = document.getElementById("service_image_url").value;
+
+  if (!title) {
+    showMsg("Başlık alanı zorunludur.", "error");
+    return;
+  }
+
+  const payload = { title, description, price, image_url: imageUrl };
+  const method = serviceId ? "PUT" : "POST";
+  const url = serviceId 
+    ? `${API}/api/business/${currentSlug}/services/${serviceId}` 
+    : `${API}/api/business/${currentSlug}/services`;
+
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: authHeaders(),
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.success) {
+      showMsg(serviceId ? "Hizmet güncellendi!" : "Hizmet başarıyla eklendi!", "success");
+      cancelServiceForm();
+      await loadServicesList();
+    } else {
+      showMsg(data.error || "İşlem başarısız.", "error");
+    }
+  } catch (err) {
+    showMsg("Bağlantı hatası.", "error");
+  }
+}
+
+function editService(id) {
+  const service = servicesList.find(s => s.id === id);
+  if (!service) return;
+
+  document.getElementById("serviceForm").style.display = "block";
+  document.getElementById("serviceFormTitle").textContent = "Hizmeti Düzenle";
+  document.getElementById("service_id").value = service.id;
+  document.getElementById("service_title").value = service.title;
+  document.getElementById("service_desc").value = service.description || "";
+  document.getElementById("service_price").value = service.price || "";
+  document.getElementById("service_image_url").value = service.image_url || "";
+
+  const img = document.getElementById("serviceImagePreview");
+  if (service.image_url) {
+    img.src = service.image_url;
+    img.style.display = "block";
+  } else {
+    img.style.display = "none";
+  }
+  document.getElementById("service_title").focus();
+}
+
+async function deleteService(id, btn) {
+  if (!confirm("Bu hizmeti silmek istediğinizden emin misiniz?")) return;
+  btn.disabled = true; btn.textContent = "Siliniyor...";
+  try {
+    const res = await fetch(`${API}/api/business/${currentSlug}/services/${id}`, {
+      method: "DELETE",
+      headers: authHeaders()
+    });
+    const data = await res.json();
+    if (data.success) {
+      showMsg("Hizmet silindi.", "success");
+      await loadServicesList();
+    } else {
+      showMsg(data.error || "Silme işlemi başarısız.", "error");
+      btn.disabled = false; btn.textContent = "🗑️ Sil";
+    }
+  } catch (err) {
+    showMsg("Bağlantı hatası.", "error");
+    btn.disabled = false; btn.textContent = "🗑️ Sil";
+  }
 }
 
 loadBusiness();

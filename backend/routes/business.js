@@ -88,7 +88,7 @@ router.get("/:slug", async (req, res) => {
     const [rows] = await pool.execute(
       `SELECT b.id, b.business_name, b.slug, b.business_type, b.short_description,
        b.business_email, b.business_phone, b.country, b.city,
-       b.logo_url, b.cover_url, b.website,
+       b.logo_url, b.cover_url, b.website, b.cta_btn_text, b.cta_btn_url,
        b.instagram_url, b.facebook_url, b.linkedin_url, b.twitter_url, b.youtube_url, b.tiktok_url,
        b.created_at, c.name AS category_name, s.name AS subcategory_name,
        (SELECT COUNT(*) FROM follows WHERE following_business_id = b.id) AS follower_count
@@ -138,7 +138,8 @@ router.put("/:slug", async (req, res) => {
   const {
     business_name, short_description, business_email, business_phone,
     city, country, logo_url, cover_url, website, category_id, subcategory_id,
-    instagram_url, facebook_url, linkedin_url, twitter_url, youtube_url, tiktok_url
+    instagram_url, facebook_url, linkedin_url, twitter_url, youtube_url, tiktok_url,
+    cta_btn_text, cta_btn_url
   } = req.body;
 
   try {
@@ -170,6 +171,8 @@ router.put("/:slug", async (req, res) => {
     if (twitter_url !== undefined) { updates.push("twitter_url = ?"); params.push(twitter_url || null); }
     if (youtube_url !== undefined) { updates.push("youtube_url = ?"); params.push(youtube_url || null); }
     if (tiktok_url !== undefined) { updates.push("tiktok_url = ?"); params.push(tiktok_url || null); }
+    if (cta_btn_text !== undefined) { updates.push("cta_btn_text = ?"); params.push(cta_btn_text || null); }
+    if (cta_btn_url !== undefined) { updates.push("cta_btn_url = ?"); params.push(cta_btn_url || null); }
 
     if (updates.length === 0) return res.status(400).json({ success: false, error: "Nothing to update." });
 
@@ -309,8 +312,6 @@ router.get("/:slug/posts", async (req, res) => {
   }
 });
 
-module.exports = router;
-
 // POST /api/business/:slug/report
 router.post("/:slug/report", async (req, res) => {
   const pool = req.app.locals.pool;
@@ -338,3 +339,115 @@ router.post("/:slug/report", async (req, res) => {
     return res.status(500).json({ success: false, error: error.message });
   }
 });
+
+// GET /api/business/:slug/services
+router.get("/:slug/services", async (req, res) => {
+  const pool = req.app.locals.pool;
+  const { slug } = req.params;
+  try {
+    const [businesses] = await pool.execute("SELECT id FROM businesses WHERE slug = ? LIMIT 1", [slug]);
+    if (!businesses.length) return res.status(404).json({ success: false, error: "Business not found." });
+    const bizId = businesses[0].id;
+
+    const [services] = await pool.execute(
+      "SELECT * FROM business_services WHERE business_id = ? ORDER BY created_at DESC", [bizId]
+    );
+    return res.json({ success: true, services });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// POST /api/business/:slug/services
+router.post("/:slug/services", async (req, res) => {
+  const pool = req.app.locals.pool;
+  const session = await requireAuth(pool, req, res);
+  if (!session) return;
+  if (session.user_type !== "business") {
+    return res.status(403).json({ success: false, error: "Only business accounts can manage services." });
+  }
+  const { slug } = req.params;
+  const { title, description, price, image_url } = req.body;
+  if (!title || !title.trim()) {
+    return res.status(400).json({ success: false, error: "Service title is required." });
+  }
+  try {
+    const [businesses] = await pool.execute("SELECT id, owner_user_id FROM businesses WHERE slug = ? LIMIT 1", [slug]);
+    if (!businesses.length) return res.status(404).json({ success: false, error: "Business not found." });
+    const biz = businesses[0];
+    if (biz.owner_user_id !== session.user_id) {
+      return res.status(403).json({ success: false, error: "Not authorized." });
+    }
+
+    const [result] = await pool.execute(
+      "INSERT INTO business_services (business_id, title, description, price, image_url) VALUES (?, ?, ?, ?, ?)",
+      [biz.id, title.trim(), description ? description.trim() : null, price ? price.trim() : null, image_url || null]
+    );
+    return res.json({ success: true, service_id: result.insertId });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// PUT /api/business/:slug/services/:id
+router.put("/:slug/services/:id", async (req, res) => {
+  const pool = req.app.locals.pool;
+  const session = await requireAuth(pool, req, res);
+  if (!session) return;
+  if (session.user_type !== "business") {
+    return res.status(403).json({ success: false, error: "Only business accounts can manage services." });
+  }
+  const { slug, id } = req.params;
+  const { title, description, price, image_url } = req.body;
+  if (!title || !title.trim()) {
+    return res.status(400).json({ success: false, error: "Service title is required." });
+  }
+  try {
+    const [businesses] = await pool.execute("SELECT id, owner_user_id FROM businesses WHERE slug = ? LIMIT 1", [slug]);
+    if (!businesses.length) return res.status(404).json({ success: false, error: "Business not found." });
+    const biz = businesses[0];
+    if (biz.owner_user_id !== session.user_id) {
+      return res.status(403).json({ success: false, error: "Not authorized." });
+    }
+
+    const [services] = await pool.execute("SELECT id FROM business_services WHERE id = ? AND business_id = ? LIMIT 1", [id, biz.id]);
+    if (!services.length) return res.status(404).json({ success: false, error: "Service not found." });
+
+    await pool.execute(
+      "UPDATE business_services SET title = ?, description = ?, price = ?, image_url = ? WHERE id = ?",
+      [title.trim(), description ? description.trim() : null, price ? price.trim() : null, image_url || null, id]
+    );
+    return res.json({ success: true });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// DELETE /api/business/:slug/services/:id
+router.delete("/:slug/services/:id", async (req, res) => {
+  const pool = req.app.locals.pool;
+  const session = await requireAuth(pool, req, res);
+  if (!session) return;
+  if (session.user_type !== "business") {
+    return res.status(403).json({ success: false, error: "Only business accounts can manage services." });
+  }
+  const { slug, id } = req.params;
+  try {
+    const [businesses] = await pool.execute("SELECT id, owner_user_id FROM businesses WHERE slug = ? LIMIT 1", [slug]);
+    if (!businesses.length) return res.status(404).json({ success: false, error: "Business not found." });
+    const biz = businesses[0];
+    if (biz.owner_user_id !== session.user_id) {
+      return res.status(403).json({ success: false, error: "Not authorized." });
+    }
+
+    const [services] = await pool.execute("SELECT id FROM business_services WHERE id = ? AND business_id = ? LIMIT 1", [id, biz.id]);
+    if (!services.length) return res.status(404).json({ success: false, error: "Service not found." });
+
+    await pool.execute("DELETE FROM business_services WHERE id = ?", [id]);
+    return res.json({ success: true });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+module.exports = router;
