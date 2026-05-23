@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile · Diwanet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <style>
+    body { min-height: 100vh; background: var(--bg); color: var(--text); }
+    
+    .wrap { max-width: 900px; margin: 0 auto; padding: 28px 24px; }
+    
+    /* Header Card */
+    .profile-header { background: white; border: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-bottom: 20px; box-shadow: var(--shadow); }
+    .profile-cover { height: 120px; background: linear-gradient(135deg, var(--accent-light), #e8f2fc 50%, #cce3f7); }
+    .profile-body { padding: 0 24px 24px; position: relative; }
+    .profile-avatar-wrap { margin-top: -34px; margin-bottom: 14px; }
+    .profile-avatar { width: 68px; height: 68px; border-radius: 50%; background: linear-gradient(135deg, #60a5fa, #3b82f6); display: grid; place-items: center; font-size: 1.6rem; font-weight: 700; color: white; border: 3px solid white; box-shadow: var(--shadow); }
+    .profile-name { font-family: 'DM Serif Display', serif; font-size: 1.6rem; margin-bottom: 4px; color: var(--text); }
+    .profile-role { display: inline-block; padding: 3px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; background: var(--accent-light); color: var(--accent-dark); margin-bottom: 10px; }
+    .profile-bio { font-size: 0.9rem; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+    
+    /* Stats */
+    .profile-stats { display: flex; gap: 28px; border-top: 1px solid var(--border); padding-top: 16px; }
+    .stat-val { font-size: 1.2rem; font-weight: 800; color: var(--accent); }
+    .stat-lbl { font-size: 0.76rem; color: var(--muted2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+    
+    /* Tabs */
+    .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: white; border: 1px solid var(--border); border-radius: 14px; padding: 5px; box-shadow: var(--shadow); }
+    .tab { flex: 1; padding: 9px; border-radius: 10px; text-align: center; font-size: 0.88rem; font-weight: 600; cursor: pointer; color: var(--muted); border: none; background: none; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+    .tab.active { background: var(--accent); color: white; font-weight: 700; }
+    .tab:hover:not(.active) { background: var(--surface2); }
+    
+    /* Content Cards */
+    .card { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 12px; box-shadow: var(--shadow); transition: all 0.2s; }
+    .card:hover { box-shadow: var(--shadow-lg); border-color: rgba(15, 76, 129, 0.2); }
+    .card-label { font-size: 0.76rem; color: var(--muted2); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .card-label a { color: var(--accent); text-decoration: none; font-weight: 700; }
+    .card-label a:hover { text-decoration: underline; }
+    .card-content { font-size: 0.91rem; line-height: 1.6; color: var(--text); }
+    .card-meta { font-size: 0.76rem; color: var(--muted2); margin-top: 8px; }
+    
+    .shared-preview { margin-top: 10px; padding: 12px; border-radius: 10px; background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--accent); }
+    .shared-preview .from { font-size: 0.76rem; color: var(--muted); margin-bottom: 5px; }
+    .shared-preview .from a { color: var(--accent); text-decoration: none; font-weight: 600; }
+    .shared-preview .text { font-size: 0.87rem; line-height: 1.5; color: var(--text); }
+    
+    /* Following Grid */
+    .following-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .follow-card { background: white; border: 1.5px solid var(--border); border-radius: 14px; padding: 16px; text-decoration: none; transition: all 0.2s; display: block; box-shadow: var(--shadow); }
+    .follow-card:hover { border-color: var(--accent); box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+    .follow-card-avatar { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); display: grid; place-items: center; font-weight: 700; color: white; margin-bottom: 10px; }
+    .follow-card-name { font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .follow-card-cat { font-size: 0.76rem; color: var(--muted2); }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="feed.html" class="brand">
+      <div class="brand-mark">D</div>
+      <span class="brand-name">Diwanet</span>
+    </a>
+    <nav class="topbar-nav" id="topbarNav">
+      <a href="feed.html">Feed</a>
+      <a href="categories.html">Explore</a>
+    </nav>
+    <div class="topbar-actions" id="authArea"></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div id="profileHeader" class="profile-header">
+    <div class="loading">Loading profile...</div>
+  </div>
+  
+  <div class="tabs" id="tabsBar" style="display:none;">
+    <button class="tab active" onclick="switchTab('shares')">Shares</button>
+    <button class="tab" onclick="switchTab('comments')">Comments</button>
+    <button class="tab" onclick="switchTab('following')">Following</button>
+  </div>
+  
+  <div id="tab-shares" class="tab-content active">
+    <div class="loading">Loading...</div>
+  </div>
+  <div id="tab-comments" class="tab-content">
+    <div class="loading">Loading...</div>
+  </div>
+  <div id="tab-following" class="tab-content">
+    <div class="loading">Loading...</div>
+  </div>
+</div>
+
+<script src="assets/js/auth.js"></script>
+<script>
+  function getUserIdFromUrl() {
+    return new URLSearchParams(window.location.search).get("id");
+  }
+
+  function switchTab(tab) {
+    document.querySelectorAll(".tab").forEach((t, i) => {
+      const tabs = ["shares", "comments", "following"];
+      t.classList.toggle("active", tabs[i] === tab);
+    });
+    document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+    document.getElementById(`tab-${tab}`).classList.add("active");
+  }
+
+  function setupNav() {
+    renderTopbarAuth("authArea");
+  }
+
+  async function loadProfile() {
+    const userId = getUserIdFromUrl();
+    if (!userId) {
+      document.getElementById("profileHeader").innerHTML = '<div class="loading">No user specified.</div>';
+      return;
+    }
+    const token = getToken();
+    const headers = token ? { "Authorization": "Bearer " + token } : {};
+    try {
+      const res = await fetch(`${API}/api/profile/${userId}`, { headers });
+      const data = await res.json();
+      if (!data.success) {
+        document.getElementById("profileHeader").innerHTML = '<div class="loading">User not found.</div>';
+        return;
+      }
+      
+      const u = data.user;
+      const initial = (u.first_name || "?").charAt(0).toUpperCase();
+      const fullName = `${u.first_name} ${u.last_name}`;
+      const joinDate = new Date(u.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+      
+      const avatarHtml = u.avatar_url 
+        ? `<img src="${escHtml(u.avatar_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`
+        : escHtml(initial);
+      
+      document.getElementById("profileHeader").innerHTML = `
+        <div class="profile-cover"></div>
+        <div class="profile-body">
+          <div class="profile-avatar-wrap">
+            <div class="profile-avatar">${avatarHtml}</div>
+          </div>
+          <div class="profile-name">${escHtml(fullName)}</div>
+          <div class="profile-role">${u.role === 'business_owner' ? 'Business Owner' : 'Individual Member'}</div>
+          ${u.bio ? `<div class="profile-bio">${escHtml(u.bio)}</div>` : ""}
+          <div class="profile-stats">
+            <div>
+              <div class="stat-val">${data.shares.length}</div>
+              <div class="stat-lbl">Shares</div>
+            </div>
+            <div>
+              <div class="stat-val">${data.comments.length}</div>
+              <div class="stat-lbl">Comments</div>
+            </div>
+            <div>
+              <div class="stat-val">${data.following.length}</div>
+              <div class="stat-lbl">Following</div>
+            </div>
+            <div>
+              <div class="stat-val" style="color:var(--muted2);font-size:0.85rem;">${joinDate}</div>
+              <div class="stat-lbl">Joined</div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById("tabsBar").style.display = "flex";
+      
+      // Shares Tab
+      if (data.shares.length === 0) {
+        document.getElementById("tab-shares").innerHTML = `
+          <div class="empty-state">
+            <h3>No shares yet</h3>
+            <p>Shares will appear here when this user shares business posts.</p>
+          </div>`;
+      } else {
+        document.getElementById("tab-shares").innerHTML = data.shares.map(s => `
+          <div class="card">
+            <div class="card-label">🔁 Shared from <a href="business.html?slug=${s.original_business_slug}">${escHtml(s.original_business_name)}</a></div>
+            ${s.content ? `<div class="card-content">${escHtml(s.content)}</div>` : ""}
+            <div class="shared-preview">
+              <div class="from">Original by <a href="business.html?slug=${s.original_business_slug}">${escHtml(s.original_business_name)}</a></div>
+              <div class="text">${escHtml((s.original_content || "").substring(0, 180))}${(s.original_content || "").length > 180 ? "…" : ""}</div>
+            </div>
+            <div class="card-meta">${timeAgo(s.created_at)}</div>
+          </div>`).join("");
+      }
+      
+      // Comments Tab
+      if (data.comments.length === 0) {
+        document.getElementById("tab-comments").innerHTML = `
+          <div class="empty-state">
+            <h3>No comments yet</h3>
+            <p>Comments on business posts will appear here.</p>
+          </div>`;
+      } else {
+        document.getElementById("tab-comments").innerHTML = data.comments.map(c => `
+          <div class="card">
+            <div class="card-label">💬 Commented on <a href="business.html?slug=${c.business_slug}">${escHtml(c.business_name)}</a></div>
+            <div class="card-content">${escHtml(c.content)}</div>
+            <div class="card-meta">${timeAgo(c.created_at)}</div>
+          </div>`).join("");
+      }
+      
+      // Following Tab
+      if (data.following.length === 0) {
+        document.getElementById("tab-following").innerHTML = `
+          <div class="empty-state">
+            <h3>Not following anyone</h3>
+            <p><a href="categories.html" style="color:var(--accent);text-decoration:none;font-weight:600;">Explore businesses</a> to follow.</p>
+          </div>`;
+      } else {
+        document.getElementById("tab-following").innerHTML = `
+          <div class="following-grid">
+            ${data.following.map(b => `
+              <a class="follow-card" href="business.html?slug=${b.slug}">
+                <div class="follow-card-avatar">${b.logo_url ? `<img src="${escHtml(b.logo_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;" />` : b.business_name.charAt(0)}</div>
+                <div class="follow-card-name">${escHtml(b.business_name)}</div>
+                <div class="follow-card-cat">${escHtml(b.category_name || "")}</div>
+              </a>`).join("")}
+          </div>`;
+      }
+    } catch (e) {
+      document.getElementById("profileHeader").innerHTML = '<div class="loading">Connection error.</div>';
+    }
+  }
+
+  setupNav();
+  loadProfile();
+</script>
+</body>
+</html>
