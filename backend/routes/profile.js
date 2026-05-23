@@ -10,7 +10,7 @@ router.get("/:userId", async (req, res) => {
   try {
     const userId = Number(req.params.userId);
     const [users] = await pool.execute(
-      "SELECT id, first_name, last_name, avatar_url, bio, role, created_at FROM users WHERE id = ? LIMIT 1",
+      "SELECT id, first_name, last_name, avatar_url, cover_url, bio, role, created_at FROM users WHERE id = ? LIMIT 1",
       [userId]
     );
     if (!users.length) return res.status(404).json({ success: false, error: "User not found." });
@@ -59,7 +59,7 @@ router.put("/update", async (req, res) => {
   const session = await requireAuth(pool, req, res);
   if (!session) return;
 
-  const { first_name, last_name, bio, avatar_url } = req.body;
+  const { first_name, last_name, bio, avatar_url, cover_url } = req.body;
 
   if (!first_name || !last_name) {
     return res.status(400).json({ success: false, error: "First name and last name are required." });
@@ -67,8 +67,8 @@ router.put("/update", async (req, res) => {
 
   try {
     await pool.execute(
-      "UPDATE users SET first_name = ?, last_name = ?, bio = ?, avatar_url = ? WHERE id = ?",
-      [first_name, last_name, bio || null, avatar_url || null, session.user_id]
+      "UPDATE users SET first_name = ?, last_name = ?, bio = ?, avatar_url = ?, cover_url = ? WHERE id = ?",
+      [first_name, last_name, bio || null, avatar_url || null, cover_url || null, session.user_id]
     );
 
     return res.json({
@@ -78,7 +78,8 @@ router.put("/update", async (req, res) => {
         first_name,
         last_name,
         bio: bio || null,
-        avatar_url: avatar_url || null
+        avatar_url: avatar_url || null,
+        cover_url: cover_url || null
       }
     });
   } catch (error) {

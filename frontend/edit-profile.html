@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Profile · Diwanet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
+  <style>
+    .wrap { max-width:800px; margin:0 auto; padding:28px 24px; }
+
+    /* COVER + AVATAR PREVIEW */
+    .profile-preview {
+      background:white; border:1px solid var(--border); border-radius:20px;
+      overflow:hidden; margin-bottom:24px; box-shadow:var(--shadow);
+    }
+    .cover-area {
+      height:160px; position:relative; cursor:pointer;
+      background:linear-gradient(135deg, var(--accent-light), #dbeafe 50%, #bfdbfe);
+      display:flex; align-items:center; justify-content:center; overflow:hidden;
+    }
+    .cover-area img { width:100%; height:100%; object-fit:cover; }
+    .cover-overlay {
+      position:absolute; inset:0; background:rgba(0,0,0,0.35);
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; transition:opacity 0.2s;
+    }
+    .cover-area:hover .cover-overlay { opacity:1; }
+    .upload-hint { color:white; font-size:0.9rem; font-weight:600; text-align:center; }
+    .upload-hint span { display:block; font-size:1.5rem; margin-bottom:4px; }
+    .logo-area {
+      display:flex; align-items:flex-end; justify-content:space-between;
+      padding:0 24px 20px; margin-top:-40px;
+      position:relative; z-index:1;
+    }
+    .logo-wrap { position:relative; cursor:pointer; }
+    .logo-circle {
+      width:80px; height:80px; border-radius:50%;
+      background:linear-gradient(135deg, #60a5fa, #3b82f6);
+      display:grid; place-items:center; font-size:2rem; font-weight:800;
+      color:white; border:4px solid white; box-shadow:var(--shadow-lg); overflow:hidden;
+    }
+    .logo-circle img { width:100%; height:100%; object-fit:cover; }
+    .logo-badge {
+      position:absolute; bottom:-4px; right:-4px; width:26px; height:26px;
+      background:var(--accent); border-radius:50%; display:grid; place-items:center;
+      border:2px solid white; font-size:0.75rem; color:white;
+    }
+    .biz-preview-name { font-family:'DM Serif Display',serif; font-size:1.4rem; }
+    .biz-preview-cat { font-size:0.82rem; color:var(--muted2); margin-top:2px; }
+
+    /* FORM CARDS */
+    .edit-card { background:white; border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:16px; box-shadow:var(--shadow); }
+    .card-title { font-size:0.8rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:18px; }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+
+    /* UPLOAD AREA */
+    .upload-area {
+      border:2px dashed var(--border); border-radius:var(--radius-sm); padding:24px;
+      text-align:center; cursor:pointer; transition:all 0.2s; position:relative;
+    }
+    .upload-area:hover { border-color:var(--accent); background:var(--accent-light); }
+    .upload-area input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; }
+    .upload-icon { font-size:2rem; margin-bottom:8px; }
+    .upload-text { font-size:0.88rem; color:var(--muted); }
+    .upload-text strong { color:var(--accent); }
+    .uploading-bar { height:4px; background:var(--surface2); border-radius:2px; margin-top:10px; overflow:hidden; display:none; }
+    .uploading-bar .bar { height:100%; background:var(--accent); border-radius:2px; animation:progress 1.5s ease-in-out infinite; }
+    @keyframes progress { 0%{width:0%} 50%{width:70%} 100%{width:100%} }
+
+    .save-btn {
+      width:100%; padding:14px; border-radius:var(--radius-sm); border:none;
+      background:var(--accent); color:white; font-size:1rem; font-weight:700;
+      cursor:pointer; font-family:'DM Sans',sans-serif; transition:background 0.2s; margin-top:8px;
+    }
+    .save-btn:hover { background:var(--accent-dark); }
+    .save-btn:disabled { opacity:0.5; cursor:not-allowed; }
+
+    /* CROP MODAL */
+    .crop-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; flex-direction:column; gap:16px; }
+    .crop-modal.open { display:flex; }
+    .crop-container { width:90vw; max-width:1000px; height:80vh; background:#000; border-radius:12px; overflow:hidden; }
+    .crop-container img { max-width:100%; display:block; }
+    .crop-actions { display:flex; gap:12px; }
+    .crop-btn { padding:10px 24px; border-radius:999px; font-size:0.9rem; font-weight:600; cursor:pointer; border:none; font-family:'DM Sans',sans-serif; }
+    .crop-confirm { background:var(--accent); color:white; }
+    .crop-cancel { background:white; color:var(--text); }
+
+    /* Topbar override - max-width */
+    .topbar-inner { max-width:800px; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--text); border-radius: 12px; padding: 12px 20px; font-size: 0.88rem; font-weight: 600; color: white; box-shadow: var(--shadow-lg); transition: transform 0.3s; z-index: 300; }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media (max-width:600px) { .grid2 { grid-template-columns:1fr; } .wrap { padding:16px; } }
+  </style>
+</head>
+<body>
+
+<div class="crop-modal" id="cropModal">
+  <div class="crop-container">
+    <img id="cropImage" src="" alt="crop" />
+  </div>
+  <div class="crop-actions">
+    <button class="crop-btn crop-confirm" onclick="confirmCrop()">Apply Crop</button>
+    <button class="crop-btn crop-cancel" onclick="cancelCrop()">Cancel</button>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="feed.html" class="brand">
+      <div class="brand-mark">D</div>
+      <span class="brand-name">Diwanet</span>
+    </a>
+    <div style="display:flex;gap:8px;">
+      <a id="viewPageBtn" href="#" class="btn btn-ghost btn-sm">View Profile</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="profile-preview">
+    <div class="cover-area" id="coverArea" onclick="document.getElementById('coverInput').click()">
+      <img id="coverPreview" src="" alt="" style="display:none;" />
+      <div class="cover-overlay">
+        <div class="upload-hint"><span>🖼️</span>Click to change cover</div>
+      </div>
+    </div>
+    <div class="logo-area">
+      <div>
+        <div class="logo-wrap" onclick="document.getElementById('logoInput').click()">
+          <div class="logo-circle" id="logoCircle">
+            <img id="logoPreview" src="" alt="" style="display:none;" />
+            <span id="logoInitial">?</span>
+          </div>
+          <div class="logo-badge">✏️</div>
+        </div>
+      </div>
+      <div>
+        <div class="biz-preview-name" id="previewName">Your Name</div>
+        <div class="biz-preview-cat" id="previewCat">Individual Member</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="edit-card">
+    <div class="card-title">Profile Image / Avatar</div>
+    <div class="upload-area">
+      <input type="file" id="logoInput" accept="image/*" onchange="uploadImage('logo', this)" />
+      <div class="upload-icon">👤</div>
+      <div class="upload-text">Click to upload avatar<br><strong>JPG, PNG or WebP</strong> · Max 5MB</div>
+      <div class="uploading-bar" id="logoBar"><div class="bar"></div></div>
+    </div>
+  </div>
+
+  <div class="edit-card">
+    <div class="card-title">Cover Photo</div>
+    <div class="upload-area">
+      <input type="file" id="coverInput" accept="image/*" onchange="uploadImage('cover', this)" />
+      <div class="upload-icon">🖼️</div>
+      <div class="upload-text">Click to upload cover photo<br><strong>JPG, PNG or WebP</strong> · Recommended 1200×400</div>
+      <div class="uploading-bar" id="coverBar"><div class="bar"></div></div>
+    </div>
+  </div>
+
+  <div class="edit-card">
+    <div class="card-title">Personal Information</div>
+    <div class="grid2">
+      <div class="field">
+        <label>First Name</label>
+        <input id="first_name" placeholder="First Name" oninput="updatePreview()" />
+      </div>
+      <div class="field">
+        <label>Last Name</label>
+        <input id="last_name" placeholder="Last Name" oninput="updatePreview()" />
+      </div>
+    </div>
+    <div class="field" style="margin-top:14px;">
+      <label>Biography</label>
+      <textarea id="bio" placeholder="Tell us something about yourself..." style="min-height:100px;"></textarea>
+    </div>
+    
+    <button class="save-btn" id="saveBtn" onclick="saveProfile()">Save Changes</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="assets/js/auth.js"></script>
+<script>
+let logoUrl = null;
+let coverUrl = null;
+
+function showMsg(msg, type="success") {
+  const toast = document.getElementById("toast");
+  toast.textContent = msg;
+  toast.className = "toast show";
+  setTimeout(() => { toast.className = "toast"; }, 2500);
+}
+
+function updatePreview() {
+  const first = document.getElementById("first_name").value.trim();
+  const last = document.getElementById("last_name").value.trim();
+  const name = (first || last) ? `${first} ${last}` : "Your Name";
+  document.getElementById("previewName").textContent = name;
+  document.getElementById("logoInitial").textContent = first ? first.charAt(0).toUpperCase() : "?";
+}
+
+async function loadProfile() {
+  const user = getUser();
+  if (!user) { window.location.href = "login.html"; return; }
+  document.getElementById("viewPageBtn").href = `profile.html?id=${user.id}`;
+  try {
+    const res = await fetch(`${API}/api/profile/${user.id}`);
+    const data = await res.json();
+    if (!data.success) return;
+    const u = data.user;
+
+    document.getElementById("first_name").value = u.first_name || "";
+    document.getElementById("last_name").value = u.last_name || "";
+    document.getElementById("bio").value = u.bio || "";
+    document.getElementById("previewName").textContent = `${u.first_name} ${u.last_name}`;
+    document.getElementById("logoInitial").textContent = u.first_name ? u.first_name.charAt(0).toUpperCase() : "?";
+
+    if (u.avatar_url) {
+      logoUrl = u.avatar_url;
+      const img = document.getElementById("logoPreview");
+      img.src = u.avatar_url; img.style.display = "block";
+      document.getElementById("logoInitial").style.display = "none";
+    }
+    if (u.cover_url) {
+      coverUrl = u.cover_url;
+      const img = document.getElementById("coverPreview");
+      img.src = u.cover_url; img.style.display = "block";
+    }
+  } catch (e) { console.error(e); }
+}
+
+async function uploadImage(type, input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) { showMsg("File too large. Max 10MB.", "error"); return; }
+  const croppedBlob = await openCrop(type, file);
+  if (!croppedBlob) return;
+  const barId = type === "logo" ? "logoBar" : "coverBar";
+  document.getElementById(barId).style.display = "block";
+  const formData = new FormData();
+  formData.append("file", croppedBlob, "image.jpg");
+  try {
+    const res = await fetch(`${API}/api/upload`, { method: "POST", body: formData });
+    const data = await res.json();
+    if (data.url) {
+      if (type === "logo") {
+        logoUrl = data.url;
+        const img = document.getElementById("logoPreview");
+        img.src = logoUrl; img.style.display = "block";
+        document.getElementById("logoInitial").style.display = "none";
+      } else {
+        coverUrl = data.url;
+        const img = document.getElementById("coverPreview");
+        img.src = coverUrl; img.style.display = "block";
+      }
+      showMsg(type === "logo" ? "Avatar uploaded!" : "Cover uploaded!", "success");
+    } else { showMsg("Upload failed.", "error"); }
+  } catch (e) { showMsg("Upload error: " + e.message, "error"); }
+  document.getElementById(barId).style.display = "none";
+}
+
+async function saveProfile() {
+  const btn = document.getElementById("saveBtn");
+  const first = document.getElementById("first_name").value.trim();
+  const last = document.getElementById("last_name").value.trim();
+  const bioText = document.getElementById("bio").value.trim();
+
+  if (!first || !last) {
+    showMsg("First name and last name are required.", "error");
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = "Saving...";
+  const payload = {
+    first_name: first,
+    last_name: last,
+    bio: bioText,
+    avatar_url: logoUrl,
+    cover_url: coverUrl
+  };
+  try {
+    const res = await fetch(`${API}/api/profile/update`, {
+      method: "PUT", headers: authHeaders(), body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.success) {
+      const currUser = getUser();
+      if (currUser) {
+        currUser.first_name = payload.first_name;
+        currUser.last_name = payload.last_name;
+        currUser.avatar_url = payload.avatar_url;
+        localStorage.setItem("dn_user", JSON.stringify(currUser));
+      }
+      showMsg("Profile saved successfully!", "success");
+      setTimeout(() => { window.location.href = `profile.html?id=${currUser.id}`; }, 1200);
+    } else { showMsg(data.error || "Save failed.", "error"); }
+  } catch (e) { showMsg("Connection error: " + e.message, "error"); }
+  btn.disabled = false; btn.textContent = "Save Changes";
+}
+
+loadProfile();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script>
+let cropper = null;
+let cropResolve = null;
+
+function openCrop(type, file) {
+  return new Promise((resolve) => {
+    cropResolve = resolve;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.getElementById("cropImage");
+      img.src = e.target.result;
+      document.getElementById("cropModal").classList.add("open");
+      if (cropper) cropper.destroy();
+      cropper = new Cropper(img, {
+        aspectRatio: type === "cover" ? 3.3 : 1,
+        viewMode: 1, autoCropArea: 1,
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function confirmCrop() {
+  if (!cropper) return;
+  cropper.getCroppedCanvas().toBlob(blob => {
+    cropResolve(blob); cancelCrop();
+  }, "image/jpeg", 0.9);
+}
+
+function cancelCrop() {
+  document.getElementById("cropModal").classList.remove("open");
+  if (cropper) { cropper.destroy(); cropper = null; }
+  cropResolve(null);
+}
+</script>
+</body>
+</html>
