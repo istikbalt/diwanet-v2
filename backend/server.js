@@ -48,6 +48,7 @@ app.use("/api/feed", require("./routes/feed"));
 app.use("/api/notifications", require("./routes/notifications"));
 app.use("/api/search", require("./routes/search"));
 app.use("/api/profile", require("./routes/profile"));
+app.use("/api/upload", require("./routes/upload"));
 // Pretty URL route for business profiles
 app.get("/b/:slug", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "frontend", "business.html"));
