@@ -42,6 +42,10 @@
     .card-label a:hover { text-decoration: underline; }
     .card-content { font-size: 0.91rem; line-height: 1.6; color: var(--text); }
     .card-meta { font-size: 0.76rem; color: var(--muted2); margin-top: 8px; }
+    .post-actions { display: flex; align-items: center; gap: 4px; border-top: 1px solid var(--border); padding-top: 12px; margin-top: 12px; }
+    .action-btn { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; border: none; background: none; color: var(--muted); font-size: 0.8rem; cursor: pointer; font-family: inherit; transition: all 0.15s; font-weight: 600; }
+    .action-btn:hover { background: var(--surface2); color: var(--text); }
+    .action-sep { width: 1px; height: 14px; background: var(--border); margin: 0 4px; }
     
     .shared-preview { margin-top: 10px; padding: 12px; border-radius: 10px; background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--accent); }
     .shared-preview .from { font-size: 0.76rem; color: var(--muted); margin-bottom: 5px; }
@@ -323,13 +327,6 @@
           </div>`;
       } else {
         document.getElementById("tab-shares").innerHTML = data.shares.map(s => {
-          const actionButtons = isMyProfile 
-            ? `<div style="display:flex;gap:8px;margin-left:auto;">
-                 <button onclick="editPost(${s.id}, this)" style="background:none;border:none;color:var(--accent);font-size:0.75rem;cursor:pointer;font-family:inherit;padding:2px 6px;font-weight:600;">✏️ Edit</button>
-                 <button onclick="deletePost(${s.id}, this)" style="background:none;border:none;color:var(--danger);font-size:0.75rem;cursor:pointer;font-family:inherit;padding:2px 6px;font-weight:600;">🗑️ Delete</button>
-               </div>`
-            : "";
-
           if (s.post_type === "post") {
             let mediaHtml = "";
             let images = [];
@@ -343,14 +340,20 @@
             }
 
             return `
-              <div class="card">
-                <div class="card-label" style="display:flex;align-items:center;">
+              <div class="card" id="post-${s.id}">
+                <div class="card-label">
                   <span>📝 Posted about <a href="business.html?slug=${s.tagged_business_slug}">${escHtml(s.tagged_business_name)}</a></span>
-                  ${actionButtons}
                 </div>
-                <div class="card-content" style="margin-top:8px;font-size:0.95rem;line-height:1.6;">${escHtml(s.content)}</div>
+                <div class="card-content" style="margin-top:8px;font-size:0.95rem;line-height:1.6;white-space:pre-wrap;">${escHtml(s.content)}</div>
                 ${mediaHtml}
                 <div class="card-meta">${timeAgo(s.created_at)}</div>
+                ${isMyProfile ? `
+                  <div class="post-actions">
+                    <button class="action-btn" onclick="editPost(${s.id}, this)">✏️ Edit</button>
+                    <div class="action-sep"></div>
+                    <button class="action-btn" style="color:var(--danger);" onclick="deletePost(${s.id}, this)">🗑️ Delete</button>
+                  </div>
+                ` : ""}
               </div>
             `;
           }
@@ -366,18 +369,24 @@
             mediaHtml = `<img src="${escHtml(images[0])}" style="width:100%;max-height:280px;object-fit:cover;border-radius:8px;margin-top:10px;display:block;" />`;
           }
           return `
-            <div class="card">
-              <div class="card-label" style="display:flex;align-items:center;">
+            <div class="card" id="post-${s.id}">
+              <div class="card-label">
                 <span>🔁 Shared from <a href="business.html?slug=${s.original_business_slug}">${escHtml(s.original_business_name)}</a></span>
-                ${actionButtons}
               </div>
-              ${s.content ? `<div class="card-content" style="margin-bottom:10px;">${escHtml(s.content)}</div>` : ""}
+              ${s.content ? `<div class="card-content" style="margin-bottom:10px;white-space:pre-wrap;">${escHtml(s.content)}</div>` : ""}
               <div class="shared-preview">
                 <div class="from">Original by <a href="business.html?slug=${s.original_business_slug}">${escHtml(s.original_business_name)}</a></div>
-                <div class="text">${escHtml((s.original_content || "").substring(0, 180))}${(s.original_content || "").length > 180 ? "…" : ""}</div>
+                <div class="text" style="white-space:pre-wrap;">${escHtml((s.original_content || "").substring(0, 180))}${(s.original_content || "").length > 180 ? "…" : ""}</div>
                 ${mediaHtml}
               </div>
               <div class="card-meta">${timeAgo(s.created_at)}</div>
+              ${isMyProfile ? `
+                <div class="post-actions">
+                  <button class="action-btn" onclick="editPost(${s.id}, this)">✏️ Edit</button>
+                  <div class="action-sep"></div>
+                  <button class="action-btn" style="color:var(--danger);" onclick="deletePost(${s.id}, this)">🗑️ Delete</button>
+                </div>
+              ` : ""}
             </div>
           `;
         }).join("");
@@ -582,64 +591,151 @@
     }
   }
 
-  async function deletePost(id, btn) {
-    if (!confirm("Are you sure you want to delete this post?")) return;
+  function deletePost(postId, btn) {
+    const postEl = document.getElementById(`post-${postId}`);
+    const existing = postEl.querySelector(".delete-confirm");
+    if (existing) { existing.remove(); return; }
+    const confirmBox = document.createElement("div");
+    confirmBox.className = "delete-confirm";
+    confirmBox.style.cssText = "margin-top:12px;padding:12px;background:#fee2e2;border:1px solid #fecaca;border-radius:10px;display:flex;align-items:center;justify-content:space-between;width:100%;box-sizing:border-box;";
+    confirmBox.innerHTML = `
+      <span style="font-size:0.85rem;color:var(--danger);font-weight:600;">Delete this post?</span>
+      <div style="display:flex;gap:8px;">
+        <button onclick="confirmDeletePost(${postId}, this)" style="padding:6px 14px;border-radius:999px;background:var(--danger);color:white;border:none;cursor:pointer;font-size:0.8rem;font-weight:700;font-family:inherit;">Delete</button>
+        <button onclick="this.closest('.delete-confirm').remove()" style="padding:6px 14px;border-radius:999px;background:white;color:#333;border:1px solid #ddd;cursor:pointer;font-size:0.8rem;font-family:inherit;font-weight:500;">Cancel</button>
+      </div>`;
+    
+    const actionsEl = postEl.querySelector(".post-actions");
+    if (actionsEl) {
+      actionsEl.after(confirmBox);
+    } else {
+      postEl.appendChild(confirmBox);
+    }
+  }
+
+  async function confirmDeletePost(postId, btn) {
     btn.disabled = true; btn.textContent = "Deleting...";
     try {
-      const res = await fetch(`${API}/api/posts/${id}`, {
+      const res = await fetch(`${API}/api/posts/${postId}`, {
         method: "DELETE",
         headers: authHeaders()
       });
       const data = await res.json();
       if (data.success) {
         showToast("Post deleted successfully.");
-        setTimeout(() => { window.location.reload(); }, 1000);
+        const card = document.getElementById(`post-${postId}`);
+        card.style.opacity = "0";
+        card.style.transform = "scale(0.95)";
+        card.style.transition = "all 0.3s ease";
+        setTimeout(() => { card.remove(); }, 300);
       } else {
         showToast(data.error || "Failed to delete post.");
-        btn.disabled = false; btn.textContent = "🗑️ Delete";
+        btn.disabled = false; btn.textContent = "Delete";
       }
     } catch (err) {
       showToast("Connection error.");
-      btn.disabled = false; btn.textContent = "🗑️ Delete";
+      btn.disabled = false; btn.textContent = "Delete";
     }
   }
 
-  async function editPost(id, btn) {
+  function editPost(postId, btn) {
+    const postEl = document.getElementById(`post-${postId}`);
+    let contentEl = postEl.querySelector(".card-content");
+    
+    // If it's a share card, it might not have an existing card-content if commentary was empty
+    if (!contentEl) {
+      // Create a temporary card-content for the editor
+      contentEl = document.createElement("div");
+      contentEl.className = "card-content";
+      contentEl.style.cssText = "margin-bottom:10px;white-space:pre-wrap;display:none;";
+      const previewEl = postEl.querySelector(".shared-preview");
+      if (previewEl) {
+        previewEl.before(contentEl);
+      } else {
+        postEl.appendChild(contentEl);
+      }
+    }
+
+    const existingEditor = postEl.querySelector(".inline-editor");
+    if (existingEditor) { existingEditor.remove(); contentEl.style.display = "block"; return; }
+    
+    contentEl.style.display = "none";
+    const currentContent = contentEl.textContent.trim();
+    const editor = document.createElement("div");
+    editor.className = "inline-editor"; editor.style.cssText = "margin-top:10px;margin-bottom:10px;width:100%;box-sizing:border-box;";
+    editor.innerHTML = `
+      <textarea style="width:100%;border:1.5px solid var(--accent);border-radius:10px;padding:10px;font-size:0.92rem;font-family:inherit;resize:vertical;min-height:80px;box-sizing:border-box;background:white;color:var(--text);">${currentContent}</textarea>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button onclick="saveEditPost(${postId},this)" style="padding:7px 16px;border-radius:999px;background:var(--accent);color:white;border:none;cursor:pointer;font-size:0.82rem;font-weight:700;font-family:inherit;">Save</button>
+        <button onclick="cancelEditPost(${postId},this)" style="padding:7px 16px;border-radius:999px;background:var(--surface2);color:var(--text);border:1px solid var(--border);cursor:pointer;font-size:0.82rem;font-family:inherit;font-weight:500;">Cancel</button>
+      </div>`;
+    contentEl.after(editor); 
+    editor.querySelector("textarea").focus();
+  }
+
+  function cancelEditPost(postId, btn) {
     const card = btn.closest(".card");
     const contentEl = card.querySelector(".card-content");
-    const currentText = contentEl.textContent.trim();
-    const newText = prompt("Edit your post:", currentText);
-    if (newText === null) return;
-    if (!newText.trim()) {
-      showToast("Post content cannot be empty.");
-      return;
+    if (contentEl.textContent.trim() === "") {
+      contentEl.remove();
+    } else {
+      contentEl.style.display = "block";
     }
+    btn.closest(".inline-editor").remove();
+  }
+
+  async function saveEditPost(postId, btn) {
+    const editor = btn.closest(".inline-editor");
+    const newContent = editor.querySelector("textarea").value.trim();
     
-    // Validate that they didn't delete the @slug tag
-    const matches = newText.match(/@([a-zA-Z0-9-_]+)/g);
-    if (!matches) {
-      showToast("Your post must tag a business using @business-slug.");
-      return;
+    // Check if the post type is a normal post (requires @tag)
+    const card = btn.closest(".card");
+    const isShare = card.querySelector(".shared-preview") !== null;
+
+    if (!isShare) {
+      if (!newContent) {
+        showToast("Content cannot be empty.");
+        return;
+      }
+      // Validate that they didn't delete the @slug tag
+      const matches = newContent.match(/@([a-zA-Z0-9-_]+)/g);
+      if (!matches) {
+        showToast("Your post must tag a business using @business-slug.");
+        return;
+      }
     }
 
     btn.disabled = true; btn.textContent = "Saving...";
     try {
-      const res = await fetch(`${API}/api/posts/${id}`, {
+      const res = await fetch(`${API}/api/posts/${postId}`, {
         method: "PUT",
         headers: authHeaders(),
-        body: JSON.stringify({ content: newText.trim() })
+        body: JSON.stringify({ content: newContent })
       });
       const data = await res.json();
       if (data.success) {
+        let contentEl = card.querySelector(".card-content");
+        if (!contentEl) {
+          contentEl = document.createElement("div");
+          contentEl.className = "card-content";
+          contentEl.style.cssText = "margin-bottom:10px;white-space:pre-wrap;";
+          card.querySelector(".shared-preview").before(contentEl);
+        }
+        contentEl.textContent = newContent;
+        if (newContent === "" && isShare) {
+          contentEl.remove();
+        } else {
+          contentEl.style.display = "block";
+        }
+        editor.remove();
         showToast("Post updated successfully.");
-        setTimeout(() => { window.location.reload(); }, 1000);
       } else {
         showToast(data.error || "Failed to update post.");
-        btn.disabled = false; btn.textContent = "✏️ Edit";
+        btn.disabled = false; btn.textContent = "Save";
       }
     } catch (err) {
       showToast("Connection error.");
-      btn.disabled = false; btn.textContent = "✏️ Edit";
+      btn.disabled = false; btn.textContent = "Save";
     }
   }
 
