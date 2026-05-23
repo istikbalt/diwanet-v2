@@ -59,6 +59,9 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
     
+    /* Compose Box */
+    #composeText:focus { border-color: var(--accent) !important; background: white !important; }
+
     /* Toast and Empty State */
     .toast {
       position: fixed;
@@ -121,6 +124,16 @@
 <div class="wrap">
   <div id="profileHeader" class="profile-header">
     <div class="empty-state"><h3>Loading profile...</h3></div>
+  </div>
+
+  <div class="compose-box" id="composeBox" style="display:none;background:white;border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:20px;box-shadow:var(--shadow);">
+    <div style="display:flex;gap:12px;">
+      <div class="avatar" id="composeAvatar" style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#60a5fa,#3b82f6);display:grid;place-items:center;font-weight:700;color:white;font-size:1.1rem;flex-shrink:0;">?</div>
+      <textarea id="composeText" placeholder="What are you doing today? Tag a business to post (e.g. @business-slug)" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:10px 14px;font-size:0.9rem;color:var(--text);font-family:inherit;resize:none;min-height:70px;outline:none;transition:border-color 0.2s;"></textarea>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+      <button class="btn btn-primary btn-sm" id="postBtn" onclick="submitPost()" style="padding:7px 18px;font-size:0.84rem;">Post</button>
+    </div>
   </div>
   
   <div class="tabs" id="tabsBar" style="display:none;">
@@ -237,17 +250,32 @@
         </div>
       `;
       
+      if (isMyProfile) {
+        document.getElementById("composeBox").style.display = "block";
+        document.getElementById("composeAvatar").textContent = u.first_name.charAt(0).toUpperCase();
+      }
+
       document.getElementById("tabsBar").style.display = "flex";
       
-      // Shares Tab
+      // Shares/Posts Tab
       if (data.shares.length === 0) {
         document.getElementById("tab-shares").innerHTML = `
           <div class="empty-state">
             <h3>No shares yet</h3>
-            <p>Shares will appear here when this user shares business posts.</p>
+            <p>Shares and tagged business posts will appear here.</p>
           </div>`;
       } else {
         document.getElementById("tab-shares").innerHTML = data.shares.map(s => {
+          if (s.post_type === "post") {
+            return `
+              <div class="card">
+                <div class="card-label">📝 Posted about <a href="business.html?slug=${s.tagged_business_slug}">${escHtml(s.tagged_business_name)}</a></div>
+                <div class="card-content" style="margin-top:8px;font-size:0.95rem;line-height:1.6;">${escHtml(s.content)}</div>
+                <div class="card-meta">${timeAgo(s.created_at)}</div>
+              </div>
+            `;
+          }
+          
           let mediaHtml = "";
           let images = [];
           try {
@@ -309,6 +337,36 @@
       }
     } catch (e) {
       document.getElementById("profileHeader").innerHTML = '<div class="empty-state"><h3>Connection error.</h3></div>';
+    }
+  }
+
+  async function submitPost() {
+    const txt = document.getElementById("composeText").value.trim();
+    if (!txt) return;
+
+    const btn = document.getElementById("postBtn");
+    btn.disabled = true;
+    btn.textContent = "Posting...";
+
+    try {
+      const res = await fetch(`${API}/api/posts`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ content: txt })
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById("composeText").value = "";
+        showToast("Post published successfully!");
+        setTimeout(() => { window.location.reload(); }, 1000);
+      } else {
+        showToast(data.error || "Failed to publish post.");
+      }
+    } catch (err) {
+      showToast("Connection error.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Post";
     }
   }
 

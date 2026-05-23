@@ -49,40 +49,107 @@ router.post("/", async (req, res) => {
   const pool = req.app.locals.pool;
   const session = await requireAuth(pool, req, res);
   if (!session) return;
-  if (session.user_type !== "business") {
-    return res.status(403).json({ success: false, error: "Only businesses can create posts." });
-  }
-  const { content, image_url, images, tagged_businesses } = req.body;
+
+  const { content, image_url, images } = req.body;
   if (!content || content.trim().length === 0) {
     return res.status(400).json({ success: false, error: "Content is required." });
   }
-  const connection = await pool.getConnection();
-  try {
-    await connection.beginTransaction();
-    const [result] = await connection.execute(
-      "INSERT INTO posts (author_type, author_business_id, post_type, content, image_url, images) VALUES ('business', ?, 'post', ?, ?, ?)",
-      [session.business_id, content.trim(), image_url || null, images ? JSON.stringify(images) : null]
+
+  // Parse tagged business slugs from content
+  let taggedSlugs = [];
+  const matches = content.match(/@([a-zA-Z0-9-_]+)/g);
+  if (matches) {
+    taggedSlugs = matches.map(m => m.substring(1));
+  }
+
+  if (session.user_type === "individual") {
+    if (taggedSlugs.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Individual members can only create posts that tag a business using @business-slug (e.g. @nora-agents)."
+      });
+    }
+    
+    // Verify at least one tagged slug belongs to a valid business
+    const [bizRows] = await pool.query(
+      "SELECT id, slug, business_name FROM businesses WHERE slug IN (?)",
+      [taggedSlugs]
     );
-    const postId = result.insertId;
-    if (tagged_businesses && Array.isArray(tagged_businesses)) {
-      for (const bSlug of tagged_businesses) {
-        const [bRows] = await connection.execute("SELECT id FROM businesses WHERE slug = ? LIMIT 1", [bSlug]);
-        if (bRows.length > 0) {
-          await connection.execute("INSERT IGNORE INTO post_tags (post_id, business_id) VALUES (?, ?)", [postId, bRows[0].id]);
+    if (bizRows.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "The tagged business does not exist. Please tag a valid business slug."
+      });
+    }
+
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+      const [result] = await connection.execute(
+        "INSERT INTO posts (author_type, author_user_id, post_type, content, image_url, images, status) VALUES ('individual', ?, 'post', ?, ?, ?, 'published')",
+        [session.user_id, content.trim(), image_url || null, images ? JSON.stringify(images) : null]
+      );
+      const postId = result.insertId;
+
+      // Add tags
+      for (const biz of bizRows) {
+        await connection.execute(
+          "INSERT IGNORE INTO post_tags (post_id, business_id) VALUES (?, ?)",
+          [postId, biz.id]
+        );
+      }
+
+      await connection.commit();
+      const [posts] = await pool.execute(
+        `SELECT p.*, u.first_name, u.last_name, u.avatar_url 
+         FROM posts p 
+         JOIN users u ON p.author_user_id = u.id 
+         WHERE p.id = ?`,
+        [postId]
+      );
+      return res.json({ success: true, post: posts[0] });
+    } catch (error) {
+      await connection.rollback();
+      return res.status(500).json({ success: false, error: error.message });
+    } finally {
+      connection.release();
+    }
+  } else {
+    // Business account flow
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+      const [result] = await connection.execute(
+        "INSERT INTO posts (author_type, author_business_id, post_type, content, image_url, images, status) VALUES ('business', ?, 'post', ?, ?, ?, 'published')",
+        [session.business_id, content.trim(), image_url || null, images ? JSON.stringify(images) : null]
+      );
+      const postId = result.insertId;
+
+      const businessTags = req.body.tagged_businesses || taggedSlugs;
+      if (businessTags && businessTags.length > 0) {
+        for (const bSlug of businessTags) {
+          const [bRows] = await connection.execute("SELECT id FROM businesses WHERE slug = ? LIMIT 1", [bSlug]);
+          if (bRows.length > 0) {
+            await connection.execute("INSERT IGNORE INTO post_tags (post_id, business_id) VALUES (?, ?)", [postId, bRows[0].id]);
+          }
         }
       }
+
+      await connection.commit();
+      const [posts] = await pool.execute(
+        `SELECT p.*, b.business_name, b.slug AS business_slug, b.logo_url 
+         FROM posts p 
+         JOIN businesses b ON p.author_business_id = b.id 
+         WHERE p.id = ?`,
+        [postId]
+      );
+      return res.json({ success: true, post: posts[0] });
+    } catch (error) {
+      await connection.rollback();
+      return res.status(500).json({ success: false, error: error.message });
+    } finally {
+      connection.release();
     }
-    await connection.commit();
-    const [posts] = await pool.execute(
-      "SELECT p.*, b.business_name, b.slug AS business_slug, b.logo_url FROM posts p JOIN businesses b ON p.author_business_id = b.id WHERE p.id = ?",
-      [postId]
-    );
-    return res.json({ success: true, post: posts[0] });
-  } catch (error) {
-    await connection.rollback();
-    return res.status(500).json({ success: false, error: error.message });
-  } finally {
-    connection.release();
   }
 });
 

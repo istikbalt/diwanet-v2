@@ -16,13 +16,15 @@ router.get("/:userId", async (req, res) => {
     if (!users.length) return res.status(404).json({ success: false, error: "User not found." });
 
     const [shares] = await pool.execute(
-      `SELECT p.id, p.content, p.created_at, p.shared_post_id,
+      `SELECT p.id, p.content, p.created_at, p.shared_post_id, p.post_type, p.image_url, p.images,
        op.content AS original_content, op.image_url AS original_image_url, op.images AS original_images,
-       ob.business_name AS original_business_name, ob.slug AS original_business_slug
+       ob.business_name AS original_business_name, ob.slug AS original_business_slug,
+       (SELECT b.business_name FROM post_tags pt JOIN businesses b ON pt.business_id = b.id WHERE pt.post_id = p.id LIMIT 1) AS tagged_business_name,
+       (SELECT b.slug FROM post_tags pt JOIN businesses b ON pt.business_id = b.id WHERE pt.post_id = p.id LIMIT 1) AS tagged_business_slug
        FROM posts p
        LEFT JOIN posts op ON p.shared_post_id = op.id
        LEFT JOIN businesses ob ON op.author_business_id = ob.id
-       WHERE p.author_user_id = ? AND p.post_type = 'share' AND p.status = 'published'
+       WHERE p.author_user_id = ? AND (p.post_type = 'share' OR p.post_type = 'post') AND p.status = 'published'
        ORDER BY p.created_at DESC LIMIT 20`,
       [userId]
     );
