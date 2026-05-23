@@ -69,10 +69,10 @@
     .c-name a:hover { color: var(--accent); }
     .c-text { font-size: 0.87rem; line-height: 1.5; }
     .c-time { font-size: 0.74rem; color: var(--muted2); margin-top: 4px; }
-    .c-input-row { display: flex; gap: 8px; margin-top: 12px; }
-    .c-input { flex: 1; background: white; border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 12px; font-size: 0.87rem; color: var(--text); font-family: 'DM Sans', sans-serif; resize: none; }
+    .c-input-row { display: flex; gap: 8px; margin-top: 12px; align-items: flex-end; }
+    .c-input { flex: 1; background: white; border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 12px; font-size: 0.87rem; color: var(--text); font-family: 'DM Sans', sans-serif; resize: none; min-height: 40px; max-height: 200px; overflow-y: auto; }
     .c-input:focus { outline: none; border-color: var(--accent); }
-    .c-send { padding: 9px 16px; border-radius: 10px; border: none; background: var(--accent); color: white; font-size: 0.84rem; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+    .c-send { padding: 10px 18px; border-radius: 10px; border: none; background: var(--accent); color: white; font-size: 0.84rem; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; height: 40px; }
 
     /* Share modal */
     .modal-overlay { position: fixed; inset: 0; background: rgba(15,76,129,0.3); display: none; place-items: center; z-index: 200; backdrop-filter: blur(4px); }
@@ -432,7 +432,7 @@ function renderPost(p) {
     <div class="comments-box" id="comments-${p.id}">
       <div class="comment-list" id="clist-${p.id}"></div>
       ${canInteract
-        ? `<div class="c-input-row"><textarea class="c-input" id="cinput-${p.id}" rows="1" placeholder="Write a comment..."></textarea><button class="c-send" onclick="submitComment(${p.id})">Send</button></div>`
+        ? `<div class="c-input-row"><textarea class="c-input" id="cinput-${p.id}" rows="1" placeholder="Write a comment..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea><button class="c-send" onclick="submitComment(${p.id})">Send</button></div>`
         : `<p style="font-size:0.84rem;color:var(--muted);"><a href="/login.html" style="color:var(--accent);font-weight:600;">Sign in</a> to comment</p>`}
     </div>
   </div>`;
@@ -487,14 +487,25 @@ async function loadComments(postId) {
       const name = isBiz ? escHtml(c.business_name) : escHtml(`${c.first_name} ${c.last_name}`);
       const link = isBiz ? `/b/${c.business_slug}` : `/profile.html?id=${c.commenter_user_id}`;
       const isMyComment = biz ? c.commenter_business_id === biz.id : (user && c.commenter_user_id === user.id);
-      const menuBtn = isMyComment ? `<div class="c-menu-wrap" style="position:relative;margin-left:auto;">
-        <button class="c-menu-btn" onclick="toggleCommentMenu(this)" style="background:none;border:none;cursor:pointer;color:var(--muted2);font-size:1.1rem;padding:2px 6px;border-radius:6px;line-height:1;">···</button>
-        <div class="c-menu-dropdown" style="display:none;position:absolute;right:0;top:24px;background:white;border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-lg);z-index:10;min-width:120px;overflow:hidden;">
-          <button onclick="editComment(${c.id},this)" style="display:block;width:100%;text-align:left;padding:10px 14px;border:none;background:none;cursor:pointer;font-size:0.88rem;font-family:'DM Sans',sans-serif;color:var(--text);">✏️ Edit</button>
-          <button onclick="bizDeleteComment(${postId},${c.id},this)" style="display:block;width:100%;text-align:left;padding:10px 14px;border:none;background:none;cursor:pointer;font-size:0.88rem;font-family:'DM Sans',sans-serif;color:var(--danger);">🗑️ Delete</button>
+      
+      const actionLinks = isMyComment ? `
+        <span style="color:var(--muted2);margin:0 4px;">·</span>
+        <button class="comment-action-btn" onclick="editComment(${c.id},this)" style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:0.75rem;font-weight:600;padding:0;font-family:inherit;transition:opacity 0.2s;">✏️ Edit</button>
+        <span style="color:var(--muted2);margin:0 4px;">·</span>
+        <button class="comment-action-btn" onclick="bizDeleteComment(${postId},${c.id},this)" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:0.75rem;font-weight:600;padding:0;font-family:inherit;transition:opacity 0.2s;">🗑️ Delete</button>
+      ` : "";
+
+      return `<div class="comment" id="comment-item-${c.id}">
+        <div class="c-avatar ${isBiz ? "" : "ind"}">${name.charAt(0)}</div>
+        <div class="c-bubble" style="flex:1;">
+          <div class="c-name"><a href="${link}">${name}</a></div>
+          <div class="c-text" id="comment-text-${c.id}">${escHtml(c.content)}</div>
+          <div class="c-time" style="display:flex;align-items:center;margin-top:4px;">
+            <span>${timeAgo(c.created_at)}</span>
+            ${actionLinks}
+          </div>
         </div>
-      </div>` : "";
-      return `<div class="comment" id="comment-item-${c.id}"><div class="c-avatar ${isBiz ? "" : "ind"}">${name.charAt(0)}</div><div class="c-bubble" style="flex:1;"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;"><div><div class="c-name"><a href="${link}">${name}</a></div><div class="c-text" id="comment-text-${c.id}">${escHtml(c.content)}</div></div>${menuBtn}</div><div class="c-time">${timeAgo(c.created_at)}</div></div></div>`;
+      </div>`;
     }).join("");
   } catch { list.innerHTML = ""; }
 }
@@ -513,7 +524,8 @@ document.addEventListener("click", e => {
 });
 
 function editComment(commentId, btn) {
-  btn.closest(".c-menu-dropdown").style.display = "none";
+  const dropdown = btn.closest(".c-menu-dropdown");
+  if (dropdown) dropdown.style.display = "none";
   const textEl = document.getElementById("comment-text-" + commentId);
   const original = textEl.textContent;
   textEl.innerHTML = '<textarea style="width:100%;border:1.5px solid var(--accent);border-radius:8px;padding:8px 10px;font-size:0.87rem;font-family:DM Sans,sans-serif;resize:none;margin-top:4px;" rows="2">' + original + '</textarea><div style="display:flex;gap:6px;margin-top:6px;"><button onclick="saveEditComment(' + commentId + ',this)" style="padding:5px 14px;border-radius:999px;background:var(--accent);color:white;border:none;font-size:0.8rem;font-weight:600;cursor:pointer;">Save</button><button onclick="cancelEditComment(' + commentId + ',this)" style="padding:5px 14px;border-radius:999px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);font-size:0.8rem;cursor:pointer;">Cancel</button></div>';
@@ -540,7 +552,8 @@ async function saveEditComment(commentId, btn) {
 }
 
 function bizDeleteComment(postId, commentId, btn) {
-  btn.closest(".c-menu-dropdown").style.display = "none";
+  const dropdown = btn.closest(".c-menu-dropdown");
+  if (dropdown) dropdown.style.display = "none";
   const modal = document.getElementById("bizDeleteCommentModal");
   modal.style.display = "flex";
   modal.dataset.postId = postId;
@@ -573,7 +586,7 @@ async function submitComment(postId) {
   try {
     const res = await fetch(`${API}/api/posts/${postId}/comments`, { method: "POST", headers: authHeaders(), body: JSON.stringify({ content }) });
     const data = await res.json();
-    if (data.success) { input.value = ""; await loadComments(postId); }
+    if (data.success) { input.value = ""; input.style.height = "auto"; await loadComments(postId); }
     else showToast(data.error || "Failed.");
   } catch {}
 }
