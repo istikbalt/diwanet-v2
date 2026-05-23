@@ -2,6 +2,7 @@
 
 const express = require("express");
 const router = express.Router();
+const { requireAuth } = require("../middleware/auth");
 
 // GET /api/profile/:userId
 router.get("/:userId", async (req, res) => {
@@ -47,6 +48,39 @@ router.get("/:userId", async (req, res) => {
     );
 
     return res.json({ success: true, user: users[0], shares, comments, following });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// PUT /api/profile/update
+router.put("/update", async (req, res) => {
+  const pool = req.app.locals.pool;
+  const session = await requireAuth(pool, req, res);
+  if (!session) return;
+
+  const { first_name, last_name, bio, avatar_url } = req.body;
+
+  if (!first_name || !last_name) {
+    return res.status(400).json({ success: false, error: "First name and last name are required." });
+  }
+
+  try {
+    await pool.execute(
+      "UPDATE users SET first_name = ?, last_name = ?, bio = ?, avatar_url = ? WHERE id = ?",
+      [first_name, last_name, bio || null, avatar_url || null, session.user_id]
+    );
+
+    return res.json({
+      success: true,
+      user: {
+        id: session.user_id,
+        first_name,
+        last_name,
+        bio: bio || null,
+        avatar_url: avatar_url || null
+      }
+    });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
   }
