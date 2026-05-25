@@ -44,6 +44,7 @@ async function seoMiddleware(req, res, next) {
           const metaTags = `
   <!-- SEO & Social Media Meta Tags -->
   <title>${title}</title>
+  <link rel="canonical" href="${pageUrl}" />
   <meta name="description" content="${description.replace(/"/g, '&quot;')}" />
   <meta property="og:title" content="${title.replace(/"/g, '&quot;')}" />
   <meta property="og:description" content="${description.replace(/"/g, '&quot;')}" />
